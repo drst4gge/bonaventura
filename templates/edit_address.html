@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Address</title>
+</head>
+<body>
+    <form action="{{ url_for('update_address') }}" method="post">
+        <input type="hidden" name="id" value="{{ property[0] }}">
+        <label for="address">Address:</label><br>
+        <input type="text" id="address" name="address" value="{{ property[1] }}"><br>
+        <label for="data">Address Data:</label><br>
+        <input type="text" id="details" name="details" value="{{ property[2] }}"><br>
+        <input type="submit" value="Update">
+    </form>
+</body>
+</html>

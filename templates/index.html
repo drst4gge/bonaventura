@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Property List</title>
+    <style>
+        body {
+            background-color: rgb(176, 207, 207);
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 2px transparent black;
+            padding: 8px;
+            text-align: left;
+            background-color: #ffffff;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+        }
+        th {
+            background-color: #7c6966;
+        }
+
+        a {
+            color: rgb(0, 0, 0);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>All Properties</h1>
+    <a href="/add_address">Add New Address</a>
+    <br><br>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Address</th>
+            <th>Property Details</th>
+            <th>Actions</th>
+        </tr>
+        {% for id, address, details in properties %}
+        <tr>
+            <td>{{ id }}</td>
+            <td>{{ address }}</td>
+            <td>{{ details }}</td>
+            <td>
+                <a href="/edit/{{ id }}">Edit</a> |
+                <a href="/delete/{{ id }}">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
