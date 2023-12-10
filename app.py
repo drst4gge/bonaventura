@@ -41,11 +41,12 @@ def get_all_properties():
 def get_property_by_id(property_id):
     conn = get_db_connection()
     try:
-        with conn.cursor() as cursor:
+        with conn.cursor(pymysql.cursors.DictCursor) as cursor:  # Use DictCursor here
             cursor.execute("SELECT * FROM all_properties WHERE id = %s", (property_id,))
             return cursor.fetchone()
     finally:
         conn.close()
+
 
 def update_property(property_id, address, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear):
     conn = get_db_connection()
@@ -244,6 +245,19 @@ def get_photos(zpid):
             return first_photo_url
 
     return None  # Return None if no photo URL is found
+
+@app.route('/handle_bid/<int:id>', methods=['POST'])
+def handle_bid(id):
+    # Retrieve form data
+    name = request.form['name']
+    email = request.form['email']
+    phone = request.form['phone']
+    bid = request.form['bid']
+
+    # Process the bid here (e.g., store in database, send notification, etc.)
+
+    # Redirect or inform the user
+    return redirect(url_for('property_details', id=id))
 
 
 if __name__ == '__main__':

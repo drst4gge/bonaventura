@@ -10,28 +10,118 @@
     <style>
         .property-image {
             width: 100%; /* Image will fill the width of the tile */
-            height: 200px; /* Fixed height for the image */
+            height: 400px; /* Fixed height for the image */
             object-fit: cover; /* This will cover the area, potentially cropping the image */
         }
+        body {
+            font-family: monospace, sans-serif;
+        }
+        a {
+            text-decoration: none;
+            color: darkblue;
+        }
+
+        h {
+            color: darkblue;
+        }
+
+        p {
+            color: black;
+        }
+
+        .bid-form {
+            margin-top: 20px;
+            border-top: 1px solid #ccc;
+            padding-top: 20px;
+        }
+
+        .bid-form form {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            grid-gap: 10px;
+            align-items: center;
+        }
+
+        .bid-form input[type="submit"] {
+            grid-column: 1 / -1;
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .property-container {
+            display: flex;
+            align-items: stretch; /* Aligns children of the container */
+            margin-top: 20px;
+        }
+
+        .property-image, .property-info {
+            flex: 1; /* Each takes up 50% of the container */
+        }
+
+        .property-image img {
+            width: 100%;
+            height: auto;
+            object-fit: cover; /* Ensures image covers the area */
+        }
+
+        .property-info {
+            padding: 20px; /* Spacing inside the right half */
+            display: flex;
+            flex-direction: column; /* Stacks children vertically */
+            justify-content: space-between; /* Space between details and form */
+        }
+
+        /* Add styles for .bid-form from the previous example */
+
+
     </style>
 </head>
+
 <body>
-    <div class="property-details">
-        
-        <img src="{{ property[-1] }}" alt="Property Image"> <!-- Assuming photo URL is the last element in the property tuple -->
-       
-    </div>
-    <div class="property-details" style="width: 50%;">
-        <h3>{{ property['address'] }}</h3>
-        <h4>- PRICING -</h4>
-        <p>LISTING PRICE ${{ property['price'] }}</p>
-        <p>TAX ASSESSED VALUE ${{ property['taxAssessedValue'] }}</p>
-        <p>TAX ASSESSED YEAR {{ property['taxAssessedYear'] }}</p>
-        <h4>- HOME DETAILS -</h4>
-        <p> {{ property['bedrooms'] }} BEDROOMS</p>
-        <p> {{ property['bathrooms'] }} BATHROOMS</p>
-        <p>{{ property['livingArea'] }} INTERIOR SQFT</p>
-        <p>{{ property['lotSize'] }} SQFT OF LAND</p>
+
+    
+    <div class="property-container">
+        <div class="property-image">
+            <img src="{{ property['photo_url'] }}" alt="Property Image">
+        </div>
+
+        <div class="property-info">
+            <div class="property-details">
+                <h3>{{ property['addresses'] }}</h3>
+                <h4>- PRICING -</h4>
+                <p>LISTING PRICE ${{ property['price'] }}</p>
+                <p>TAX ASSESSED VALUE ${{ property['taxAssessedValue'] }}</p>
+                <p>TAX ASSESSED YEAR {{ property['taxAssessedYear'] }}</p>
+                <h4>- HOME DETAILS -</h4>
+                <p> {{ property['bedrooms'] }} BEDROOMS</p>
+                <p> {{ property['bathrooms'] }} BATHROOMS</p>
+                <p>{{ property['livingArea'] }} INTERIOR SQFT</p>
+                <p>{{ property['lotSize'] }} SQFT OF LAND</p>
+            </div>
+            
+            <div class="bid-form">
+                <h3>- PLACE A BID -</h3>
+                <form action="{{ url_for('handle_bid', id=property['id']) }}" method="post">
+
+                    <label for="name">NAME</label>
+                    <input type="text" id="name" name="name" required>
+
+                    <label for="email">EMAIL</label>
+                    <input type="email" id="email" name="email" required>
+
+                    <label for="phone">PHONE NUMBER</label>
+                    <input type="tel" id="phone" name="phone">
+
+                    <label for="bid">BID AMOUNT ($)</label>
+                    <input type="number" id="bid" name="bid" required>
+
+                    <input type="submit" value="Place Bid">
+                </form>
+            </div>
+        </div>
     </div>
 </body>
 </html>
