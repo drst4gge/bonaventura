@@ -1,15 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>BONAVENTURA HOME</title>
-    <header class="main-header">
+    <title>BONAVENTURA ADMIN</title>
+    <header>
         <a href="{{ url_for('home') }}">
-            <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="Logo" style="height: 50px;">
+            <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="Logo" style="height: 50px; text-align: center;">
         </a>
-    
-        <div class="login-link">
-            <h2><a href="{{ url_for('login') }}">LOGIN</a></h2>
-        </div>
     </header>
     <style>
         body {
@@ -88,54 +84,34 @@
             background-color: #ff4d4d; /* Retain the delete button color for clarity */
             color: white;
         }
-        .main-header {
-            display: flex;
-            justify-content: space-between; /* Distributes space between logo and login link */
-            align-items: center; /* Aligns items vertically in the center */
-            padding: 10px; /* Add some padding around the header */
-        }
-
-        .main-header a {
-            text-decoration: none;
-            color: #272343; /* Set your preferred color for the links */
-        }
-
-        .login-link h2 {
-            margin: 0; /* Removes default margin from h2 to align properly */
-        }
     </style>
-    
     
 </head>
 <body>
-    <div style="text-align: center; margin-bottom: 20px;">
-        <form action="{{ url_for('home') }}" method="get">
-            <label for="county">Select County:</label>
-            <select name="county" id="county">
-                <option value="">All Counties</option>
-                {% for county in counties %}
-                <option value="{{ county }}" {% if request.args.get('county') == county %}selected{% endif %}>{{ county }}</option>
-                {% endfor %}
-            </select>
-            <button type="submit">SORT</button>
-        </form>
+    <div class="property-buttons">
+        <button onclick="location.href='/add_address'" class="add-btn">ADD AN ADDRESS</button>
+        
     </div>
+    
     
     <div class="property-grid">
         {% for property in properties %}
             <div class="property-tile">
+                <!-- Wrap the contents in an anchor tag -->
                 <a href="{{ url_for('property_details', id=property['id']) }}" class="property-link">
                     <img class="property-image" src="{{ property['photo_url'] }}" alt="Property Image">
                     <div class="property-content">
-                        <h3>{{ property['addresses'] }}</h3>
+                        <h3>{{ property['address'] }}</h3>
                         <h4>- DETAILS -</h4>
-                        <p> {{ property['bedrooms'] }} BEDROOMS</p>
-                        <p> {{ property['bathrooms'] }} BATHROOMS</p>
-                        <p>{{ property['livingArea'] }} INTERIOR SQFT</p>
-                        <p>{{ property['lotSize'] }} SQFT OF LAND</p>
-                        <p>{{ property['county'] }}</p>
+                        <p>LISTING PRICE ${{ property['price'] }}</p>
+                        <p>TAX ASSESSED VALUE ${{ property['taxAssessedValue'] }}</p>
+                        <p>TAX ASSESSED YEAR {{ property['taxAssessedYear'] }}</p>
                     </div>
                 </a>
+                <div class="property-buttons">
+                    <button onclick="location.href='/edit/{{ property['id'] }}'" class="edit-btn">EDIT</button>
+                    <button onclick="if(confirm('Are you sure you want to delete this property?')) location.href='/delete/{{ property['id'] }}';" class="delete-btn">DELETE</button>
+                </div>
             </div>
         {% endfor %}
     </div>

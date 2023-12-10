@@ -15,15 +15,15 @@ def get_db_connection():
         port=3306
     )
 
-def insert_address(address, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear, photo_url):
+def insert_address(address, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear, county, photo_url):
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
             insert_sql = """
-            INSERT INTO all_properties (addresses, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear, photo_url) 
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO all_properties (addresses, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear, county, photo_url) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
-            cursor.execute(insert_sql, (address, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear, photo_url))
+            cursor.execute(insert_sql, (address, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear, county, photo_url))
         conn.commit()
     finally:
         conn.close()
@@ -31,8 +31,8 @@ def insert_address(address, zpid, bedrooms, bathrooms, livingArea, lotSize, pric
 def get_all_properties():
     conn = get_db_connection()
     try:
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT id, addresses, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear, photo_url FROM all_properties")
+        with conn.cursor(pymysql.cursors.DictCursor) as cursor:  # Ensure DictCursor is used
+            cursor.execute("SELECT id, addresses, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear, county, photo_url FROM all_properties")
             return cursor.fetchall()
     finally:
         conn.close()
@@ -47,17 +47,26 @@ def get_property_by_id(property_id):
     finally:
         conn.close()
 
+def get_unique_counties():
+    conn = get_db_connection()
+    try:
+        with conn.cursor(pymysql.cursors.DictCursor) as cursor:  # Use DictCursor here
+            cursor.execute("SELECT DISTINCT county FROM all_properties WHERE county IS NOT NULL")
+            return [row['county'] for row in cursor.fetchall()]
+    finally:
+        conn.close()
 
-def update_property(property_id, address, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear):
+
+def update_property(property_id, address, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, county, taxAssessedYear):
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
             update_sql = """
             UPDATE all_properties 
-            SET addresses = %s, zpid = %s, bedrooms = %s, bathrooms = %s, livingArea = %s, lotSize = %s, price = %s, taxAssessedValue = %s, taxAssessedYear = %s 
+            SET addresses = %s, zpid = %s, bedrooms = %s, bathrooms = %s, livingArea = %s, lotSize = %s, price = %s, taxAssessedValue = %s, county = %s, taxAssessedYear = %s 
             WHERE id = %s
             """
-            cursor.execute(update_sql, (address, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear, property_id))
+            cursor.execute(update_sql, (address, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear, county, property_id))
         conn.commit()
     finally:
         conn.close()
@@ -111,6 +120,7 @@ def get_property_details(zpid):
     price = response_json.get('price', 'N/A')
     taxAssessedValue = response_json.get('taxAssessedValue', 'N/A')
     taxAssessedYear = response_json.get('taxAssessedYear', 'N/A')
+    county = response_json.get('county', 'N/A')
 
     return {
         'bedrooms': bedrooms,
@@ -119,32 +129,48 @@ def get_property_details(zpid):
         'lotSize': lotSize,
         'price': price,
         'taxAssessedValue': taxAssessedValue,
-        'taxAssessedYear': taxAssessedYear
+        'taxAssessedYear': taxAssessedYear,
+        'county': county
     }
 
 
 @app.route('/')
 def home():
+    county_filter = request.args.get('county')
     properties = get_all_properties()
     detailed_properties = []
+    counties = get_unique_counties()
 
     for prop in properties:
-        id, address, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear, photo_url = prop
-        
-        detailed_properties.append({
-            'id': id,
-            'address': address,
-            'bedrooms': bedrooms,
-            'bathrooms': bathrooms,
-            'livingArea': livingArea,
-            'lotSize': lotSize,
-            'price': price,
-            'taxAssessedValue': taxAssessedValue,
-            'taxAssessedYear': taxAssessedYear,
-            'photo_url': photo_url
-        })
+        id, address, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear, county, photo_url = prop
 
-    return render_template('index.html', properties=detailed_properties)
+    detailed_properties.append({
+        'id': id,
+        'address': address,
+        'bedrooms': bedrooms,
+        'bathrooms': bathrooms,
+        'livingArea': livingArea,
+        'lotSize': lotSize,
+        'price': price,
+        'taxAssessedValue': taxAssessedValue,
+        'taxAssessedYear': taxAssessedYear,
+        'county': county,
+        'photo_url': photo_url
+    })
+
+    if county_filter:
+        properties = [prop for prop in properties if prop.get('county') == county_filter]
+
+    return render_template('index.html', properties=properties, counties=counties)
+
+@app.route('/admin')
+def admin():
+    properties = get_all_properties()
+    # Convert 'id' to integer if necessary
+    for property in properties:
+        property['id'] = int(property['id'])
+    return render_template('admin.html', properties=properties)
+
 
 @app.route('/property/<int:id>')
 def property_details(id):
@@ -157,8 +183,21 @@ def property_details(id):
     else:
         return 'Property not found', 404
 
+@app.route('/login', methods=['GET'])
+def login_form():
+    return render_template('login.html')
 
+@app.route('/login', methods=['POST'])
+def login():
+    username = request.form['username']
+    password = request.form['password']
 
+    # Here, you should fetch the user from the database and check the password
+    # For now, this is a simplified version
+    if username == 'admin' and password == 'password':
+        return redirect(url_for('admin'))  # Redirect to the admin page
+    else:
+        return 'Invalid credentials', 401
 
 @app.route('/add_address', methods=['GET'])
 def add_address():
@@ -183,14 +222,15 @@ def submit_address():
             details.get('price', None),
             details.get('taxAssessedValue', None),
             details.get('taxAssessedYear', None),
+            details.get('county', None),
             photo_url
         )
 
     else:
         # Handle the case where no details are available
-        insert_address(address, None, None, None, None, None, None, None, None, None)
+        insert_address(address, None, None, None, None, None, None, None, None, None, None)
 
-    return redirect(url_for('home'))
+    return redirect(url_for('admin'))
 
 @app.route('/edit/<int:id>', methods=['GET'])
 def edit_address(id):
@@ -212,14 +252,15 @@ def update_address():
     price = request.form['price']
     taxAssessedValue = request.form['taxAssessedValue']
     taxAssessedYear = request.form['taxAssessedYear']
+    county = request.form['county']
 
-    update_property(property_id, address, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear)
+    update_property(property_id, address, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear, county)
     return redirect(url_for('home'))
 
 @app.route('/delete/<int:id>', methods=['GET'])
 def delete_address(id):
     delete_property(id)
-    return redirect(url_for('home'))
+    return redirect(url_for('admin'))
 
 
 def get_photos(zpid):
