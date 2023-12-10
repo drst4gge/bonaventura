@@ -1,55 +1,115 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Property List</title>
+    <title>PROPERTY MANAGER</title>
+    <header>
+        <a href="{{ url_for('home') }}">
+            <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="Logo" style="height: 50px; text-align: center;">
+        </a>
+    </header>
     <style>
         body {
-            background-color: rgb(176, 207, 207);
-            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            font-family: monospace, sans-serif;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 2px transparent black;
-            padding: 8px;
-            text-align: left;
-            background-color: #ffffff;
-            font-family: Verdana, Geneva, Tahoma, sans-serif;
-        }
-        th {
-            background-color: #7c6966;
+        a {
+            text-decoration: none;
+            color: darkblue;
         }
 
-        a {
-            color: rgb(0, 0, 0);
-            text-decoration: none;
+        h {
+            color: darkblue;
         }
+
+        p {
+            color: black;
+        }
+        .property-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Adjust the min size to your preference */
+            grid-gap: 10px; /* This adds space between the tiles */
+            padding: 10px; /* Padding around the grid */
+        }
+
+        .property-tile {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden; /* This ensures that content does not spill out of the tile */
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .property-image {
+            width: 100%; /* Image will fill the width of the tile */
+            height: 200px; /* Fixed height for the image */
+            object-fit: cover; /* This will cover the area, potentially cropping the image */
+        }
+
+        .property-content {
+            padding: 10px; /* Padding inside the tile for the content */
+        }
+
+        .property-buttons {
+            display: flex;
+            justify-content: space-evenly;
+            padding: 10px;
+            background: #cecece; /* Slightly different background for the button area */
+        }
+
+        .add-btn {
+            width: 10%;
+            background-color: #505050;
+            color: white;
+        }
+        .edit-btn, .delete-btn, .add-btn {
+            padding: 5px 10px;
+            margin: 0 5px; /* Space between buttons */
+            border: none;
+            cursor: pointer;
+            text-transform: capitalize;
+        }
+
+        .delete-btn {
+            background-color: #ff4d4d;
+            color: white;
+        }
+
     </style>
 </head>
 <body>
-    <h1>All Properties</h1>
-    <a href="/add_address">Add New Address</a>
-    <br><br>
-    <table>
-        <tr>
-            <th>ID</th>
-            <th>Address</th>
-            <th>Property Details</th>
-            <th>Actions</th>
-        </tr>
-        {% for id, address, details in properties %}
-        <tr>
-            <td>{{ id }}</td>
-            <td>{{ address }}</td>
-            <td>{{ details }}</td>
-            <td>
-                <a href="/edit/{{ id }}">Edit</a> |
-                <a href="/delete/{{ id }}">Delete</a>
-            </td>
-        </tr>
+    <div class="property-buttons">
+        <button onclick="location.href='/add_address'" class="add-btn">ADD AN ADDRESS</button>
+        
+    </div>
+    
+    
+    <div class="property-grid">
+        {% for property in properties %}
+            <div class="property-tile">
+                <!-- Wrap the contents in an anchor tag -->
+                <a href="{{ url_for('property_details', id=property['id']) }}" class="property-link">
+                    <img class="property-image" src="{{ property['photo_url'] }}" alt="Property Image">
+                    <div class="property-content">
+                        <h3>{{ property['address'] }}</h3>
+                        <h4>- PRICING -</h4>
+                        <p>LISTING PRICE ${{ property['price'] }}</p>
+                        <p>TAX ASSESSED VALUE ${{ property['taxAssessedValue'] }}</p>
+                        <p>TAX ASSESSED YEAR {{ property['taxAssessedYear'] }}</p>
+                        <h4>- HOME DETAILS -</h4>
+                        <p> {{ property['bedrooms'] }} BEDROOMS</p>
+                        <p> {{ property['bathrooms'] }} BATHROOMS</p>
+                        <p>{{ property['livingArea'] }} INTERIOR SQFT</p>
+                        <p>{{ property['lotSize'] }} SQFT OF LAND</p>
+                    </div>
+                </a>
+                <div class="property-buttons">
+                    <button onclick="location.href='/edit/{{ property['id'] }}'" class="edit-btn">EDIT</button>
+                    <button onclick="if(confirm('Are you sure you want to delete this property?')) location.href='/delete/{{ property['id'] }}';" class="delete-btn">DELETE</button>
+                </div>
+            </div>
         {% endfor %}
-    </table>
+    </div>
 </body>
 </html>

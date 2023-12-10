@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PROPERTY DETAILS</title>
+    <header>
+        <a href="{{ url_for('home') }}">
+            <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="Logo" style="height: 50px; text-align: center;">
+        </a>
+    </header>
+    <style>
+        .property-image {
+            width: 100%; /* Image will fill the width of the tile */
+            height: 200px; /* Fixed height for the image */
+            object-fit: cover; /* This will cover the area, potentially cropping the image */
+        }
+    </style>
+</head>
+<body>
+    <div class="property-details">
+        
+        <img src="{{ property[-1] }}" alt="Property Image"> <!-- Assuming photo URL is the last element in the property tuple -->
+       
+    </div>
+    <div class="property-details" style="width: 50%;">
+        <h3>{{ property['address'] }}</h3>
+        <h4>- PRICING -</h4>
+        <p>LISTING PRICE ${{ property['price'] }}</p>
+        <p>TAX ASSESSED VALUE ${{ property['taxAssessedValue'] }}</p>
+        <p>TAX ASSESSED YEAR {{ property['taxAssessedYear'] }}</p>
+        <h4>- HOME DETAILS -</h4>
+        <p> {{ property['bedrooms'] }} BEDROOMS</p>
+        <p> {{ property['bathrooms'] }} BATHROOMS</p>
+        <p>{{ property['livingArea'] }} INTERIOR SQFT</p>
+        <p>{{ property['lotSize'] }} SQFT OF LAND</p>
+    </div>
+</body>
+</html>

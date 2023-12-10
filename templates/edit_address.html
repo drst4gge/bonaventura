@@ -4,12 +4,37 @@
     <title>Edit Address</title>
 </head>
 <body>
-    <form action="{{ url_for('update_address') }}" method="post">
+    <h1>Edit Property Details</h1>
+    <form action="/update_address" method="post">
         <input type="hidden" name="id" value="{{ property[0] }}">
-        <label for="address">Address:</label><br>
-        <input type="text" id="address" name="address" value="{{ property[1] }}"><br>
-        <label for="data">Address Data:</label><br>
-        <input type="text" id="details" name="details" value="{{ property[2] }}"><br>
+
+        <label for="address">Address:</label>
+        <input type="text" id="address" name="address" value="{{ property[1] }}" required><br><br>
+
+        <label for="zpid">ZPID:</label>
+        <input type="text" id="zpid" name="zpid" value="{{ property[2] }}"><br><br>
+
+        <label for="bedrooms">Bedrooms:</label>
+        <input type="number" id="bedrooms" name="bedrooms" value="{{ property[3] }}"><br><br>
+
+        <label for="bathrooms">Bathrooms:</label>
+        <input type="number" id="bathrooms" name="bathrooms" value="{{ property[4] }}"><br><br>
+
+        <label for="livingArea">Living Area:</label>
+        <input type="number" id="livingArea" name="livingArea" value="{{ property[5] }}"><br><br>
+
+        <label for="lotSize">Lot Size:</label>
+        <input type="number" id="lotSize" name="lotSize" value="{{ property[6] }}"><br><br>
+
+        <label for="price">Price:</label>
+        <input type="number" id="price" name="price" value="{{ property[7] }}"><br><br>
+
+        <label for="taxAssessedValue">Tax Assessed Value:</label>
+        <input type="number" id="taxAssessedValue" name="taxAssessedValue" value="{{ property[8] }}"><br><br>
+
+        <label for="taxAssessedYear">Tax Assessed Year:</label>
+        <input type="number" id="taxAssessedYear" name="taxAssessedYear" value="{{ property[9] }}"><br><br>
+
         <input type="submit" value="Update">
     </form>
 </body>
