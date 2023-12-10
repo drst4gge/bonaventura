@@ -1,12 +1,12 @@
 branch-defaults:
   main:
-    environment: bonaventura-demo-dev
+    environment: bonaventura-eb-first-demo
     group_suffix: null
 global:
-  application_name: bonaventura_demo
+  application_name: bonaventura-eb-first-demo
   branch: null
-  default_ec2_keyname: null
-  default_platform: Python 3.11 running on 64bit Amazon Linux 2023
+  default_ec2_keyname: aws-eb
+  default_platform: Python 3.11
   default_region: us-east-1
   include_git_submodules: true
   instance_profile: null

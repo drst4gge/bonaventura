@@ -301,6 +301,6 @@ def handle_bid(id):
     return redirect(url_for('property_details', id=id))
 
 
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    app.run()
 
