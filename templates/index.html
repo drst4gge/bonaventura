@@ -2,101 +2,285 @@
 <html>
 <head>
     <title>BONAVENTURA HOME</title>
-    
-
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
     <style>
-        html {
-            min-height: 100%; /* Ensures the html element covers the full viewport height */
-            box-sizing: border-box; /* Ensures the padding and border are included in the width/height */
-        }
 
-        body {
-            min-height: 100vh; /* Ensures the body covers the full viewport height */
-            margin: 0; /* Removes default margin */
-            padding: 0; /* Removes default padding */
-            background: linear-gradient(to bottom,#ffffff, #272343 ); /* Gradient from #272343 to a slightly lighter shade */
-            color: #d1d1d1; /* Text color */
-            font-family: monospace, sans-serif; /* Your chosen font */
-            box-sizing: border-box; /* Ensures the padding and border are included in the width/height */
-        }
-        a {
-            text-decoration: none;
-            color: #272343; /* Dark blue color for links */
-        }
-    
-        h {
-            color: #272343; /* Dark blue color for headers */
+        .cs-button-6 {
             text-align: center;
-        }
-    
-        p {
-            color: #272343; /* Dark blue color for paragraphs */
-        }   
-        .property-content {
-            padding: 10px;
-        }
-    
-        .property-buttons {
-            display: flex;
-            justify-content: space-evenly;
-            padding: 10px;
-            background: #272343; /* Dark blue background for buttons */
-            background: #39405a;
-        }
-    
-
-        .main-header {
-            display: flex;
-            
-            align-items: center; /* Aligns items vertically in the center */
-            padding: 10px; /* Add some padding around the header */
-        }
-
-        .main-header a {
+            font-size: 1rem;
+            /* 46px - 56px */
+            line-height: clamp(2.875rem, 8vw, 3.5rem);
             text-decoration: none;
-            font-family: monospace;
-            color: #272343; /* Set your preferred color for the links */
+            font-weight: 700;
+            min-width: 10.875rem;
+            margin: auto;
+            color: #1a1a1a;
+            padding: 0 0 0 1.5rem;
+            /* prevents padding and border from affecting height and width */
+            box-sizing: border-box;
+            background-color: #fff;
+            display: inline-flex;
+            align-items: stretch;
+            justify-content: space-between;
+            gap: 1.5rem;
+            position: relative;
+            z-index: 1;
+            transition:
+                color 0.3s,
+                border 0.3s;
         }
-
-
-        .main-content {
+        .cs-button-6:before {
+            /* background color */
+            content: "";
+            width: 0%;
+            height: 100%;
+            background-color: #1a1a1a;
+            opacity: 1;
+            position: absolute;
+            display: block;
+            bottom: 0;
+            left: 0;
+            transition: width 0.3s;
+            z-index: -1;
+        }
+        .cs-button-6:after {
+            /* button border */
+            content: "";
+            width: 100%;
+            height: 100%;
+            background-color: transparent;
+            border: 2px solid #1a1a1a;
+            /* prevents border from affecting height and width */
+            box-sizing: border-box;
+            opacity: 1;
+            position: absolute;
+            display: block;
+            bottom: 0;
+            right: 0;
+            transition: opacity 0.3s;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .cs-button-6 .cs-wrapper {
+            width: 2.75rem;
+            height: auto;
+            background-color: #fff;
+            border-left: 2px solid #1a1a1a;
             display: flex;
-            align-items: center; /* Vertically center items */
-            justify-content: space-between; /* Distribute space between elements */
-            margin: 20px;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+            position: relative;
+            transition: border 0.3s;
         }
-        .intro-text {
-            
-            width: 50%; /* Half of the screen width */
-            text-align: left;
-            font-size: 1.5em; /* Larger text size */
-            color: #272343; /* Text color */
-            padding-right: 20px; /* Space between text and property grid */
+        .cs-button-6 .cs-wrapper:before {
+            /* background color */
+            content: "";
+            width: 0%;
+            height: 100%;
+            background-color: #f15a24;
+            opacity: 1;
+            position: absolute;
+            display: block;
+            bottom: 0;
+            left: 0;
+            transition: width 0.3s;
+            transition-delay: 0.1s;
+            z-index: -1;
         }
-    </style>
-    
-    
-</head>
-<body>
-    <header class="main-header">
-        <a href="{{ url_for('home') }}">
-            <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="Logo" style="height: 50px;">
-        </a>
-    
+        .cs-button-6 .cs-icon {
+            width: 1.5rem;
+            height: auto;
+        }
+        .cs-button-6 .cs-icon path {
+            transition: fill 0.3s;
+        }
+        .cs-button-6:hover {
+            color: #fff;
+        }
+        .cs-button-6:hover:before {
+            width: 100%;
+        }
+        .cs-button-6:hover:after {
+            opacity: 0;
+        }
+        .cs-button-6:hover .cs-wrapper {
+            border-color: #1a1a1a;
+        }
+        .cs-button-6:hover .cs-wrapper:before {
+            width: 100%;
+        }
+        .cs-button-6:hover .cs-icon path {
+            fill: #fff;
+        }
 
-    </header>
-    
-    <div class="main-content">
+        /* Mobile - 360px */
+@media only screen and (min-width: 0rem) {
+    #hero-82 {
+        /* Centers button */
+        text-align: center;
+        /* 144px - 300px - leaving extra space for the navigation */
+        padding: clamp(9rem, 25.95vw, 18.75rem) 1rem 0;
+        /* 130px - 200px */
+        padding-bottom: clamp(8.125rem, 12.5vw, 25em);
+        position: relative;
+        z-index: 1;
+    }
+    #hero-82 .cs-background {
+        width: 100%;
+        height: 100%;
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: -2;
+    }
+    #hero-82 .cs-background:before {
+        /* Overlay */
+        content: "";
+        width: 100%;
+        height: 100%;
+        background: #000;
+        opacity: 0.7;
+        position: absolute;
+        display: block;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        /* prevents the cursor from interacting with it */
+        pointer-events: none;
+    }
+    #hero-82 .cs-background img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+    }
+    #hero-82 .cs-container {
+        width: 100%;
+        max-width: 67.5rem;
+        margin: auto;
+    }
+    #hero-82 .cs-title {
+        /* 39px - 61px */
+        font-size: clamp(2.4375rem, 6.4vw, 3.8125rem);
+        font-weight: 700;
+        line-height: 1.2em;
+        text-align: center;
+        max-width: 51.8125rem;
+        /* 16px - 24px */
+        margin: 0 auto clamp(1rem, 4vw, 1.5rem);
+        color: #fff;
+        position: relative;
+    }
+    #hero-82 .cs-title:after {
+        /* Divider Line */
+        content: "";
+        width: 6.25rem;
+        height: 0.5rem;
+        /* 16px - 24px */
+        margin: clamp(1rem, 4vw, 1.5rem) auto clamp(1rem, 4vw, 1.5rem);
+        background: var(--primary);
+        opacity: 1;
+        position: relative;
+        display: block;
+    }
+    #hero-82 .cs-text {
+        /* 16px - 25px */
+        font-size: clamp(1rem, 1.95vw, 1.5625rem);
+        line-height: 1.5em;
+        text-align: center;
+        width: 100%;
+        /* 464px - 800px */
+        max-width: clamp(29rem, 60vw, 50rem);
+        margin: 0 auto;
+        /* 40px - 48px */
+        margin-bottom: clamp(2.5rem, 4vw, 3rem);
+        color: #fff;
+    }
+    #hero-82 .cs-button-solid {
+        font-size: 1rem;
+        line-height: 3.5rem;
+        text-decoration: none;
+        font-weight: 700;
+        margin: auto;
+        color: #fff;
+        padding: 0 1.5rem;
+        background-color: var(--primary);
+        border-radius: 0.25rem;
+        display: inline-block;
+        position: relative;
+        z-index: 1;
+    }
+    #hero-82 .cs-button-solid:before {
+        content: "";
+        position: absolute;
+        display: block;
+        height: 100%;
+        width: 0%;
+        background: #000;
+        opacity: 1;
+        top: 0;
+        left: 0;
+        z-index: -1;
+        border-radius: 0.25rem;
+        transition: width 0.3s;
+    }
+    #hero-82 .cs-button-solid:hover:before {
+        width: 100%;
+    }
+}
 
-        <div class="login-link">
-            <h2><a href="{{ url_for('login') }}">LOGIN</a></h2>
-        </div>
-        <div class="login-link">
-            <h2><a href="{{ url_for('create_user') }}">CREATE AN ACCOUNT</a></h2>
-        </div>
+        
+
+        
 
 
         
-    </div>
+    </style>
+</head>
+<body>
+    <section id="hero-82">
+        <div class="cs-container">
+            <h1 class="cs-title">Bonaventura</h1>
+            <p class="cs-text">
+                Browse, Bid, Buy. 
+            </p>
+            <a href="{{ url_for('create_user') }}" class="cs-button-6" aria-label="read more about us">
+                CREATE AN ACCOUNT
+                <!--SVG Arrow-->
+                <div class="cs-wrapper">
+                    <svg class="cs-icon" aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17.92 11.62C17.8724 11.4973 17.801 11.3851 17.71 11.29L12.71 6.29C12.6168 6.19676 12.5061 6.1228 12.3842 6.07234C12.2624 6.02188 12.1319 5.99591 12 5.99591C11.7337 5.99591 11.4783 6.1017 11.29 6.29C11.1968 6.38324 11.1228 6.49393 11.0723 6.61575C11.0219 6.73758 10.9959 6.86814 10.9959 7C10.9959 7.2663 11.1017 7.5217 11.29 7.71L14.59 11H7C6.73478 11 6.48043 11.1054 6.29289 11.2929C6.10536 11.4804 6 11.7348 6 12C6 12.2652 6.10536 12.5196 6.29289 12.7071C6.48043 12.8946 6.73478 13 7 13H14.59L11.29 16.29C11.1963 16.383 11.1219 16.4936 11.0711 16.6154C11.0203 16.7373 10.9942 16.868 10.9942 17C10.9942 17.132 11.0203 17.2627 11.0711 17.3846C11.1219 17.5064 11.1963 17.617 11.29 17.71C11.383 17.8037 11.4936 17.8781 11.6154 17.9289C11.7373 17.9797 11.868 18.0058 12 18.0058C12.132 18.0058 12.2627 17.9797 12.3846 17.9289C12.5064 17.8781 12.617 17.8037 12.71 17.71L17.71 12.71C17.801 12.6149 17.8724 12.5028 17.92 12.38C18.02 12.1365 18.02 11.8635 17.92 11.62Z" fill="#1a1a1a"/>
+                    </svg>
+                </div>
+            </a>
+            <a href="{{ url_for('login') }}" class="cs-button-6" aria-label="read more about us">
+                LOGIN
+                <!--SVG Arrow-->
+                <div class="cs-wrapper">
+                    <svg class="cs-icon" aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17.92 11.62C17.8724 11.4973 17.801 11.3851 17.71 11.29L12.71 6.29C12.6168 6.19676 12.5061 6.1228 12.3842 6.07234C12.2624 6.02188 12.1319 5.99591 12 5.99591C11.7337 5.99591 11.4783 6.1017 11.29 6.29C11.1968 6.38324 11.1228 6.49393 11.0723 6.61575C11.0219 6.73758 10.9959 6.86814 10.9959 7C10.9959 7.2663 11.1017 7.5217 11.29 7.71L14.59 11H7C6.73478 11 6.48043 11.1054 6.29289 11.2929C6.10536 11.4804 6 11.7348 6 12C6 12.2652 6.10536 12.5196 6.29289 12.7071C6.48043 12.8946 6.73478 13 7 13H14.59L11.29 16.29C11.1963 16.383 11.1219 16.4936 11.0711 16.6154C11.0203 16.7373 10.9942 16.868 10.9942 17C10.9942 17.132 11.0203 17.2627 11.0711 17.3846C11.1219 17.5064 11.1963 17.617 11.29 17.71C11.383 17.8037 11.4936 17.8781 11.6154 17.9289C11.7373 17.9797 11.868 18.0058 12 18.0058C12.132 18.0058 12.2627 17.9797 12.3846 17.9289C12.5064 17.8781 12.617 17.8037 12.71 17.71L17.71 12.71C17.801 12.6149 17.8724 12.5028 17.92 12.38C18.02 12.1365 18.02 11.8635 17.92 11.62Z" fill="#1a1a1a"/>
+                    </svg>
+                </div>
+            </a>
+        </div>
+    
+        <!-- Background Image -->
+        <picture class="cs-background">
+            <source media="(max-width: 600px)" src="{{ url_for('static', filename='images/background.jpg') }}">
+            <source media="(min-width: 601px)" src="{{ url_for('static', filename='images/background.jpg') }}">
+            <img loading="lazy" decoding="async" src="{{ url_for('static', filename='images/background.jpg') }}" width="2250" height="1500" aria-hidden="true">
+        </picture>
+    </section>
+    
+
+    
+  
+            
+            
+
 </body>
 </html>
