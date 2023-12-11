@@ -8,7 +8,7 @@ from flask import session, redirect, url_for, flash
 from functools import wraps
 from dotenv import load_dotenv
 import os
-app = Flask(__name__)
+application = Flask(__name__)
 
 def requires_roles(*roles):
     def wrapper(f):
@@ -21,7 +21,7 @@ def requires_roles(*roles):
     return wrapper
 
 load_dotenv()
-app.secret_key = os.environ.get('SECRET_KEY')
+application.secret_key = os.environ.get('SECRET_KEY')
 
 # Database Helper Functions
 def get_db_connection():
@@ -152,7 +152,7 @@ def get_property_details(zpid):
     }
 
 
-@app.route('/')
+@application.route('/')
 def home():
     county_filter = request.args.get('county')
     conn = get_db_connection()
@@ -172,7 +172,7 @@ def home():
     counties = get_unique_counties()  # Assuming this function fetches unique counties
     return render_template('index.html', properties=properties, counties=counties)
 
-@app.route('/subscriber')
+@application.route('/subscriber')
 @requires_roles(0)
 def subscriber():
     properties = get_all_properties()
@@ -181,7 +181,7 @@ def subscriber():
         property['id'] = int(property['id'])
     return render_template('subscriber.html', properties=properties)
 
-@app.route('/agent')
+@application.route('/agent')
 @requires_roles(1)
 def agent():
     properties = get_all_properties()
@@ -191,7 +191,7 @@ def agent():
         property['id'] = int(property['id'])
     return render_template('agent.html', properties=properties)
 
-@app.route('/admin')
+@application.route('/admin')
 @requires_roles(2)
 def admin():
     properties = get_all_properties()
@@ -201,7 +201,7 @@ def admin():
         property['id'] = int(property['id'])
     return render_template('admin.html', properties=properties, users=users)
 
-@app.route('/delete_user/<int:user_id>')
+@application.route('/delete_user/<int:user_id>')
 @requires_roles('admin')
 def delete_user(user_id):
     conn = get_db_connection()
@@ -212,7 +212,7 @@ def delete_user(user_id):
     conn.close()
     return redirect(url_for('admin'))
 
-@app.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
+@application.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
 def edit_user(user_id):
     conn = get_db_connection()
     if request.method == 'GET':
@@ -238,7 +238,7 @@ def get_all_users():
         conn.close()
 
 
-@app.route('/property/<int:id>')
+@application.route('/property/<int:id>')
 def property_details(id):
     property = get_property_by_id(id)
 
@@ -249,7 +249,7 @@ def property_details(id):
     else:
         return 'Property not found', 404
 
-@app.route('/login', methods=['GET'])
+@application.route('/login', methods=['GET'])
 def login_form():
     return render_template('login.html')
 
@@ -265,7 +265,7 @@ def get_hashed_password(username):
     else:
         return None
     
-@app.route('/login', methods=['POST'])
+@application.route('/login', methods=['POST'])
 def login():
     username = request.form['username']
     password = request.form['password']
@@ -291,7 +291,7 @@ def login():
         return 'Invalid credentials', 401
 
     
-@app.route('/create_user', methods=['GET', 'POST'])
+@application.route('/create_user', methods=['GET', 'POST'])
 def create_user():
     if request.method == 'GET':
         return render_template('create_user.html')
@@ -314,16 +314,16 @@ def create_user():
 
         return redirect(url_for('login_form'))
     
-@app.route('/logout')
+@application.route('/logout')
 def logout():
     session.pop('user_role', None)  # Remove the user role from session
     # Redirect to login page or home page
 
-@app.route('/add_address', methods=['GET'])
+@application.route('/add_address', methods=['GET'])
 def add_address():
     return render_template('add_address.html')
 
-@app.route('/submit_address', methods=['POST'])
+@application.route('/submit_address', methods=['POST'])
 def submit_address():
     address = request.form['address']
     zpid = get_zpid_from_address(address)
@@ -352,14 +352,14 @@ def submit_address():
 
     return redirect(url_for('admin'))
 
-@app.route('/edit/<int:id>', methods=['GET'])
+@application.route('/edit/<int:id>', methods=['GET'])
 def edit_address(id):
     property = get_property_by_id(id)
     if property:
         return render_template('edit_address.html', property=property)
     return 'Property not found', 404
 
-@app.route('/update_address', methods=['POST'])
+@application.route('/update_address', methods=['POST'])
 def update_address():
     property_id = request.form['id']
     address = request.form['address']
@@ -377,7 +377,7 @@ def update_address():
     update_property(property_id, address, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear, county)
     return redirect(url_for('home'))
 
-@app.route('/delete/<int:id>', methods=['GET'])
+@application.route('/delete/<int:id>', methods=['GET'])
 def delete_address(id):
     delete_property(id)
     return redirect(url_for('admin'))
@@ -407,7 +407,7 @@ def get_photos(zpid):
 
     return None  # Return None if no photo URL is found
 
-@app.route('/bid/<int:id>', methods=['GET'])
+@application.route('/bid/<int:id>', methods=['GET'])
 def bid(id):
     # You might want to fetch property details here to display on the bid page
     property = get_property_by_id(id)
@@ -416,7 +416,7 @@ def bid(id):
     else:
         return 'Property not found', 404
 
-@app.route('/submit_bid/<int:id>', methods=['POST'])
+@application.route('/submit_bid/<int:id>', methods=['POST'])
 def submit_bid(id):
     # Here you would handle the bid submission
     # For example, save the bid to the database
@@ -434,5 +434,5 @@ def submit_bid(id):
 
 
 if __name__ == "__main__":
-    app.run()
+    application.run()
 
