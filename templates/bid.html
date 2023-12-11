@@ -18,20 +18,20 @@
 </head>
 <body>
     <h1>PLACE A BID</h1>
-    <form action="{{ url_for('submit_bid', id=property_id) }}" method="post">
+    <form action="/submit_bid/{{ property_id }}" method="post">
         <label for="name">Name:</label>
-        <input type="text" id="name" name="name" required>
-
+        <input type="text" id="name" name="name" value="{{ user['username'] }}" readonly>
+        
         <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
-
+        <input type="email" id="email" name="email" value="{{ user['email'] }}" readonly>
+    
         <label for="phone">Phone Number:</label>
-        <input type="tel" id="phone" name="phone">
-
-        <label for="bid">Bid Amount ($):</label>
-        <input type="number" id="bid" name="bid" required>
-
-        <input type="submit" value="Place Bid">
+        <input type="tel" id="phone" name="phone" value="{{ user['phone'] }}" readonly>
+    
+        <label for="bid">Bid Amount:</label>
+        <input type="number" id="bid" name="bid">
+    
+        <!-- ... rest of the form ... -->
     </form>
 </body>
 </html>

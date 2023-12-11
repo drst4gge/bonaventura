@@ -170,16 +170,18 @@ def home():
     conn.close()
 
     counties = get_unique_counties()  # Assuming this function fetches unique counties
-    return render_template('index.html', properties=properties, counties=counties)
+    return render_template('index.html', properties=properties)
 
 @application.route('/subscriber')
 @requires_roles(0)
 def subscriber():
     properties = get_all_properties()
+    counties = get_unique_counties()
     # Convert 'id' to integer if necessary
     for property in properties:
         property['id'] = int(property['id'])
-    return render_template('subscriber.html', properties=properties)
+    
+    return render_template('subscriber.html', properties=properties, counties=counties)
 
 @application.route('/agent')
 @requires_roles(1)
@@ -278,6 +280,9 @@ def login():
     conn.close()
 
     if user and check_password_hash(user['password'], password):
+        session['user_id'] = user['id']  # Store user ID in session
+        session['user_email'] = user['email']  # Store user email in session
+        session['user_phone'] = user['phone']  # Store user phone in session
         session['user_role'] = user['role']
         if user['role'] == 0:
             return redirect(url_for('subscriber'))
@@ -409,10 +414,14 @@ def get_photos(zpid):
 
 @application.route('/bid/<int:id>', methods=['GET'])
 def bid(id):
-    # You might want to fetch property details here to display on the bid page
     property = get_property_by_id(id)
     if property:
-        return render_template('bid.html', property_id=id)
+        user_details = {
+            'username': session.get('username', ''),
+            'email': session.get('user_email', ''),
+            'phone': session.get('user_phone', '')
+        }
+        return render_template('bid.html', property_id=id, user=user_details)
     else:
         return 'Property not found', 404
 
