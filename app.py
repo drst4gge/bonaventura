@@ -1,9 +1,27 @@
 from flask import Flask, request, render_template, redirect, url_for
+from werkzeug.security import generate_password_hash
+from werkzeug.security import check_password_hash
 import pymysql
 import http.client
 import json
-
+from flask import session, redirect, url_for, flash
+from functools import wraps
+from dotenv import load_dotenv
+import os
 app = Flask(__name__)
+
+def requires_roles(*roles):
+    def wrapper(f):
+        @wraps(f)
+        def wrapped(*args, **kwargs):
+            if 'user_role' not in session or session['user_role'] not in roles:
+                return redirect(url_for('login'))
+            return f(*args, **kwargs)
+        return wrapped
+    return wrapper
+
+load_dotenv()
+app.secret_key = os.environ.get('SECRET_KEY')
 
 # Database Helper Functions
 def get_db_connection():
@@ -163,13 +181,60 @@ def home():
 
     return render_template('index.html', properties=properties, counties=counties)
 
-@app.route('/admin')
-def admin():
+@app.route('/subscriber')
+@requires_roles(0)
+def subscriber():
     properties = get_all_properties()
     # Convert 'id' to integer if necessary
     for property in properties:
         property['id'] = int(property['id'])
-    return render_template('admin.html', properties=properties)
+    return render_template('subscriber.html', properties=properties)
+
+@app.route('/admin')
+@requires_roles(2)
+def admin():
+    properties = get_all_properties()
+    users = get_all_users()
+    # Convert 'id' to integer if necessary
+    for property in properties:
+        property['id'] = int(property['id'])
+    return render_template('admin.html', properties=properties, users=users)
+
+@app.route('/delete_user/<int:user_id>')
+@requires_roles('admin')
+def delete_user(user_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM users WHERE id = %s", (user_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return redirect(url_for('admin'))
+
+@app.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
+def edit_user(user_id):
+    conn = get_db_connection()
+    if request.method == 'GET':
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        cursor.execute("SELECT * FROM users WHERE id = %s", (user_id,))
+        user = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return render_template('edit_user.html', user=user)
+    else:
+        # Update user logic here
+        # Fetch updated user data from the form
+        # ...
+        return redirect(url_for('admin'))
+
+def get_all_users():
+    conn = get_db_connection()
+    try:
+        with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+            cursor.execute("SELECT * FROM users")
+            return cursor.fetchall()
+    finally:
+        conn.close()
 
 
 @app.route('/property/<int:id>')
@@ -187,17 +252,69 @@ def property_details(id):
 def login_form():
     return render_template('login.html')
 
+def get_hashed_password(username):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT password FROM users WHERE username = %s", (username,))
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    if result:
+        return result[0]  # Assuming 'password' is the first field
+    else:
+        return None
+    
 @app.route('/login', methods=['POST'])
 def login():
     username = request.form['username']
     password = request.form['password']
+    
+    conn = get_db_connection()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+    user = cursor.fetchone()
+    cursor.close()
+    conn.close()
 
-    # Here, you should fetch the user from the database and check the password
-    # For now, this is a simplified version
-    if username == 'admin' and password == 'password':
-        return redirect(url_for('admin'))  # Redirect to the admin page
+    if user and check_password_hash(user['password'], password):
+        session['user_role'] = user['role']
+        if user['role'] == 0:
+            return redirect(url_for('subscriber'))
+        elif user['role'] == 2:
+            return redirect(url_for('admin'))
+        else:
+            return 'Invalid role', 401
     else:
         return 'Invalid credentials', 401
+
+    
+@app.route('/create_user', methods=['GET', 'POST'])
+def create_user():
+    if request.method == 'GET':
+        return render_template('create_user.html')
+    else:
+        username = request.form['username']
+        password = request.form['password']
+        email = request.form['email']
+        phone = request.form['phone']
+        role = request.form['role']  # Ensure this is properly validated and secured
+
+        hashed_password = generate_password_hash(password)
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO users (username, password, email, phone, role) VALUES (%s, %s,%s, %s, %s)",
+                       (username, hashed_password, email, phone, role))
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return redirect(url_for('login_form'))
+    
+@app.route('/logout')
+def logout():
+    session.pop('user_role', None)  # Remove the user role from session
+    # Redirect to login page or home page
 
 @app.route('/add_address', methods=['GET'])
 def add_address():
@@ -287,18 +404,30 @@ def get_photos(zpid):
 
     return None  # Return None if no photo URL is found
 
-@app.route('/handle_bid/<int:id>', methods=['POST'])
-def handle_bid(id):
-    # Retrieve form data
+@app.route('/bid/<int:id>', methods=['GET'])
+def bid(id):
+    # You might want to fetch property details here to display on the bid page
+    property = get_property_by_id(id)
+    if property:
+        return render_template('bid.html', property_id=id)
+    else:
+        return 'Property not found', 404
+
+@app.route('/submit_bid/<int:id>', methods=['POST'])
+def submit_bid(id):
+    # Here you would handle the bid submission
+    # For example, save the bid to the database
+
     name = request.form['name']
     email = request.form['email']
     phone = request.form['phone']
-    bid = request.form['bid']
+    bid_amount = request.form['bid']
 
-    # Process the bid here (e.g., store in database, send notification, etc.)
+    # Save the bid information to the database or process it as needed
 
-    # Redirect or inform the user
+    # Redirect to a confirmation page or back to the property details
     return redirect(url_for('property_details', id=id))
+
 
 
 if __name__ == "__main__":

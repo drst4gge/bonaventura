@@ -11,76 +11,44 @@
         body {
             font-family: monospace, sans-serif;
             background-color: #272343;
-            color: #ffffff; /* White text for readability on dark background */
-            
+            color: #ffffff;
+            text-align: left; 
         }
-    
-        a {
-            text-decoration: none;
-            color: #ffffff; /* Dark blue for links */
-        }
-    
-        h, p {
-            color: #ffffff; /* Dark blue for headings and paragraphs */
-        }
-    
-        .property-container {
-            display: flex;
-            align-items: stretch;
+
+        .property-content {
+            width: 40%;
+            margin: left; /* Center the container */
             margin-top: 20px;
-            background: #272343; /* White background for property container */
-            border-radius: 5px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-left: 20px;
         }
-    
-        .property-image, .property-info {
-            flex: 1;
-        }
-    
+
         .property-image img {
             width: 100%;
             height: auto;
             object-fit: cover;
-            
+            border-radius: 5px;
         }
-    
-        .property-info {
+
+        .property-details {
+            background: #272343; /* Background color for details */
             padding: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            background: #272343; /* Lighter blue for property info section */
+            border-radius: 5px;
+            margin-top: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-    
-        .bid-form {
+
+        .bid-button {
             margin-top: 20px;
-            border-top: 1px solid #ccc;
-            padding-top: 20px;
-            background: #272343; /* Dark blue for the bid form */
-            color: white; /* White text for readability */
         }
-    
-        .bid-form form {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            grid-gap: 10px;
-            align-items: center;
-        }
-    
-        .bid-form input[type="submit"] {
-            grid-column: 1 / -1;
-            background-color: #ffffff; /* Green for submit button */
-            color: #272343;
-            padding: 12px 20px;
+
+        .btn {
+            background-color: #ffffff; /* White background */
+            color: #272343; /* Text color as the main background */
+            padding: 10px 20px;
             border: none;
-            cursor: pointer;
-        }
-    
-        .property-image {
-            width: 100%;
-            height: 400px;
-            object-fit: cover;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
         }
     </style>
     
@@ -89,36 +57,27 @@
 <body>
 
     
-    <div class="property-container">
+    <div class="property-content">
         <div class="property-image">
             <img src="{{ property['photo_url'] }}" alt="Property Image">
         </div>
 
-        <div class="property-info">
-            <div class="property-details">
-                <h3>{{ property['addresses'] }}</h3>
-                <h4>- PRICING -</h4>
-                <p>LISTING PRICE ${{ property['price'] }}</p>
-                <p>TAX ASSESSED VALUE ${{ property['taxAssessedValue'] }}</p>
-                <p>TAX ASSESSED YEAR {{ property['taxAssessedYear'] }}</p>
-                <h4>- HOME DETAILS -</h4>
-                <p> {{ property['bedrooms'] }} BEDROOMS</p>
-                <p> {{ property['bathrooms'] }} BATHROOMS</p>
-                <p>{{ property['livingArea'] }} INTERIOR SQFT</p>
-                <p>{{ property['lotSize'] }} SQFT OF LAND</p>
-            </div>
-            
-            <div class="bid-form">
-                <h3>- PLACE A BID -</h3>
-                <form action="{{ url_for('handle_bid', id=property['id']) }}" method="post">
-
-                    <label for="bid">BID AMOUNT ($)</label>
-                    <input type="number" id="bid" name="bid" required>
-
-                    <input type="submit" value="Place Bid">
-                </form>
-            </div>
+        <div class="property-details">
+            <h3>{{ property['addresses'] }}</h3>
+            <h4>- PRICING -</h4>
+            <p>LISTING PRICE ${{ property['price'] }}</p>
+            <p>TAX ASSESSED VALUE ${{ property['taxAssessedValue'] }}</p>
+            <p>TAX ASSESSED YEAR {{ property['taxAssessedYear'] }}</p>
+            <h4>- HOME DETAILS -</h4>
+            <p> {{ property['bedrooms'] }} BEDROOMS</p>
+            <p> {{ property['bathrooms'] }} BATHROOMS</p>
+            <p>{{ property['livingArea'] }} INTERIOR SQFT</p>
+            <p>{{ property['lotSize'] }} SQFT OF LAND</p>
         </div>
+
+        
+        <a href="{{ url_for('bid', id=property['id']) }}" class="btn">PLACE BID</a>
+        
     </div>
 </body>
 </html>

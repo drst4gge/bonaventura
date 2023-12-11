@@ -12,10 +12,19 @@
         </div>
     </header>
     <style>
+        html {
+            min-height: 100%; /* Ensures the html element covers the full viewport height */
+            box-sizing: border-box; /* Ensures the padding and border are included in the width/height */
+        }
+
         body {
-            font-family: monospace, sans-serif;
+            min-height: 100vh; /* Ensures the body covers the full viewport height */
+            margin: 0; /* Removes default margin */
+            padding: 0; /* Removes default padding */
             background: linear-gradient(to bottom,#ffffff, #272343 ); /* Gradient from #272343 to a slightly lighter shade */
-            color: #272343; /* White text for readability on dark background */
+            color: #d1d1d1; /* Text color */
+            font-family: monospace, sans-serif; /* Your chosen font */
+            box-sizing: border-box; /* Ensures the padding and border are included in the width/height */
         }
         a {
             text-decoration: none;
@@ -42,12 +51,12 @@
             flex-direction: column;
             justify-content: space-between;
             border: 1px solid #e3f6f5; /* Light blue border for contrast */
-            border-radius: 5px;
+            border-radius: 10px;
             overflow: hidden;
             background: #ffffff; /* White background for tiles for contrast */
             color: #272343; /* Dark text in tiles */
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            opacity: 0.9; /* Makes the tile slightly transparent */
+            opacity: 0.8; /* Makes the tile slightly transparent */
             transition: transform 0.3s ease, opacity 0.3s ease;
             
         }
@@ -124,16 +133,11 @@
     <div class="property-grid">
         {% for property in properties %}
             <div class="property-tile">
-                <a href="{{ url_for('property_details', id=property['id']) }}" class="property-link">
+                <a href="{{ url_for('login') }}" class="property-link">
                     <img class="property-image" src="{{ property['photo_url'] }}" alt="Property Image">
                     <div class="property-content">
                         <h3>{{ property['addresses'] }}</h3>
-                        <h4>- DETAILS -</h4>
-                        <p> {{ property['bedrooms'] }} BEDROOMS</p>
-                        <p> {{ property['bathrooms'] }} BATHROOMS</p>
-                        <p>{{ property['livingArea'] }} INTERIOR SQFT</p>
-                        <p>{{ property['lotSize'] }} SQFT OF LAND</p>
-                        <p>{{ property['county'] }}</p>
+                        <h4>- LOGIN FOR MORE DETAILS -</h4>
                     </div>
                 </a>
             </div>
