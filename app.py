@@ -155,30 +155,21 @@ def get_property_details(zpid):
 @app.route('/')
 def home():
     county_filter = request.args.get('county')
-    properties = get_all_properties()
-    detailed_properties = []
-    counties = get_unique_counties()
-
-    for prop in properties:
-        id, address, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear, county, photo_url = prop
-
-    detailed_properties.append({
-        'id': id,
-        'address': address,
-        'bedrooms': bedrooms,
-        'bathrooms': bathrooms,
-        'livingArea': livingArea,
-        'lotSize': lotSize,
-        'price': price,
-        'taxAssessedValue': taxAssessedValue,
-        'taxAssessedYear': taxAssessedYear,
-        'county': county,
-        'photo_url': photo_url
-    })
+    conn = get_db_connection()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
 
     if county_filter:
-        properties = [prop for prop in properties if prop.get('county') == county_filter]
+        query = "SELECT * FROM all_properties WHERE county = %s LIMIT 3"
+        cursor.execute(query, (county_filter,))
+    else:
+        query = "SELECT * FROM all_properties LIMIT 3"
+        cursor.execute(query)
 
+    properties = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    counties = get_unique_counties()  # Assuming this function fetches unique counties
     return render_template('index.html', properties=properties, counties=counties)
 
 @app.route('/subscriber')
@@ -189,6 +180,16 @@ def subscriber():
     for property in properties:
         property['id'] = int(property['id'])
     return render_template('subscriber.html', properties=properties)
+
+@app.route('/agent')
+@requires_roles(1)
+def agent():
+    properties = get_all_properties()
+    users = get_all_users()
+    # Convert 'id' to integer if necessary
+    for property in properties:
+        property['id'] = int(property['id'])
+    return render_template('agent.html', properties=properties)
 
 @app.route('/admin')
 @requires_roles(2)
@@ -280,6 +281,8 @@ def login():
         session['user_role'] = user['role']
         if user['role'] == 0:
             return redirect(url_for('subscriber'))
+        elif user['role'] == 1:
+            return redirect(url_for('agent'))
         elif user['role'] == 2:
             return redirect(url_for('admin'))
         else:
