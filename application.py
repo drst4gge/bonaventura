@@ -8,7 +8,10 @@ from flask import session, redirect, url_for, flash
 from functools import wraps
 from dotenv import load_dotenv
 import os
+import stripe
 application = Flask(__name__)
+
+stripe.api_key = 'your_stripe_secret_key'
 
 def requires_roles(*roles):
     def wrapper(f):
@@ -439,6 +442,53 @@ def submit_bid(id):
 
     # Redirect to a confirmation page or back to the property details
     return redirect(url_for('property_details', id=id))
+
+@application.route('/create-checkout-session', methods=['POST'])
+def create_checkout_session():
+    session = stripe.checkout.Session.create(
+        payment_method_types=['card'],
+        line_items=[{
+            'price_data': {
+                'currency': 'usd',
+                'product_data': {
+                    'name': 'Premium Account',
+                },
+                'unit_amount': 1000,  # price in cents
+            },
+            'quantity': 1,
+        }],
+        mode='payment',
+        success_url='https://yourdomain.com/success',
+        cancel_url='https://yourdomain.com/cancel',
+    )
+    return redirect(session.url, code=303)
+
+# Webhook endpoint for Stripe
+@application.route('/webhook', methods=['POST'])
+def stripe_webhook():
+    payload = request.get_data(as_text=True)
+    sig_header = request.headers.get('Stripe-Signature')
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, 'your_stripe_webhook_secret'
+        )
+
+        # Handle the checkout.session.completed event
+        if event['type'] == 'checkout.session.completed':
+            session = event['data']['object']
+
+            # Perform actions after successful payment (e.g., activate user account)
+            # ...
+
+    except ValueError as e:
+        # Invalid payload
+        return 'Invalid payload', 400
+    except stripe.error.SignatureVerificationError as e:
+        # Invalid signature
+        return 'Invalid signature', 400
+
+    return 'Success', 200
 
 
 

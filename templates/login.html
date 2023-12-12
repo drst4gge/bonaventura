@@ -273,18 +273,20 @@
         <div class="cs-container">
             <!-- Optional picture section here, if you want to include an image -->
             <div class="cs-content">
-                <span class="cs-topper">LOGIN TO YOUR ACCOUNT</span>
-                <h2 class="cs-title">Access your personalized dashboard.</h2>
+                <span class="cs-topper">Login</span>
+                <h2 class="cs-title">Access your Bonaventura dashboard.</h2>
                 <form class="cs-form" action="/login" method="post">
                     <label for="username" class="cs-label">
-                        USERNAME
+                        Username
                         <input class="cs-input" type="text" id="username" name="username" placeholder="Username" required>
                     </label>
                     <label class="cs-label cs-password">
-                        PASSWORD
+                        Password
                         <input class="cs-input" type="password" id="password" name="password" placeholder="Password" required>
                     </label>
-                    <button class="cs-button-solid cs-submit" type="submit">LOGIN</button>
+                    <button class="cs-button-solid cs-submit" type="submit">Login</button>
+                    <h2 class="cs-title">Don't have an account?</h2>
+                    <a href="{{ url_for('create_user') }}"><button class="cs-button-solid cs-submit">Create an account</button></a>
                 </form>
             </div>
         </div>

@@ -4,7 +4,142 @@
     <title>BONAVENTURA HOME</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
     <style>
+        /*-- -------------------------- -->
+<---          Gallery           -->
+<--- -------------------------- -*/
 
+/* Mobile - 360px */
+@media only screen and (min-width: 0rem) {
+    #gallery-45 {
+        padding: var(--sectionPadding);
+        position: relative;
+        /* Prevents overflow from the image going off screen */
+        overflow: hidden;
+    }
+    #gallery-45 .cs-container {
+        width: 100%;
+        max-width: 80rem;
+        margin: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        /* 48px - 64px */
+        gap: clamp(3rem, 6vw, 4rem);
+    }
+    #gallery-45 .cs-content {
+        /* set text align to left if content needs to be left aligned */
+        text-align: center;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        /* centers content horizontally, set to flex-start to left align */
+        align-items: center;
+    }
+
+    #gallery-45 .cs-image-group {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        /* 16px - 20px */
+        gap: clamp(1rem, 1.5vw, 1.25rem);
+    }
+    #gallery-45 .cs-item {
+        list-style: none;
+        width: 100%;
+        height: 100%;
+        aspect-ratio: 1;
+        margin: 0;
+        position: relative;
+        display: block;
+    }
+    #gallery-45 .cs-item:hover .cs-hover-box {
+        opacity: 1;
+    }
+    #gallery-45 .cs-item:hover .cs-icon {
+        /* return to original position */
+        transform: rotateY(0);
+    }
+    #gallery-45 .cs-item:hover .cs-h3 {
+        opacity: 1;
+        /* Return to original position */
+        transform: translateY(0);
+    }
+    #gallery-45 .cs-item:hover .cs-hover-box-text {
+        opacity: 1;
+        /* Return to original position */
+        transform: translateY(0);
+    }
+    #gallery-45 .cs-picture {
+        margin: auto;
+        width: 100%;
+        height: 100%;
+        display: block;
+        position: relative;
+    }
+    #gallery-45 .cs-picture img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+    }
+    #gallery-45 .cs-button-solid {
+        font-size: 1rem;
+        /* 46px - 56px */
+        line-height: clamp(2.875rem, 5.5vw, 3.5rem);
+        text-decoration: none;
+        font-weight: 700;
+        text-align: center;
+        margin: 0;
+        color: #fff;
+        min-width: 9.375rem;
+        padding: 0 1.5rem;
+        background-color: var(--primary);
+        border-radius: 0.25rem;
+        display: inline-block;
+        position: relative;
+        z-index: 1;
+        /* prevents padding from adding to the width */
+        box-sizing: border-box;
+    }
+    #gallery-45 .cs-button-solid:before {
+        content: "";
+        position: absolute;
+        height: 100%;
+        width: 0%;
+        background: #000;
+        opacity: 1;
+        top: 0;
+        left: 0;
+        z-index: -1;
+        border-radius: 0.25rem;
+        transition: width 0.3s;
+    }
+    #gallery-45 .cs-button-solid:hover:before {
+        width: 100%;
+    }
+}
+/* In Between - 600px */
+@media only screen and (min-width: 37.5rem) {
+    #gallery-45 .cs-image-group {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        grid-template-rows: 1fr;
+    }
+    #gallery-45 .cs-item {
+        grid-column: span 6;
+    }
+}
+/* Tablet - 768px */
+@media only screen and (min-width: 48rem) {
+    #gallery-45 .cs-item {
+        grid-column: span 3;
+    }
+}
         .cs-button-6 {
             text-align: center;
             font-size: 1rem;
@@ -242,9 +377,85 @@
     </style>
 </head>
 <body>
-    <section id="hero-82">
+<!-- ============================================ -->
+<!--                   Gallery                    -->
+<!-- ============================================ -->
+
+    <section id="gallery-45">
         <div class="cs-container">
-            
+            <div class="cs-content">
+                <span class="cs-topper">Bonaventura</span>
+                <h2 class="cs-title">Real estate bidding services near New York City. </h2>
+                <p class="cs-text">
+                    A Bonaventura subscription grants access to our exclusive database of properties. 
+                </p>
+            </div>
+            <ul class="cs-image-group">
+                <!-- Image 1 -->
+                <li class="cs-item">
+                    <picture class="cs-picture">
+                        <source media="(max-width: 600px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house1-m.jpg">
+                        <source media="(min-width: 601px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house1.jpg">
+                        <img loading="lazy" decoding="async" src="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house1.jpg" alt="fancy house" width="346" height="346">
+                    </picture>
+                </li>
+                <!-- Image 2 -->
+                <li class="cs-item">
+                    <picture class="cs-picture">
+                        <source media="(max-width: 600px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house2-m.jpg">
+                        <source media="(min-width: 601px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house2.jpg">
+                        <img loading="lazy" decoding="async" src="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house2.jpg" alt="modern house" width="346" height="346">
+                    </picture>
+                </li>
+                <!-- Image 3 -->
+                <li class="cs-item">
+                    <picture class="cs-picture">
+                        <source media="(max-width: 600px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house3-m.jpg">
+                        <source media="(min-width: 601px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house1.jpg">
+                        <img aria-hidden="true" loading="lazy" decoding="async" src="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house1.jpg" alt="modern home at night" width="346" height="346">
+                    </picture>
+                </li>
+                <!-- Image 4 -->
+                <li class="cs-item">
+                    <picture class="cs-picture">
+                        <source media="(max-width: 600px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house4-m.jpg">
+                        <source media="(min-width: 601px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house4.jpg">
+                        <img aria-hidden="true" loading="lazy" decoding="async" src="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house4.jpg" alt="modern home" width="346" height="346">
+                    </picture>
+                </li>
+                <!-- Image 5 -->
+                <li class="cs-item">
+                    <picture class="cs-picture">
+                        <source media="(max-width: 600px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house5-m.jpg">
+                        <source media="(min-width: 601px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house5.jpg">
+                        <img aria-hidden="true" loading="lazy" decoding="async" src="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house5.jpg" alt="appliance" width="346" height="346">
+                    </picture>
+                </li>
+                <!-- Image 6 -->
+                <li class="cs-item">
+                    <picture class="cs-picture">
+                        <source media="(max-width: 600px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house6-m.jpg">
+                        <source media="(min-width: 601px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house6.jpg">
+                        <img aria-hidden="true" loading="lazy" decoding="async" src="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house6.jpg" alt="modern home" width="346" height="346">
+                    </picture>
+                </li>
+                <!-- Image 7 -->
+                <li class="cs-item">
+                    <picture class="cs-picture">
+                        <source media="(max-width: 600px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house6-m.jpg">
+                        <source media="(min-width: 601px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house6.jpg">
+                        <img aria-hidden="true" loading="lazy" decoding="async" src="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house6.jpg" alt="modern home" width="346" height="346">
+                    </picture>
+                </li>
+                <!-- Image 8 -->
+                <li class="cs-item">
+                    <picture class="cs-picture">
+                        <source media="(max-width: 600px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house6-m.jpg">
+                        <source media="(min-width: 601px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house6.jpg">
+                        <img aria-hidden="true" loading="lazy" decoding="async" src="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house6.jpg" alt="modern home" width="346" height="346">
+                    </picture>
+                </li>
+            </ul>
             <a href="{{ url_for('create_user') }}" class="cs-button-6" aria-label="read more about us">
                 CREATE AN ACCOUNT
                 <!--SVG Arrow-->
@@ -264,13 +475,6 @@
                 </div>
             </a>
         </div>
-    
-        <!-- Background Image -->
-        <picture class="cs-background">
-            <source media="(max-width: 600px)" src="{{ url_for('static', filename='images/background.jpg') }}">
-            <source media="(min-width: 601px)" src="{{ url_for('static', filename='images/background.jpg') }}">
-            <img loading="lazy" decoding="async" src="{{ url_for('static', filename='images/background.jpg') }}" width="2250" height="1500" aria-hidden="true">
-        </picture>
     </section>
     
 
