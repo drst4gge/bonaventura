@@ -4,7 +4,13 @@
     <title>BONAVENTURA HOME</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
     <style>
-        /*-- -------------------------- -->
+        body {
+            
+            background: linear-gradient(to bottom,#ffffff, #f15a24 );
+            
+        }
+        
+/*-- -------------------------- -->
 <---          Gallery           -->
 <--- -------------------------- -*/
 
@@ -367,6 +373,45 @@
         width: 100%;
     }
 }
+.property-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-gap: 10px;
+            padding: 10px;
+        }
+    
+        .property-tile {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border: 1px solid #e3f6f5; /* Light blue border for contrast */
+            border-radius: 10px;
+            overflow: hidden;
+            background: #ffffff; /* White background for tiles for contrast */
+            color: #272343; /* Dark text in tiles */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            opacity: 0.98; /* Makes the tile slightly transparent */
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            
+        }
+        .property-tile:hover {
+            transform: scale(1.02); /* Scales up the tile by 5% on hover */
+            opacity: 1; /* Full opacity on hover */
+        }
+    
+        .property-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+    
+        .property-content {
+            padding: 10px;
+        }
+        a {
+            text-decoration: none;
+            color: black;
+        }
 
         
 
@@ -390,72 +435,7 @@
                     A Bonaventura subscription grants access to our exclusive database of properties. 
                 </p>
             </div>
-            <ul class="cs-image-group">
-                <!-- Image 1 -->
-                <li class="cs-item">
-                    <picture class="cs-picture">
-                        <source media="(max-width: 600px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house1-m.jpg">
-                        <source media="(min-width: 601px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house1.jpg">
-                        <img loading="lazy" decoding="async" src="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house1.jpg" alt="fancy house" width="346" height="346">
-                    </picture>
-                </li>
-                <!-- Image 2 -->
-                <li class="cs-item">
-                    <picture class="cs-picture">
-                        <source media="(max-width: 600px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house2-m.jpg">
-                        <source media="(min-width: 601px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house2.jpg">
-                        <img loading="lazy" decoding="async" src="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house2.jpg" alt="modern house" width="346" height="346">
-                    </picture>
-                </li>
-                <!-- Image 3 -->
-                <li class="cs-item">
-                    <picture class="cs-picture">
-                        <source media="(max-width: 600px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house3-m.jpg">
-                        <source media="(min-width: 601px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house1.jpg">
-                        <img aria-hidden="true" loading="lazy" decoding="async" src="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house1.jpg" alt="modern home at night" width="346" height="346">
-                    </picture>
-                </li>
-                <!-- Image 4 -->
-                <li class="cs-item">
-                    <picture class="cs-picture">
-                        <source media="(max-width: 600px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house4-m.jpg">
-                        <source media="(min-width: 601px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house4.jpg">
-                        <img aria-hidden="true" loading="lazy" decoding="async" src="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house4.jpg" alt="modern home" width="346" height="346">
-                    </picture>
-                </li>
-                <!-- Image 5 -->
-                <li class="cs-item">
-                    <picture class="cs-picture">
-                        <source media="(max-width: 600px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house5-m.jpg">
-                        <source media="(min-width: 601px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house5.jpg">
-                        <img aria-hidden="true" loading="lazy" decoding="async" src="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house5.jpg" alt="appliance" width="346" height="346">
-                    </picture>
-                </li>
-                <!-- Image 6 -->
-                <li class="cs-item">
-                    <picture class="cs-picture">
-                        <source media="(max-width: 600px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house6-m.jpg">
-                        <source media="(min-width: 601px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house6.jpg">
-                        <img aria-hidden="true" loading="lazy" decoding="async" src="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house6.jpg" alt="modern home" width="346" height="346">
-                    </picture>
-                </li>
-                <!-- Image 7 -->
-                <li class="cs-item">
-                    <picture class="cs-picture">
-                        <source media="(max-width: 600px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house6-m.jpg">
-                        <source media="(min-width: 601px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house6.jpg">
-                        <img aria-hidden="true" loading="lazy" decoding="async" src="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house6.jpg" alt="modern home" width="346" height="346">
-                    </picture>
-                </li>
-                <!-- Image 8 -->
-                <li class="cs-item">
-                    <picture class="cs-picture">
-                        <source media="(max-width: 600px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house6-m.jpg">
-                        <source media="(min-width: 601px)" srcset="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house6.jpg">
-                        <img aria-hidden="true" loading="lazy" decoding="async" src="https://csimg.nyc3.digitaloceanspaces.com/Gallery/house6.jpg" alt="modern home" width="346" height="346">
-                    </picture>
-                </li>
-            </ul>
+            
             <a href="{{ url_for('create_user') }}" class="cs-button-6" aria-label="read more about us">
                 CREATE AN ACCOUNT
                 <!--SVG Arrow-->
@@ -476,6 +456,22 @@
             </a>
         </div>
     </section>
+
+    
+    <div class="property-grid">
+        {% for property in properties %}
+            <div class="property-tile">
+                
+                    <img class="property-image" src="{{ property['photo_url'] }}" alt="Property Image">
+                    <div class="property-content">
+                        <h3>{{ property['addresses'] }}</h3>
+
+                        <p>{{ property['county'] }}</p>
+                    </div>
+                </a>
+            </div>
+        {% endfor %}
+    </div>
     
 
     

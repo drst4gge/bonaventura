@@ -157,22 +157,11 @@ def get_property_details(zpid):
 
 @application.route('/')
 def home():
-    county_filter = request.args.get('county')
-    conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
-
-    if county_filter:
-        query = "SELECT * FROM all_properties WHERE county = %s LIMIT 3"
-        cursor.execute(query, (county_filter,))
-    else:
-        query = "SELECT * FROM all_properties LIMIT 3"
-        cursor.execute(query)
-
-    properties = cursor.fetchall()
-    cursor.close()
-    conn.close()
-
-    counties = get_unique_counties()  # Assuming this function fetches unique counties
+    properties = get_all_properties()
+    users = get_all_users()
+    # Convert 'id' to integer if necessary
+    for property in properties:
+        property['id'] = int(property['id'])
     return render_template('index.html', properties=properties)
 
 @application.route('/subscriber')
