@@ -335,6 +335,10 @@ def logout():
 def add_address():
     return render_template('add_address.html')
 
+@application.route('/add_user', methods=['GET'])
+def add_user():
+    return render_template('add_user.html')
+
 @application.route('/submit_address', methods=['POST'])
 def submit_address():
     address = request.form['address']
@@ -363,6 +367,8 @@ def submit_address():
         insert_address(address, None, None, None, None, None, None, None, None, None, None)
 
     return redirect(url_for('admin'))
+
+
 
 @application.route('/edit/<int:id>', methods=['GET'])
 def edit_address(id):

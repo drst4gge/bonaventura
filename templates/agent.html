@@ -2,35 +2,13 @@
 <html>
 <head>
     <title>BONAVENTURA AGENT</title>
-    <header>
-        <a href="{{ url_for('home') }}">
-            <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="Logo" style="height: 50px; text-align: center;">
-        </a>
-    </header>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/property-grid.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/header.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/property-grid.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/cs-button-6.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/html.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background_color.css') }}">
     <style>
-        body {
-            font-family: monospace, sans-serif;
-            background: linear-gradient(to bottom,#ffffff, #f15a24 );
-            color: #272343; /* White text for readability on dark background */
-        }
-        a {
-            text-decoration: none;
-            color: #272343; /* Dark blue color for links */
-        }
-    
-        h {
-            color: #272343; /* Dark blue color for headers */
-            text-align: center;
-        }
-    
-        p {
-            color: #272343; /* Dark blue color for paragraphs */
-        }
-
         th {
             text-align: left;
         
@@ -47,6 +25,32 @@
     
 </head>
 <body>
+
+    <header id="cs-navigation">
+        <div class="cs-container">
+            <!--Nav Logo-->
+            <a href="" class="cs-logo" aria-label="back to home">
+                <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="logo" width="210" height="29" aria-hidden="true" decoding="async">
+            </a>
+            <!--Navigation List-->
+            <nav class="cs-nav" role="navigation">
+                <!--Mobile Nav Toggle-->
+                <button class="cs-toggle" aria-label="mobile menu toggle">
+                    <div class="cs-box" aria-hidden="true">
+                        <span class="cs-line cs-line1" aria-hidden="true"></span>
+                        <span class="cs-line cs-line2" aria-hidden="true"></span>
+                        <span class="cs-line cs-line3" aria-hidden="true"></span>
+                    </div>
+                </button>
+
+          
+        </div>
+    </header>
+
+    <br>
+    <br>
+    <br>
+    <br>
 
     <div class="property-grid">
         {% for property in properties %}
