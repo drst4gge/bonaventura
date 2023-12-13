@@ -1,50 +1,79 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Edit Address</title>
-    <style>
-        body {
-            background: linear-gradient(to bottom,#ffffff, #f15a24 );
-        }
-        
-    </style>
+    <title>BONAVENTURA ADMIN</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/html.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background_color.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/contact-718.css') }}">
 </head>
 <body>
-    <h1>Edit Property Details</h1>
-    <form action="/update_address" method="post">
-        <input type="hidden" name="id" value="{{ property[0] }}">
-
-        <label for="address">Address:</label>
-        <input type="text" id="address" name="address" value="{{ property[1] }}" required><br><br>
-
-        <label for="zpid">ZPID:</label>
-        <input type="text" id="zpid" name="zpid" value="{{ property[2] }}"><br><br>
-
-        <label for="bedrooms">Bedrooms:</label>
-        <input type="number" id="bedrooms" name="bedrooms" value="{{ property[3] }}"><br><br>
-
-        <label for="bathrooms">Bathrooms:</label>
-        <input type="number" id="bathrooms" name="bathrooms" value="{{ property[4] }}"><br><br>
-
-        <label for="livingArea">Living Area:</label>
-        <input type="number" id="livingArea" name="livingArea" value="{{ property[5] }}"><br><br>
-
-        <label for="lotSize">Lot Size:</label>
-        <input type="number" id="lotSize" name="lotSize" value="{{ property[6] }}"><br><br>
-
-        <label for="price">Price:</label>
-        <input type="number" id="price" name="price" value="{{ property[7] }}"><br><br>
-
-        <label for="taxAssessedValue">Tax Assessed Value:</label>
-        <input type="number" id="taxAssessedValue" name="taxAssessedValue" value="{{ property[8] }}"><br><br>
-
-        <label for="taxAssessedYear">Tax Assessed Year:</label>
-        <input type="number" id="taxAssessedYear" name="taxAssessedYear" value="{{ property[9] }}"><br><br>
-
-        <label for="taxAssessedYear">County:</label>
-        <input type="number" id="taxAssessedYear" name="taxAssessedYear" value="{{ property[11] }}"><br><br>
-
-        <input type="submit" value="Update">
-    </form>
+    <section id="contact-718">
+        <div class="cs-container">
+            <!-- Optional picture section here, if you want to include an image -->
+            <div class="cs-content">
+                <span class="cs-topper">Bonaventura Admin</span>
+                <h2 class="cs-title">Update Property Details in the Bonaventura Dashboard.</h2>
+                <form class="cs-form" action="/update_address" method="post">
+                    <!-- Hidden ID Field -->
+                    <input type="hidden" name="id" value="{{ property[0] }}">
+    
+                    <!-- Address Field -->
+                    <label for="address">
+                        <input class="cs-input" type="text" id="address" name="address" value="{{ property[1] }}" placeholder="Address" required>
+                    </label>
+    
+                    <!-- ZPID Field -->
+                    <label for="zpid">
+                        <input class="cs-input" type="text" id="zpid" name="zpid" value="{{ property[2] }}" placeholder="ZPID">
+                    </label>
+    
+                    <!-- Bedrooms Field -->
+                    <label for="bedrooms">
+                        <input class="cs-input" type="number" id="bedrooms" name="bedrooms" value="{{ property[3] }}" placeholder="Bedrooms">
+                    </label>
+    
+                    <!-- Bathrooms Field -->
+                    <label for="bathrooms">
+                        <input class="cs-input" type="number" id="bathrooms" name="bathrooms" value="{{ property[4] }}" placeholder="Bathrooms">
+                    </label>
+    
+                    <!-- Living Area Field -->
+                    <label for="livingArea">
+                        <input class="cs-input" type="number" id="livingArea" name="livingArea" value="{{ property[5] }}" placeholder="Living Area">
+                    </label>
+    
+                    <!-- Lot Size Field -->
+                    <label for="lotSize">
+                        <input class="cs-input" type="number" id="lotSize" name="lotSize" value="{{ property[6] }}" placeholder="Lot Size">
+                    </label>
+    
+                    <!-- Price Field -->
+                    <label for="price">
+                        <input class="cs-input" type="number" id="price" name="price" value="{{ property[7] }}" placeholder="Price">
+                    </label>
+    
+                    <!-- Tax Assessed Value Field -->
+                    <label for="taxAssessedValue">
+                        <input class="cs-input" type="number" id="taxAssessedValue" name="taxAssessedValue" value="{{ property[8] }}" placeholder="Tax Assessed Value">
+                    </label>
+    
+                    <!-- Tax Assessed Year Field -->
+                    <label for="taxAssessedYear">
+                        <input class="cs-input" type="number" id="taxAssessedYear" name="taxAssessedYear" value="{{ property[9] }}" placeholder="Tax Assessed Year">
+                    </label>
+    
+                    <!-- County Field -->
+                    <label for="county">
+                        <input class="cs-input" type="text" id="county" name="county" value="{{ property[11] }}" placeholder="County">
+                    </label>
+    
+                    <!-- Submit Button -->
+                    <button class="cs-button-solid cs-submit" type="submit">Update</button>
+                </form>
+            </div>
+        </div>
+    </section>
+    
 </body>
 </html>

@@ -41,8 +41,8 @@ a {
     display: flex;
     justify-content: space-evenly;
     padding: 10px;
-    background: #272343; /* Dark blue background for buttons */
-    background: #39405a;
+    background: #ffffff; /* Dark blue background for buttons */
+
 }
 
 .add-btn, .edit-btn, .delete-btn {
@@ -51,7 +51,7 @@ a {
     border: none;
     cursor: pointer;
     text-transform: capitalize;
-    background-color: #272343; /* Dark blue background for individual buttons */
+    background-color: #000000; /* Dark blue background for individual buttons */
     color: white; /* White text on buttons */
 }
 

@@ -1,21 +1,32 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Add New Address</title>
-
-    <style>
-        body {
-            background: linear-gradient(to bottom,#ffffff, #f15a24 );
-        }
-    </style>
-    
+    <title>BONAVENTURA ADMIN</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/html.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background_color.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/contact-718.css') }}">
 </head>
 <body>
-    <h1>Add a New Address</h1>
-    <form action="/submit_address" method="post">
-        <label for="address">Address:</label>
-        <input type="text" id="address" name="address" required><br><br>
-        <input type="submit" value="Add Address">
-    </form>
+
+    <section id="contact-718">
+        <div class="cs-container">
+            <!-- Optional picture section here, if you want to include an image -->
+            <div class="cs-content">
+                <span class="cs-topper">Bonaventura Admin</span>
+                <h2 class="cs-title">Add an address to the Bonaventura dashboard.</h2>
+                <form class="cs-form" action="/submit_address" method="post">
+                    
+                        
+                        <input class="cs-input" type="text" id="address" name="address" placeholder="Enter Address" required>
+                    </label>
+
+                    <button class="cs-button-solid cs-submit" type="submit">Add Address</button>
+                    
+                    
+                </form>
+            </div>
+        </div>
+    </section>
 </body>
 </html>
