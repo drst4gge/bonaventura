@@ -3,13 +3,14 @@
 <head>
     <title>BONAVENTURA HOME</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background_color.css') }}">
+    
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/gallery-45.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/cs-button-6.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/property-grid.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/html.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/footer.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/header.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/services.css') }}">
     <script src="{{ url_for('static', filename='js/header.js') }}"></script>
 </head>
 <body>
@@ -72,19 +73,82 @@
             </button> -->
         </div>
     </header>
-    <section id="gallery-45">
+    <br>
+    <br>
+    <br>
+    <br>
+
+    <section id="services-1644">
         <div class="cs-container">
             <div class="cs-content">
-                <br>
-                <br>
-                <br>
-                <br>
-                <span class="cs-topper">Bonaventura</span>
-                <h2 class="cs-title">Real estate bidding services near New York City. </h2>
+                <span class="cs-topper">Our Services</span>
+                <h2 class="cs-title">What We Provide To Our Customer</h2>
                 <p class="cs-text">
-                    A Bonaventura subscription grants access to our exclusive database of properties. 
+                    Designed to maintain your current colour, blend out a growing root or balance your blonde while providing full and demi-permanent coverage.
                 </p>
             </div>
+            <ul class="cs-card-group">
+                <li class="cs-item">
+                    <div class="cs-image-group">
+                        <img class="cs-icon" loading="lazy" decoding="async"
+                                src="https://csimg.nyc3.cdn.digitaloceanspaces.com/Images/Icons/checkmark-circle-gold.svg" alt="icon" width="48"
+                                height="48" aria-hidden="true">
+                    </div>
+                    <div class="cs-flex">
+                        <h2 class="cs-h2">100% Success Rate</h2>
+                        <p class="cs-item-text">
+                            We provide some of the finest quality, most responsive and reliable, and cost effective services and solutions.
+                        </p>
+                    </div>
+                </li>
+                <li class="cs-item">
+                    <div class="cs-image-group">
+                        <img class="cs-icon" loading="lazy" decoding="async"
+                                src="https://csimg.nyc3.cdn.digitaloceanspaces.com/Images/Icons/dashboard-gold.svg" alt="icon" width="48"
+                                height="48" aria-hidden="true">
+                    </div>
+                    <div class="cs-flex">
+                        <h2 class="cs-h2">Expert Legal Services</h2>
+                        <p class="cs-item-text">
+                            Fortune 500 companies to smaller and medium-sized companies to help manage risks to as low as reasonably practical.
+                        </p>
+                    </div>
+                </li>
+                <li class="cs-item">
+                    <div class="cs-image-group">
+                        <img class="cs-icon" loading="lazy" decoding="async"
+                                src="https://csimg.nyc3.cdn.digitaloceanspaces.com/Images/Icons/Lifebuoy-gold.svg" alt="icon" width="48"
+                                height="48" aria-hidden="true">
+                    </div>
+                    <div class="cs-flex">
+                        <h2 class="cs-h2">Business Strategy</h2>
+                        <p class="cs-item-text">
+                            Highly experienced staff of more than 100 professionals averaging 29+ years in industry and hands-on knowledge.
+                        </p>
+                    </div>
+                </li>
+                <li class="cs-item">
+                    <div class="cs-image-group">
+                        <img class="cs-icon" loading="lazy" decoding="async"
+                                src="https://csimg.nyc3.cdn.digitaloceanspaces.com/Images/Icons/Like-gold.svg" alt="icon" width="48"
+                                height="48" aria-hidden="true">
+                    </div>
+                    <div class="cs-flex">
+                        <h2 class="cs-h2">Highly Recommend</h2>
+                        <p class="cs-item-text">
+                            Highly experienced staff of more than 100 professionals averaging 29+ years in industry and hands-on knowledge.
+                        </p>
+                    </div>
+                </li>
+            </ul>
+        </div>                            
+    </section>
+    
+
+
+    <section id="gallery-45">
+        <div class="cs-container">
+
             <a href="{{ url_for('create_user') }}" class="cs-button-6" aria-label="read more about us">
                 CREATE AN ACCOUNT
                 <!--SVG Arrow-->

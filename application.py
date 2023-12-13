@@ -157,12 +157,27 @@ def get_property_details(zpid):
 
 @application.route('/')
 def home():
+
+    return render_template('index.html')
+
+@application.route('/pricing')
+def pricing():
+
+    return render_template('pricing.html')
+
+@application.route('/services')
+def services():
+
+    return render_template('services.html')
+
+@application.route('/properties')
+def properties_page():
     properties = get_all_properties()
     users = get_all_users()
     # Convert 'id' to integer if necessary
     for property in properties:
         property['id'] = int(property['id'])
-    return render_template('index.html', properties=properties)
+    return render_template('properties.html', properties=properties)
 
 @application.route('/subscriber')
 @requires_roles(0)

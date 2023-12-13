@@ -1,14 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <title>CREATE BONAVENTURA ACCOUNT</title>
+    <title>BONAVENTURA HOME</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/cs-button-6.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background_color.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/contact-718.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/footer.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/gallery-45.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/cs-button-6.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/property-grid.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/html.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/footer.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/header.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/pricing.css') }}">
+    <script src="{{ url_for('static', filename='js/header.js') }}"></script>
 </head>
 <body>
     <header id="cs-navigation">
@@ -70,52 +73,32 @@
             </button> -->
         </div>
     </header>
-    <section id="contact-718">
-        <div class="cs-container">
-            <div class="cs-content">
-                <span class="cs-topper">Creating a Bonaventura account.</span>
-                <h2 class="cs-title">$xx.xx/month</h2>
-                <p class="cs-text">
-                    
-                    Subscribers get access to our exclusive database of properties.
-                </p>
-                <!-- Form structure from the second form with content from the first form -->
-                <form class="cs-form" id="cs-form-718" name="Contact Form" action="/create_user" method="post">
-                    <label for="username" class="cs-label">
-                        Username
-                        <input class="cs-input" type="text" id="username" name="username" required placeholder="Username">
-                    </label>
-                    <label class="cs-label cs-email">
-                        Password
-                        <input class="cs-input" type="password" id="password" name="password" required placeholder="Password">
-                    </label>
-                    <label class="cs-label cs-phone">
-                        Email
-                        <input class="cs-input" type="email" id="email" name="email" required placeholder="Email">
-                    </label>
-                    <label class="cs-label">
-                        Phone Number
-                        <input class="cs-input" type="tel" id="phone" name="phone" placeholder="Phone Number">
-                    </label>
-                    <label class="cs-label">
-                        Role
-                        <select class="cs-input" id="role" name="role">
-                            <option value="0">Subscriber</option>
-                            <option value="1">Agent</option>
-                            <option value="2">Admin</option>
-                        </select>
-                    </label>
-                    <button class="cs-button-solid cs-submit" type="submit">Subscribe</button>
-                    
-                </form>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <div class="property-grid">
+        {% for property in properties %}
+            <div class="property-tile">
+                <a href="{{ url_for('property_details', id=property['id']) }}" class="property-link">
+                    <img class="property-image" src="{{ property['photo_url'] }}" alt="Property Image">
+                    <div class="property-content">
+                        <h3>{{ property['addresses'] }}</h3>
+
+                        <p>{{ property['county'] }}</p>
+                    </div>
+                </a>
             </div>
-        </div>
-    </section>
+        {% endfor %}
+    </div>
+
+
+
 
     <footer>
         <p>© Bonaventura</p>
     </footer>
-    
-    
+
 </body>
 </html>

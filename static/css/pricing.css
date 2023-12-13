@@ -1,0 +1,73 @@
+/* Mobile - 360px */
+@media only screen and (min-width: 0rem) {
+    #table-1669 {
+      padding: var(--sectionPadding);
+    }
+    #table-1669 .cs-container {
+      width: 100%;
+      max-width: 80rem;
+      margin: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      /* 48px - 64px */
+      gap: clamp(3rem, 6vw, 4rem);
+    }
+    #table-1669 .cs-content {
+      /* set text align to left if content needs to be left aligned */
+      text-align: left;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      /* centers content horizontally, set to flex-start to left align */
+      align-items: flex-start;
+    }
+    #table-1669 .cs-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    #table-1669 .cs-th {
+      padding: 0.75rem 1rem;
+      box-sizing: border-box;
+    }
+    #table-1669 .cs-td {
+      padding: 0.5rem 1rem;
+      box-sizing: border-box;
+    }
+    #table-1669 .cs-th,
+    #table-1669 .cs-td {
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+    #table-1669 .cs-color .cs-th:first-child {
+      color: #fff;
+      background-color: var(--primary);
+    }
+    #table-1669 .cs-th:first-child,
+    #table-1669 .cs-td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 100;
+      /* Make sure it sits above the other cells */
+      background-color: #f2f2f2;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    #table-1669 .cs-th {
+      background-color: #f2f2f2;
+    }
+    #table-1669 .cs-tr {
+      color: var(--bodyTextColor);
+    }
+    #table-1669 .cs-icon {
+      height: 1rem;
+      width: auto;
+    }
+  }
+  /* Tablet - 600px */
+  @media screen and (max-width: 37.5rem) {
+    #table-1669 .cs-table {
+      display: block;
+      overflow-x: auto;
+    }
+  }
