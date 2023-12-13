@@ -7,6 +7,9 @@
             <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="Logo" style="height: 50px; text-align: center;">
         </a>
     </header>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/property-grid.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/cs-button-6.css') }}">
     <style>
         body {
             font-family: monospace, sans-serif;
@@ -26,64 +29,7 @@
         p {
             color: #272343; /* Dark blue color for paragraphs */
         }
-        .property-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            grid-gap: 10px;
-            padding: 10px;
-        }
-    
-        .property-tile {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            border: 1px solid #e3f6f5; /* Light blue border for contrast */
-            border-radius: 5px;
-            overflow: hidden;
-            background: #ffffff; /* White background for tiles for contrast */
-            color: #272343; /* Dark text in tiles */
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            opacity: 0.9; /* Makes the tile slightly transparent */
-            transition: transform 0.3s ease, opacity 0.3s ease;
-            
-        }
-        .property-tile:hover {
-            transform: scale(1.02); /* Scales up the tile by 5% on hover */
-            opacity: 1; /* Full opacity on hover */
-        }
-    
-        .property-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-    
-        .property-content {
-            padding: 10px;
-        }
-    
-        .property-buttons {
-            display: flex;
-            justify-content: space-evenly;
-            padding: 10px;
-            background: #272343; /* Dark blue background for buttons */
-            background: #39405a;
-        }
-    
-        .add-btn, .edit-btn, .delete-btn {
-            padding: 5px 10px;
-            margin: 0 5px;
-            border: none;
-            cursor: pointer;
-            text-transform: capitalize;
-            background-color: #272343; /* Dark blue background for individual buttons */
-            color: white; /* White text on buttons */
-        }
-    
-        .delete-btn {
-            background-color: #ff4d4d; /* Retain the delete button color for clarity */
-            color: white;
-        }
+
         th {
             text-align: left;
         
@@ -100,12 +46,7 @@
     
 </head>
 <body>
-    <div class="property-buttons">
-        <button onclick="location.href='/add_address'" class="add-btn">ADD AN ADDRESS</button>
-        
-    </div>
-    
-    
+
     <div class="property-grid">
         {% for property in properties %}
             <div class="property-tile">
@@ -127,5 +68,14 @@
             </div>
         {% endfor %}
     </div>
+    <a href="{{ url_for('add_address') }}" class="cs-button-6">
+        ADD ADDRESS
+        <!--SVG Arrow-->
+        <div class="cs-wrapper">
+            <svg class="cs-icon" aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17.92 11.62C17.8724 11.4973 17.801 11.3851 17.71 11.29L12.71 6.29C12.6168 6.19676 12.5061 6.1228 12.3842 6.07234C12.2624 6.02188 12.1319 5.99591 12 5.99591C11.7337 5.99591 11.4783 6.1017 11.29 6.29C11.1968 6.38324 11.1228 6.49393 11.0723 6.61575C11.0219 6.73758 10.9959 6.86814 10.9959 7C10.9959 7.2663 11.1017 7.5217 11.29 7.71L14.59 11H7C6.73478 11 6.48043 11.1054 6.29289 11.2929C6.10536 11.4804 6 11.7348 6 12C6 12.2652 6.10536 12.5196 6.29289 12.7071C6.48043 12.8946 6.73478 13 7 13H14.59L11.29 16.29C11.1963 16.383 11.1219 16.4936 11.0711 16.6154C11.0203 16.7373 10.9942 16.868 10.9942 17C10.9942 17.132 11.0203 17.2627 11.0711 17.3846C11.1219 17.5064 11.1963 17.617 11.29 17.71C11.383 17.8037 11.4936 17.8781 11.6154 17.9289C11.7373 17.9797 11.868 18.0058 12 18.0058C12.132 18.0058 12.2627 17.9797 12.3846 17.9289C12.5064 17.8781 12.617 17.8037 12.71 17.71L17.71 12.71C17.801 12.6149 17.8724 12.5028 17.92 12.38C18.02 12.1365 18.02 11.8635 17.92 11.62Z" fill="#1a1a1a"/>
+            </svg>
+        </div>
+    </a>
 </body>
 </html>

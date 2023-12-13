@@ -1,0 +1,66 @@
+.property-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-gap: 10px;
+    padding: 10px;
+}
+
+.property-tile {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 1px solid #e3f6f5; /* Light blue border for contrast */
+    border-radius: 10px;
+    overflow: hidden;
+    background: #ffffff; /* White background for tiles for contrast */
+    color: #272343; /* Dark text in tiles */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    opacity: 0.98; /* Makes the tile slightly transparent */
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    
+}
+.property-tile:hover {
+    transform: scale(1.02); /* Scales up the tile by 5% on hover */
+    opacity: 1; /* Full opacity on hover */
+}
+
+.property-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.property-content {
+    padding: 10px;
+}
+a {
+    text-decoration: none;
+    color: black;
+}
+.property-buttons {
+    display: flex;
+    justify-content: space-evenly;
+    padding: 10px;
+    background: #272343; /* Dark blue background for buttons */
+    background: #39405a;
+}
+
+.add-btn, .edit-btn, .delete-btn {
+    padding: 5px 10px;
+    margin: 0 5px;
+    border: none;
+    cursor: pointer;
+    text-transform: capitalize;
+    background-color: #272343; /* Dark blue background for individual buttons */
+    color: white; /* White text on buttons */
+}
+
+.add-btn {
+    background-color: #f15a24; /* Retain the delete button color for clarity */
+    color: white;
+}
+
+.delete-btn {
+    background-color: #f15a24; /* Retain the delete button color for clarity */
+    color: white;
+}
