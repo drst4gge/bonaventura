@@ -36,15 +36,15 @@ def get_db_connection():
         port=3306
     )
 
-def insert_address(address, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear, county, photo_url):
+def insert_address(address, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear,foreclosureAuctionLocation, county, photo_url):
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
             insert_sql = """
-            INSERT INTO all_properties (addresses, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear, county, photo_url) 
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO all_properties (addresses, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear, county, foreclosureAuctionLocation, photo_url) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
-            cursor.execute(insert_sql, (address, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear, county, photo_url))
+            cursor.execute(insert_sql, (address, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear, county, foreclosureAuctionLocation, photo_url))
         conn.commit()
     finally:
         conn.close()
@@ -53,7 +53,7 @@ def get_all_properties():
     conn = get_db_connection()
     try:
         with conn.cursor(pymysql.cursors.DictCursor) as cursor:  # Ensure DictCursor is used
-            cursor.execute("SELECT id, addresses, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear, county, photo_url FROM all_properties")
+            cursor.execute("SELECT id, addresses, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear, foreclosureAuctionLocation, county, photo_url FROM all_properties")
             return cursor.fetchall()
     finally:
         conn.close()
@@ -78,16 +78,16 @@ def get_unique_counties():
         conn.close()
 
 
-def update_property(property_id, address, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, county, taxAssessedYear):
+def update_property(property_id, address, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, foreclosureAuctionLocation, county, taxAssessedYear):
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
             update_sql = """
             UPDATE all_properties 
-            SET addresses = %s, zpid = %s, bedrooms = %s, bathrooms = %s, livingArea = %s, lotSize = %s, price = %s, taxAssessedValue = %s, county = %s, taxAssessedYear = %s 
+            SET addresses = %s, zpid = %s, bedrooms = %s, bathrooms = %s, livingArea = %s, lotSize = %s, price = %s, taxAssessedValue = %s, county = %s, taxAssessedYear = %s, foreclosureAuctionLocation= %s
             WHERE id = %s
             """
-            cursor.execute(update_sql, (address, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear, county, property_id))
+            cursor.execute(update_sql, (address, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear, foreclosureAuctionLocation, county, property_id))
         conn.commit()
     finally:
         conn.close()
@@ -142,6 +142,7 @@ def get_property_details(zpid):
     taxAssessedValue = response_json.get('taxAssessedValue', 'N/A')
     taxAssessedYear = response_json.get('taxAssessedYear', 'N/A')
     county = response_json.get('county', 'N/A')
+    foreclosureAuctionLocation = response_json.get('foreclosureAuctionLocation', 'N/A')
 
     return {
         'bedrooms': bedrooms,
@@ -151,7 +152,8 @@ def get_property_details(zpid):
         'price': price,
         'taxAssessedValue': taxAssessedValue,
         'taxAssessedYear': taxAssessedYear,
-        'county': county
+        'county': county,
+        'foreclosureAuctionLocation': foreclosureAuctionLocation
     }
 
 @application.route('/')
@@ -306,7 +308,8 @@ def login():
 
     if user and check_password_hash(user['password'], password):
         session['user_id'] = user['id']  # Store user ID in session
-        session['user_email'] = user['email']  # Store user email in session
+        session['user_email'] = user['email'] 
+        session['user_username'] = user['username'] # Store user email in session
         session['user_phone'] = user['phone']  # Store user phone in session
         session['user_role'] = user['role']
         if user['role'] == 0:
@@ -376,13 +379,14 @@ def submit_address():
             details.get('price', None),
             details.get('taxAssessedValue', None),
             details.get('taxAssessedYear', None),
+            details.get('foreclosureAuctionLocation', None),
             details.get('county', None),
             photo_url
         )
 
     else:
         # Handle the case where no details are available
-        insert_address(address, None, None, None, None, None, None, None, None, None, None)
+        insert_address(address, None, None, None, None, None, None, None, None, None, None, None)
 
     return redirect(url_for('admin'))
 
@@ -487,7 +491,7 @@ def submit_bid(id):
     # Here you would handle the bid submission
     # For example, save the bid to the database
 
-    name = request.form['name']
+    username = request.form['username']
     email = request.form['email']
     phone = request.form['phone']
     bid_amount = request.form['bid']
@@ -496,55 +500,6 @@ def submit_bid(id):
 
     # Redirect to a confirmation page or back to the property details
     return redirect(url_for('property_details', id=id))
-
-@application.route('/create-checkout-session', methods=['POST'])
-def create_checkout_session():
-    session = stripe.checkout.Session.create(
-        payment_method_types=['card'],
-        line_items=[{
-            'price_data': {
-                'currency': 'usd',
-                'product_data': {
-                    'name': 'Premium Account',
-                },
-                'unit_amount': 1000,  # price in cents
-            },
-            'quantity': 1,
-        }],
-        mode='payment',
-        success_url='https://yourdomain.com/success',
-        cancel_url='https://yourdomain.com/cancel',
-    )
-    return redirect(session.url, code=303)
-
-# Webhook endpoint for Stripe
-@application.route('/webhook', methods=['POST'])
-def stripe_webhook():
-    payload = request.get_data(as_text=True)
-    sig_header = request.headers.get('Stripe-Signature')
-
-    try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, 'your_stripe_webhook_secret'
-        )
-
-        # Handle the checkout.session.completed event
-        if event['type'] == 'checkout.session.completed':
-            session = event['data']['object']
-
-            # Perform actions after successful payment (e.g., activate user account)
-            # ...
-
-    except ValueError as e:
-        # Invalid payload
-        return 'Invalid payload', 400
-    except stripe.error.SignatureVerificationError as e:
-        # Invalid signature
-        return 'Invalid signature', 400
-
-    return 'Success', 200
-
-
 
 if __name__ == "__main__":
     application.run()

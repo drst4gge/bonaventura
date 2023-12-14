@@ -1,83 +1,75 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>PROPERTY DETAILS</title>
-    <header>
-        <a href="{{ url_for('home') }}">
-            <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="Logo" style="height: 50px; text-align: center;">
-        </a>
-    </header>
-    <style>
-        body {
-            font-family: monospace, sans-serif;
-            background: linear-gradient(to bottom,#ffffff, #f15a24 );
-            color: #ffffff;
-            text-align: left; 
-        }
+    <title>{{ property['addresses'] }}</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/html.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/hero-408.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/header.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
 
-        .property-content {
-            width: 40%;
-            margin: left; /* Center the container */
-            margin-top: 20px;
-            margin-left: 20px;
-        }
-
-        .property-image img {
-            width: 100%;
-            height: auto;
-            object-fit: cover;
-            border-radius: 5px;
-        }
-
-        .property-details {
-            
-            padding: 20px;
-            border-radius: 5px;
-            margin-top: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .bid-button {
-            margin-top: 20px;
-        }
-
-        .btn {
-            background-color: #ffffff; /* White background */
-            color: #272343; /* Text color as the main background */
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: bold;
-        }
-    </style>
     
 </head>
 
 <body>
+    <header id="cs-navigation">
+        <div class="cs-container">
+            <!--Nav Logo-->
+            <a href="{{ url_for('home') }}" class="cs-logo" aria-label="back to home">
+                <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="logo" width="210" height="29" aria-hidden="true" decoding="async">
+            </a>
+            <!--Navigation List-->
+            <nav class="cs-nav" role="navigation">
+                <!--Mobile Nav Toggle-->
+                <button class="cs-toggle" aria-label="mobile menu toggle">
+                    <div class="cs-box" aria-hidden="true">
+                        <span class="cs-line cs-line1" aria-hidden="true"></span>
+                        <span class="cs-line cs-line2" aria-hidden="true"></span>
+                        <span class="cs-line cs-line3" aria-hidden="true"></span>
+                    </div>
+                </button>
 
-    
-    <div class="property-content">
-        <div class="property-image">
-            <img src="{{ property['photo_url'] }}" alt="Property Image">
+          
         </div>
+    </header>
 
-        <div class="property-details">
-            <h3>{{ property['addresses'] }}</h3>
-            <h4>- PRICING -</h4>
-            <p>LISTING PRICE ${{ property['price'] }}</p>
-            <p>TAX ASSESSED VALUE ${{ property['taxAssessedValue'] }}</p>
-            <p>TAX ASSESSED YEAR {{ property['taxAssessedYear'] }}</p>
-            <h4>- HOME DETAILS -</h4>
-            <p> {{ property['bedrooms'] }} BEDROOMS</p>
-            <p> {{ property['bathrooms'] }} BATHROOMS</p>
-            <p>{{ property['livingArea'] }} INTERIOR SQFT</p>
-            <p>{{ property['lotSize'] }} SQFT OF LAND</p>
+    <section id="hero-408">
+        <div class="cs-container">
+            <div class="cs-content">
+                <h2 class="cs-title"><span class="cs-color">{{ property['addresses'] }}</span></h2>
+
+                <p class="cs-text">LISTING PRICE ${{ property['price'] }}</p>
+                <p class="cs-text"> </p>
+                <p class="cs-text"> </p>
+                <p class="cs-text"> {{ property['bedrooms'] }} BEDROOMS</p>
+                <p class="cs-text"> {{ property['bathrooms'] }} BATHROOMS</p>
+                <p class="cs-text">{{ property['livingArea'] }} INTERIOR SQFT</p>
+                <p class="cs-text">{{ property['lotSize'] }} SQFT OF LAND</p>
+                <p class="cs-text">{{ property['foreclosureAuctionLocation'] }}</p>
+                
+                <a class="cs-button-solid" href="{{ url_for('bid', id=property['id']) }}" class="btn">PLACE BID</a>
+                
+                
+            </div>
+            <div class="cs-stat-group">
+                <picture class="cs-background">
+                    <source media="(max-width: 600px)" src="{{ property['photo_url'] }}">
+                    <source media="(min-width: 601px)" src="{{ property['photo_url'] }}">
+                    <img loading="lazy" decoding="async" src="{{ property['photo_url'] }}" alt="photo" width="842" height="737" aria-hidden="true">
+                </picture>
+                <div class="cs-stat-box">
+                    <span class="cs-stat">
+                        ${{ property['taxAssessedValue'] }}
+                        <span class="cs-desc">TAX ASSESSED VALUE</span>
+                    </span>
+                </div>
+                <div class="cs-stat-box">
+                    <span class="cs-stat">
+                        {{ property['taxAssessedYear'] }}
+                        <span class="cs-desc">TAX ASSESSED YEAR</span>
+                    </span>
+                </div>
+            </div>
         </div>
-
-        
-        <a href="{{ url_for('bid', id=property['id']) }}" class="btn">PLACE BID</a>
-        
-    </div>
+    </section>
 </body>
 </html>

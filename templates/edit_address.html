@@ -4,6 +4,7 @@
     <title>BONAVENTURA ADMIN</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/html.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/contact-718.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background_color.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/contact-718.css') }}">
 </head>
@@ -62,10 +63,14 @@
                     <label for="taxAssessedYear">
                         <input class="cs-input" type="number" id="taxAssessedYear" name="taxAssessedYear" value="{{ property[9] }}" placeholder="Tax Assessed Year">
                     </label>
+
+                    <label for="taxAssessedYear">
+                        <input class="cs-input" type="number" id="taxAssessedYear" name="taxAssessedYear" value="{{ property[9] }}" placeholder="Tax Assessed Year">
+                    </label>
     
                     <!-- County Field -->
-                    <label for="county">
-                        <input class="cs-input" type="text" id="county" name="county" value="{{ property[11] }}" placeholder="County">
+                    <label for="foreclosureAuctionLocation">
+                        <input class="cs-input" type="text" id="foreclosureAuctionLocation" name="foreclosureAuctionLocation" value="{{ property[11] }}" placeholder="Auction Location">
                     </label>
     
                     <!-- Submit Button -->

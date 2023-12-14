@@ -3,35 +3,53 @@
 <html>
 <head>
     <title>BID</title>
-    <style>
-        body {
-            font-family: monospace, sans-serif;
-            background: linear-gradient(to bottom,#ffffff, #f15a24 );
-            color: #ffffff; /* White text for readability on dark background */
-        }
-    </style>
-    <header>
-        <a href="{{ url_for('home') }}">
-            <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="Logo" style="height: 50px;">
-        </a>
-    </header>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/html.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background_color.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/header.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/contact-718.css') }}">
+
+
 </head>
 <body>
-    <h1>PLACE A BID</h1>
-    <form action="/submit_bid/{{ property_id }}" method="post">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" value="{{ user['username'] }}" readonly>
-        
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" value="{{ user['email'] }}" readonly>
+
+
+    <section id="contact-718">
+        <div class="cs-container">
+            <!-- Optional picture section here, if you want to include an image -->
+            <div class="cs-content">
+                <span class="cs-topper">Bonaventura Bidding</span>
+                
+                <form class="cs-form" action="/submit_bid/{{ property_id }}" method="post">
+                    <!-- Hidden ID Field -->
+                    
     
-        <label for="phone">Phone Number:</label>
-        <input type="tel" id="phone" name="phone" value="{{ user['phone'] }}" readonly>
+                    <!-- Address Field -->
+                    <label for="username">
+                        <input class="cs-input" type="text" id="username" name="username" value="{{ user['username'] }}" placeholder="user" required>
+                    </label>
     
-        <label for="bid">Bid Amount:</label>
-        <input type="number" id="bid" name="bid">
+                    <!-- ZPID Field -->
+                    <label for="email">
+                        <input class="cs-input" type="text" id="email" name="email" value="{{ user['email'] }}" placeholder="email">
+                    </label>
     
-        <!-- ... rest of the form ... -->
-    </form>
+                    <!-- Bedrooms Field -->
+                    <label for="phone">
+                        <input class="cs-input" type="number" id="phone" name="phone" value="{{ user['phone'] }}" placeholder="phone">
+                    </label>
+    
+                    <!-- Bathrooms Field -->
+                    <label for="bid">
+                        <input class="cs-input" type="number" id="bid" name="bid"  placeholder="bid">
+                    </label>
+
+    
+                    <!-- Submit Button -->
+                    <button class="cs-button-solid cs-submit" type="submit">Bid</button>
+                </form>
+            </div>
+        </div>
+    </section>
 </body>
 </html>
