@@ -9,9 +9,12 @@ from functools import wraps
 from dotenv import load_dotenv
 import os
 import stripe
+
 application = Flask(__name__)
+load_dotenv()
 
 stripe.api_key = 'your_stripe_secret_key'
+application.secret_key = os.environ.get('SECRET_KEY')
 
 def requires_roles(*roles):
     def wrapper(f):
@@ -22,9 +25,6 @@ def requires_roles(*roles):
             return f(*args, **kwargs)
         return wrapped
     return wrapper
-
-load_dotenv()
-application.secret_key = os.environ.get('SECRET_KEY')
 
 # Database Helper Functions
 def get_db_connection():
@@ -154,20 +154,16 @@ def get_property_details(zpid):
         'county': county
     }
 
-
 @application.route('/')
 def home():
-
     return render_template('index.html')
 
 @application.route('/pricing')
 def pricing():
-
     return render_template('pricing.html')
 
 @application.route('/services')
 def services():
-
     return render_template('services.html')
 
 @application.route('/properties')
@@ -210,32 +206,57 @@ def admin():
         property['id'] = int(property['id'])
     return render_template('admin.html', properties=properties, users=users)
 
-@application.route('/delete_user/<int:user_id>')
-@requires_roles('admin')
+@application.route('/delete_user/<int:user_id>', methods=['GET'])
 def delete_user(user_id):
+    # Delete user from the database
     conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM users WHERE id = %s", (user_id,))
-    conn.commit()
-    cursor.close()
-    conn.close()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("DELETE FROM users WHERE id = %s", (user_id,))
+        conn.commit()
+    finally:
+        conn.close()
+
+    flash('User deleted successfully!')
     return redirect(url_for('admin'))
 
-@application.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
+@application.route('/edit_user/<int:user_id>', methods=['GET'])
 def edit_user(user_id):
+    # Fetch user details from the database
     conn = get_db_connection()
-    if request.method == 'GET':
-        cursor = conn.cursor(pymysql.cursors.DictCursor)
-        cursor.execute("SELECT * FROM users WHERE id = %s", (user_id,))
-        user = cursor.fetchone()
-        cursor.close()
+    try:
+        with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+            cursor.execute("SELECT * FROM users WHERE id = %s", (user_id,))
+            user = cursor.fetchone()
+    finally:
         conn.close()
+
+    if user:
         return render_template('edit_user.html', user=user)
     else:
-        # Update user logic here
-        # Fetch updated user data from the form
-        # ...
+        flash('User not found.')
         return redirect(url_for('admin'))
+
+@application.route('/update_user/<int:user_id>', methods=['POST'])
+def update_user(user_id):
+    # Extract form data
+    username = request.form['username']
+    email = request.form['email']
+    phone = request.form['phone']
+    role = request.form['role']
+
+    # Update user details in the database
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            sql = "UPDATE users SET username = %s, email = %s, phone = %s, role = %s WHERE id = %s"
+            cursor.execute(sql, (username, email, phone, role, user_id))
+        conn.commit()
+    finally:
+        conn.close()
+
+    flash('User updated successfully!')
+    return redirect(url_for('admin'))
 
 def get_all_users():
     conn = get_db_connection()
@@ -246,14 +267,11 @@ def get_all_users():
     finally:
         conn.close()
 
-
 @application.route('/property/<int:id>')
 def property_details(id):
     property = get_property_by_id(id)
 
     if property:
-        # Since the photo URL is already part of your property object, no need to fetch it again
-        # Just pass the entire property object to the template
         return render_template('property_details.html', property=property)
     else:
         return 'Property not found', 404
@@ -366,6 +384,32 @@ def submit_address():
         # Handle the case where no details are available
         insert_address(address, None, None, None, None, None, None, None, None, None, None)
 
+    return redirect(url_for('admin'))
+
+@application.route('/submit_user', methods=['POST'])
+def submit_user():
+    # Extract form data
+    username = request.form['username']
+    password = request.form['password']
+    email = request.form['email']
+    phone = request.form['phone']
+    role = request.form['role']
+
+    # Hash the password
+    hashed_password = generate_password_hash(password)
+
+    # Connect to database
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            # Insert new user
+            sql = "INSERT INTO users (username, password, email, phone, role) VALUES (%s, %s, %s, %s, %s)"
+            cursor.execute(sql, (username, hashed_password, email, phone, role))
+        conn.commit()
+    finally:
+        conn.close()
+
+    flash('User created successfully!')
     return redirect(url_for('admin'))
 
 

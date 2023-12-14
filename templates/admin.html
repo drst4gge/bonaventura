@@ -7,7 +7,6 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/property-grid.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/cs-button-6.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/html.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background_color.css') }}">
     <style>
 
         a {
@@ -39,7 +38,7 @@
     <header id="cs-navigation">
         <div class="cs-container">
             <!--Nav Logo-->
-            <a href="" class="cs-logo" aria-label="back to home">
+            <a href="{{ url_for('home') }}" class="cs-logo" aria-label="back to home">
                 <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="logo" width="210" height="29" aria-hidden="true" decoding="async">
             </a>
             <!--Navigation List-->
@@ -117,8 +116,10 @@
                 <td>{{ user['email'] }}</td>
                 <td>{{ user['phone'] }}</td>
                 <td>{{ user['role'] }}</td>
-                <td><a href="/edit_user/{{ user['id'] }}">Edit</a></td>
-                <td><a href="/delete_user/{{ user['id'] }}" onclick="return confirm('Are you sure?');">Delete</a></td>
+                <td><a href="{{ url_for('edit_user', user_id=user.id) }}" class="btn">Edit</a></td>
+                <td><a href="{{ url_for('delete_user', user_id=user.id) }}" class="btn" onclick="return confirm('Are you sure?')">Delete</a></td>
+                
+    
             </tr>
             {% endfor %}
         </table>

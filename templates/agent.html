@@ -15,7 +15,7 @@
         }
 
         table {
-            background-color: aliceblue;
+            background-color: rgb(255, 255, 255);
             color:#272343;
             border: 1px white solid;
             width: 100%;
@@ -29,7 +29,7 @@
     <header id="cs-navigation">
         <div class="cs-container">
             <!--Nav Logo-->
-            <a href="" class="cs-logo" aria-label="back to home">
+            <a href="{{ url_for('home') }}" class="cs-logo" aria-label="back to home">
                 <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="logo" width="210" height="29" aria-hidden="true" decoding="async">
             </a>
             <!--Navigation List-->

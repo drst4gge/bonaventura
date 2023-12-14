@@ -9,7 +9,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    border: 1px solid #e3f6f5; /* Light blue border for contrast */
+    border: 1px solid #f15a24 /* Light blue border for contrast */
     border-radius: 10px;
     overflow: hidden;
     background: #ffffff; /* White background for tiles for contrast */
