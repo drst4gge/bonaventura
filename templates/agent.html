@@ -1,69 +1,65 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>BONAVENTURA AGENT</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background_color.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/contact-718.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/cs-button-6.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/footer.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/gallery-45.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/header.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/hero-82.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/hero-408.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/property-grid.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/cs-button-6.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/html.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background_color.css') }}">
-    <style>
-        th {
-            text-align: left;
-        
-        }
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/services.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/table.css') }}">
+    <script src="{{ url_for('static', filename='js/header.js') }}"></script>
 
-        table {
-            background-color: rgb(255, 255, 255);
-            color:#272343;
-            border: 1px white solid;
-            width: 100%;
-            padding: 5px;
-        }
-    </style>
-    
+
 </head>
+
 <body>
+    <div class="wrapper">
+        <header id="cs-navigation">
+            <div class="cs-container">
+                <!--Nav Logo-->
+                <a href="{{ url_for('home') }}" class="cs-logo" aria-label="back to home">
+                    <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="logo" width="210"
+                        height="29" aria-hidden="true" decoding="async">
+                </a>
+                <!--Navigation List-->
+                <nav class="cs-nav" role="navigation">
+                    <!--Mobile Nav Toggle-->
+                    <button class="cs-toggle" aria-label="mobile menu toggle">
+                        <div class="cs-box" aria-hidden="true">
+                            <span class="cs-line cs-line1" aria-hidden="true"></span>
+                            <span class="cs-line cs-line2" aria-hidden="true"></span>
+                            <span class="cs-line cs-line3" aria-hidden="true"></span>
+                        </div>
+                    </button>
+                    <div class="cs-ul-wrapper">
+                        <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
+                            <li class="cs-li">
+                                <a href="{{ url_for('add_address') }}" class="cs-li-link cs-active">
+                                    Add an Address
+                                </a>
+                            </li>
 
-    <header id="cs-navigation">
-        <div class="cs-container">
-            <!--Nav Logo-->
-            <a href="{{ url_for('home') }}" class="cs-logo" aria-label="back to home">
-                <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="logo" width="210"
-                    height="29" aria-hidden="true" decoding="async">
-            </a>
-            <!--Navigation List-->
-            <nav class="cs-nav" role="navigation">
-                <!--Mobile Nav Toggle-->
-                <button class="cs-toggle" aria-label="mobile menu toggle">
-                    <div class="cs-box" aria-hidden="true">
-                        <span class="cs-line cs-line1" aria-hidden="true"></span>
-                        <span class="cs-line cs-line2" aria-hidden="true"></span>
-                        <span class="cs-line cs-line3" aria-hidden="true"></span>
+                        </ul>
                     </div>
-                </button>
-                <div class="cs-ul-wrapper">
-                    <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
-                        <li class="cs-li">
-                            <a href="{{ url_for('add_address') }}" class="cs-li-link cs-active">
-                                Add an Address
-                            </a>
-                        </li>
-            
-                    </ul>
-                </div>
-            </nav>
-        </div>
-    </header>
+                </nav>
+            </div>
+        </header>
 
-    <br>
-    <br>
-    <br>
-    <br>
+        <br>
+        <br>
+        <br>
+        <br>
 
-    <div class="property-grid">
-        {% for property in properties %}
+        <div class="property-grid">
+            {% for property in properties %}
             <div class="property-tile">
                 <!-- Wrap the contents in an anchor tag -->
                 <a href="{{ url_for('property_details', id=property['id']) }}" class="property-link">
@@ -78,10 +74,14 @@
                 </a>
                 <div class="property-buttons">
                     <button onclick="location.href='/edit/{{ property['id'] }}'" class="edit-btn">EDIT</button>
-                    <button onclick="if(confirm('Are you sure you want to delete this property?')) location.href='/delete/{{ property['id'] }}';" class="delete-btn">DELETE</button>
+                    <button
+                        onclick="if(confirm('Are you sure you want to delete this property?')) location.href='/delete/{{ property['id'] }}';"
+                        class="delete-btn">DELETE</button>
                 </div>
             </div>
-        {% endfor %}
+            {% endfor %}
+        </div>
     </div>
 </body>
+
 </html>
