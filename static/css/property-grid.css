@@ -9,6 +9,10 @@ th {
     padding: 10px;
 }
 
+p {
+    padding-bottom: 3px;
+}
+
 .property-tile {
     display: flex;
     flex-direction: column;
