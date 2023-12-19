@@ -27,6 +27,26 @@
                     <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="logo" width="210"
                         height="29" aria-hidden="true" decoding="async">
                 </a>
+                <nav class="cs-nav" role="navigation">
+                    <!--Mobile Nav Toggle-->
+                    <button class="cs-toggle" aria-label="mobile menu toggle">
+                        <div class="cs-box" aria-hidden="true">
+                            <span class="cs-line cs-line1" aria-hidden="true"></span>
+                            <span class="cs-line cs-line2" aria-hidden="true"></span>
+                            <span class="cs-line cs-line3" aria-hidden="true"></span>
+                        </div>
+                    </button>
+                    <div class="cs-ul-wrapper">
+                        <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
+                            <li class="cs-li">
+                                <a href="{{ url_for('edit_profile') }}" class="cs-li-link cs-active">
+                                    Account Settings
+                                </a>
+                            </li>
+
+                        </ul>
+                    </div>
+                </nav>
 
             </div>
         </header>
@@ -38,17 +58,17 @@
         <br>
 
         <div style="text-align: center; margin-bottom: 20px;">
-            <form action="{{ url_for('home') }}" method="get">
+            <form action="{{ url_for('subscriber') }}" method="get">
                 <label for="county">Select County:</label>
                 <select name="county" id="county">
                     <option value="">All Counties</option>
                     {% for county in counties %}
-                    <option value="{{ county }}" {% if request.args.get('county')==county %}selected{% endif %}>{{
-                        county }}</option>
+                    <option value="{{ county }}" {% if request.args.get('county') == county %}selected{% endif %}>{{ county }}</option>
                     {% endfor %}
                 </select>
                 <button type="submit">SORT</button>
             </form>
+            
         </div>
 
         <div class="property-grid">
@@ -69,7 +89,12 @@
             </div>
             {% endfor %}
         </div>
+        <footer>
+            <p>© Bonaventura</p>
+        </footer>
     </div>
+
+
 </body>
 
 </html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <!-- Add HTML structure and styling as needed -->
+    <h1>Profile Information</h1>
+    <p>Username: {{ user['username'] }}</p>
+    <p>Email: {{ user['email'] }}</p>
+    <p>Phone: {{ user['phone'] }}</p>
+    <!-- Add other fields as needed -->
+
+    <a href="{{ url_for('edit_profile') }}">Edit Profile</a>
+    <a href="{{ url_for('delete_account') }}">Delete Account</a>
+
+</body>
+
+</html>

@@ -180,12 +180,12 @@ def properties_page():
 @application.route('/subscriber')
 @requires_roles(0)
 def subscriber():
+    county_filter = request.args.get('county')
     properties = get_all_properties()
-    counties = get_unique_counties()
-    # Convert 'id' to integer if necessary
-    for property in properties:
-        property['id'] = int(property['id'])
-    
+    if county_filter:
+        properties = [prop for prop in properties if prop.get('county') == county_filter]
+
+    counties = get_unique_counties()  # Function to get unique counties from the database
     return render_template('subscriber.html', properties=properties, counties=counties)
 
 @application.route('/agent')
@@ -207,6 +207,26 @@ def admin():
     for property in properties:
         property['id'] = int(property['id'])
     return render_template('admin.html', properties=properties, users=users)
+
+@application.route('/edit_profile', methods=['GET', 'POST'])
+def edit_profile():
+    if 'user_id' not in session:
+        return redirect(url_for('login_form'))
+
+    user_id = session['user_id']
+    user = get_user_by_id(user_id)
+    
+    if request.method == 'GET':
+        return render_template('edit_profile.html', user=user)
+    else:
+        # Get data from form
+        username = request.form['username']
+        email = request.form['email']
+        phone = request.form['phone']
+        # Update user information in the database
+        update_user(user_id, username, email, phone)
+        return redirect(url_for('profile'))
+
 
 @application.route('/delete_user/<int:user_id>', methods=['GET'])
 def delete_user(user_id):
@@ -237,7 +257,7 @@ def edit_user(user_id):
         return render_template('edit_user.html', user=user)
     else:
         flash('User not found.')
-        return redirect(url_for('admin'))
+        return redirect(url_for('home'))
 
 @application.route('/update_user/<int:user_id>', methods=['POST'])
 def update_user(user_id):
@@ -251,14 +271,14 @@ def update_user(user_id):
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
-            sql = "UPDATE users SET username = %s, email = %s, phone = %s, role = %s WHERE id = %s"
-            cursor.execute(sql, (username, email, phone, role, user_id))
+            sql = "UPDATE users SET username = %s, email = %s, phone = %s WHERE id = %s"
+            cursor.execute(sql, (username, email, phone, user_id))
         conn.commit()
     finally:
         conn.close()
 
     flash('User updated successfully!')
-    return redirect(url_for('admin'))
+    return redirect(url_for('subscriber'))
 
 def get_all_users():
     conn = get_db_connection()
@@ -268,6 +288,16 @@ def get_all_users():
             return cursor.fetchall()
     finally:
         conn.close()
+
+def get_user_by_id(user_id):
+    conn = get_db_connection()
+    try:
+        with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+            cursor.execute("SELECT * FROM users WHERE id = %s", (user_id,))
+            return cursor.fetchone()
+    finally:
+        conn.close()
+
 
 @application.route('/property/<int:id>')
 def property_details(id):

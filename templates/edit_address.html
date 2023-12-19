@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>BONAVENTURA ADMIN</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background_color.css') }}">
@@ -16,77 +17,93 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/table.css') }}">
     <script src="{{ url_for('static', filename='js/header.js') }}"></script>
 </head>
-<body>
-    <section id="contact-718">
-        <div class="cs-container">
-            <!-- Optional picture section here, if you want to include an image -->
-            <div class="cs-content">
-                <span class="cs-topper">Bonaventura Admin</span>
-                <h2 class="cs-title">Update Property Details in the Bonaventura Dashboard.</h2>
-                <form class="cs-form" action="/update_address" method="post">
-                    <!-- Hidden ID Field -->
-                    <input type="hidden" name="id" value="{{ property[0] }}">
-    
-                    <!-- Address Field -->
-                    <label for="address">
-                        <input class="cs-input" type="text" id="address" name="address" value="{{ property['address'] }}" placeholder="Address" required>
-                    </label>
-    
-                    <!-- ZPID Field -->
-                    <label for="zpid">
-                        <input class="cs-input" type="text" id="zpid" name="zpid" value="{{ property[2] }}" placeholder="ZPID">
-                    </label>
-    
-                    <!-- Bedrooms Field -->
-                    <label for="bedrooms">
-                        <input class="cs-input" type="number" id="bedrooms" name="bedrooms" value="{{ property[3] }}" placeholder="Bedrooms">
-                    </label>
-    
-                    <!-- Bathrooms Field -->
-                    <label for="bathrooms">
-                        <input class="cs-input" type="number" id="bathrooms" name="bathrooms" value="{{ property[4] }}" placeholder="Bathrooms">
-                    </label>
-    
-                    <!-- Living Area Field -->
-                    <label for="livingArea">
-                        <input class="cs-input" type="number" id="livingArea" name="livingArea" value="{{ property[5] }}" placeholder="Living Area">
-                    </label>
-    
-                    <!-- Lot Size Field -->
-                    <label for="lotSize">
-                        <input class="cs-input" type="number" id="lotSize" name="lotSize" value="{{ property[6] }}" placeholder="Lot Size">
-                    </label>
-    
-                    <!-- Price Field -->
-                    <label for="price">
-                        <input class="cs-input" type="number" id="price" name="price" value="{{ property[7] }}" placeholder="Price">
-                    </label>
-    
-                    <!-- Tax Assessed Value Field -->
-                    <label for="taxAssessedValue">
-                        <input class="cs-input" type="number" id="taxAssessedValue" name="taxAssessedValue" value="{{ property[8] }}" placeholder="Tax Assessed Value">
-                    </label>
-    
-                    <!-- Tax Assessed Year Field -->
-                    <label for="taxAssessedYear">
-                        <input class="cs-input" type="number" id="taxAssessedYear" name="taxAssessedYear" value="{{ property[9] }}" placeholder="Tax Assessed Year">
-                    </label>
 
-                    <label for="taxAssessedYear">
-                        <input class="cs-input" type="number" id="taxAssessedYear" name="taxAssessedYear" value="{{ property[9] }}" placeholder="Tax Assessed Year">
-                    </label>
-    
-                    <!-- County Field -->
-                    <label for="foreclosureAuctionLocation">
-                        <input class="cs-input" type="text" id="foreclosureAuctionLocation" name="foreclosureAuctionLocation" value="{{ property[11] }}" placeholder="Auction Location">
-                    </label>
-    
-                    <!-- Submit Button -->
-                    <button class="cs-button-solid cs-submit" type="submit">Update</button>
-                </form>
+<body>
+    <div class="wrapper">
+        <section id="contact-718">
+            <div class="cs-container">
+                <!-- Optional picture section here, if you want to include an image -->
+                <div class="cs-content">
+                    <span class="cs-topper">Bonaventura Admin</span>
+                    <h2 class="cs-title">Update Property Details in the Bonaventura Dashboard.</h2>
+                    <form class="cs-form" action="/update_address" method="post">
+                        <!-- Hidden ID Field -->
+                        <input type="hidden" name="id" value="{{ property[0] }}">
+
+                        <!-- Address Field -->
+                        <label for="address">
+                            <input class="cs-input" type="text" id="address" name="address"
+                                value="{{ property['address'] }}" placeholder="Address" required>
+                        </label>
+
+                        <!-- ZPID Field -->
+                        <label for="zpid">
+                            <input class="cs-input" type="text" id="zpid" name="zpid" value="{{ property[2] }}"
+                                placeholder="ZPID">
+                        </label>
+
+                        <!-- Bedrooms Field -->
+                        <label for="bedrooms">
+                            <input class="cs-input" type="number" id="bedrooms" name="bedrooms"
+                                value="{{ property[3] }}" placeholder="Bedrooms">
+                        </label>
+
+                        <!-- Bathrooms Field -->
+                        <label for="bathrooms">
+                            <input class="cs-input" type="number" id="bathrooms" name="bathrooms"
+                                value="{{ property[4] }}" placeholder="Bathrooms">
+                        </label>
+
+                        <!-- Living Area Field -->
+                        <label for="livingArea">
+                            <input class="cs-input" type="number" id="livingArea" name="livingArea"
+                                value="{{ property[5] }}" placeholder="Living Area">
+                        </label>
+
+                        <!-- Lot Size Field -->
+                        <label for="lotSize">
+                            <input class="cs-input" type="number" id="lotSize" name="lotSize" value="{{ property[6] }}"
+                                placeholder="Lot Size">
+                        </label>
+
+                        <!-- Price Field -->
+                        <label for="price">
+                            <input class="cs-input" type="number" id="price" name="price" value="{{ property[7] }}"
+                                placeholder="Price">
+                        </label>
+
+                        <!-- Tax Assessed Value Field -->
+                        <label for="taxAssessedValue">
+                            <input class="cs-input" type="number" id="taxAssessedValue" name="taxAssessedValue"
+                                value="{{ property[8] }}" placeholder="Tax Assessed Value">
+                        </label>
+
+                        <!-- Tax Assessed Year Field -->
+                        <label for="taxAssessedYear">
+                            <input class="cs-input" type="number" id="taxAssessedYear" name="taxAssessedYear"
+                                value="{{ property[9] }}" placeholder="Tax Assessed Year">
+                        </label>
+
+                        <label for="taxAssessedYear">
+                            <input class="cs-input" type="number" id="taxAssessedYear" name="taxAssessedYear"
+                                value="{{ property[9] }}" placeholder="Tax Assessed Year">
+                        </label>
+
+                        <!-- County Field -->
+                        <label for="foreclosureAuctionLocation">
+                            <input class="cs-input" type="text" id="foreclosureAuctionLocation"
+                                name="foreclosureAuctionLocation" value="{{ property[11] }}"
+                                placeholder="Auction Location">
+                        </label>
+
+                        <!-- Submit Button -->
+                        <button class="cs-button-solid cs-submit" type="submit">Update</button>
+                    </form>
+                </div>
             </div>
-        </div>
-    </section>
-    
+        </section>
+    </div>
 </body>
+
+
 </html>

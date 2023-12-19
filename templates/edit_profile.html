@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>USER ACCOUNT</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background_color.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/contact-718.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/cs-button-6.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/footer.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/gallery-45.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/header.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/hero-82.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/hero-408.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/property-grid.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/services.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/table.css') }}">
+    <script src="{{ url_for('static', filename='js/header.js') }}"></script>
+</head>
+
+<body>
+    <div class="wrapper">
+        <section id="contact-718">
+            <div class="cs-container">
+                <!-- Optional picture section here, if you want to include an image -->
+                <div class="cs-content">
+                    <span class="cs-topper">User Account</span>
+                    <h2 class="cs-title">Update your Bonaventura account information.</h2>
+                    <form class="cs-form" action="/update_user" method="post">
+                        <!-- Hidden ID Field -->
+                        <input type="hidden" name="id" value="{{ user['user_id'] }}">
+
+                        <label for="username">
+                            <input class="cs-input" type="text" id="username" name="username"
+                                value="{{ user['username'] }}" placeholder="Username" required>
+                        </label>
+
+                        <label for="email">
+                            <input class="cs-input" type="text" id="email" name="email" value="{{ user['email'] }}"
+                                placeholder="Email">
+                        </label>
+
+                        <label for="phone">
+                            <input class="cs-input" type="number" id="phone" name="phone"
+                                value="{{ user['phone'] }}" placeholder="Phone Number (Only digits, no seperators or extension.)">
+                        </label>
+
+                        <!-- Submit Button -->
+                        <button class="cs-button-solid cs-submit" type="submit">Update</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+
+</html>
