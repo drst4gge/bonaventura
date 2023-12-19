@@ -1,54 +1,59 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>BONAVENTURA ADMIN</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/html.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background_color.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/contact-718.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/header.css') }}">
 </head>
+
 <body>
+    <div class="wrapper">
+        <header id="cs-navigation">
+            <div class="cs-container">
+                <!--Nav Logo-->
+                <a href="{{ url_for('home') }}" class="cs-logo" aria-label="back to home">
+                    <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="logo" width="210"
+                        height="29" aria-hidden="true" decoding="async">
+                </a>
+                <!--Navigation List-->
+                <nav class="cs-nav" role="navigation">
+                    <!--Mobile Nav Toggle-->
+                    <button class="cs-toggle" aria-label="mobile menu toggle">
+                        <div class="cs-box" aria-hidden="true">
+                            <span class="cs-line cs-line1" aria-hidden="true"></span>
+                            <span class="cs-line cs-line2" aria-hidden="true"></span>
+                            <span class="cs-line cs-line3" aria-hidden="true"></span>
+                        </div>
+                    </button>
 
-    <header id="cs-navigation">
-        <div class="cs-container">
-            <!--Nav Logo-->
-            <a href="{{ url_for('home') }}" class="cs-logo" aria-label="back to home">
-                <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="logo" width="210" height="29" aria-hidden="true" decoding="async">
-            </a>
-            <!--Navigation List-->
-            <nav class="cs-nav" role="navigation">
-                <!--Mobile Nav Toggle-->
-                <button class="cs-toggle" aria-label="mobile menu toggle">
-                    <div class="cs-box" aria-hidden="true">
-                        <span class="cs-line cs-line1" aria-hidden="true"></span>
-                        <span class="cs-line cs-line2" aria-hidden="true"></span>
-                        <span class="cs-line cs-line3" aria-hidden="true"></span>
-                    </div>
-                </button>
 
-          
-        </div>
-    </header>
-
-    <section id="contact-718">
-        <div class="cs-container">
-            <!-- Optional picture section here, if you want to include an image -->
-            <div class="cs-content">
-                <span class="cs-topper">Add an address to the Bonaventura dashboard.</span>
-                
-                <form class="cs-form" action="/submit_address" method="post">
-                    
-                        
-                        <input class="cs-input" type="text" id="address" name="address" placeholder="Enter Address" required>
-                    
-
-                    <button class="cs-button-solid cs-submit" type="submit">Submit</button>
-                    
-                    
-                </form>
             </div>
-        </div>
-    </section>
+        </header>
+
+        <section id="contact-718">
+            <div class="cs-container">
+                <!-- Optional picture section here, if you want to include an image -->
+                <div class="cs-content">
+                    <span class="cs-topper">Add an address to Bonaventura</span>
+
+                    <form class="cs-form" action="/submit_address" method="post">
+
+
+                        <input class="cs-input" type="text" id="address" name="address" placeholder="Enter Address"
+                            required>
+
+
+                        <button class="cs-button-solid cs-submit" type="submit">Submit</button>
+
+
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
 </body>
+
 </html>

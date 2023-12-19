@@ -1,6 +1,10 @@
-body {
-            
-    background: linear-gradient(to bottom,#ffffff, #f15a24 );
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.wrapper {
     min-height: 100%;
-    
+    background: linear-gradient(to bottom, #ffffff, rgba(241, 90, 36, 0.5));
 }

@@ -1,56 +1,61 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>BONAVENTURA ADMIN</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/html.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background_color.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/contact-718.css') }}">
-    
+
 </head>
+
 <body>
+    <div class="wrapper">
+        <section id="contact-718">
+            <div class="cs-container">
+                <div class="cs-content">
+                    <span class="cs-topper">Add a user to Bonaventura</span>
+                    
+                    <p class="cs-text">
 
-    <section id="contact-718">
-        <div class="cs-container">
-            <div class="cs-content">
-                <span class="cs-topper">Bonaventura Admin</span>
-                <h2 class="cs-title">Add User</h2>
-                <p class="cs-text">
-                    
-                    
-                </p>
-                <!-- Form structure from the second form with content from the first form -->
-                <form class="cs-form" id="cs-form-718" name="Contact Form" action="{{ url_for('submit_user') }}" method="post">
-                    <label for="username" class="cs-label">
-                        Username
-                        <input class="cs-input" type="text" id="username" name="username" required placeholder="Username">
-                    </label>
-                    <label class="cs-label cs-email">
-                        Password
-                        <input class="cs-input" type="password" id="password" name="password" required placeholder="Password">
-                    </label>
-                    <label class="cs-label cs-phone">
-                        Email
-                        <input class="cs-input" type="email" id="email" name="email" required placeholder="Email">
-                    </label>
-                    <label class="cs-label">
-                        Phone Number
-                        <input class="cs-input" type="tel" id="phone" name="phone" placeholder="Phone Number">
-                    </label>
-                    <label class="cs-label">
-                        Role
-                        <select class="cs-input" id="role" name="role">
-                            <option value="0">Subscriber</option>
-                            <option value="1">Agent</option>
-                            <option value="2">Admin</option>
-                        </select>
-                    </label>
-                    <button class="cs-button-solid cs-submit" type="submit">Create</button>
-                    
-                </form>
+
+                    </p>
+                    <!-- Form structure from the second form with content from the first form -->
+                    <form class="cs-form" id="cs-form-718" name="Contact Form" action="{{ url_for('submit_user') }}"
+                        method="post">
+                        <label for="username" class="cs-label">
+                            Username
+                            <input class="cs-input" type="text" id="username" name="username" required
+                                placeholder="Username">
+                        </label>
+                        <label class="cs-label cs-email">
+                            Password
+                            <input class="cs-input" type="password" id="password" name="password" required
+                                placeholder="Password">
+                        </label>
+                        <label class="cs-label cs-phone">
+                            Email
+                            <input class="cs-input" type="email" id="email" name="email" required placeholder="Email">
+                        </label>
+                        <label class="cs-label">
+                            Phone Number
+                            <input class="cs-input" type="tel" id="phone" name="phone" placeholder="Phone Number">
+                        </label>
+                        <label class="cs-label">
+                            Role
+                            <select class="cs-input" id="role" name="role">
+                                <option value="0">Subscriber</option>
+                                <option value="1">Agent</option>
+                                <option value="2">Admin</option>
+                            </select>
+                        </label>
+                        <button class="cs-button-solid cs-submit" type="submit">Create</button>
+
+                    </form>
+                </div>
             </div>
-        </div>
-    </section>
-
+        </section>
+    </div>
 </body>
+
 </html>

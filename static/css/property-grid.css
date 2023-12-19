@@ -1,3 +1,7 @@
+th {
+    text-align: left;
+}
+
 .property-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -9,7 +13,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    border: 1px solid #f15a24 /* Light blue border for contrast */
+    border: 1px solid #008080; /* Light blue border for contrast */
     border-radius: 10px;
     overflow: hidden;
     background: #ffffff; /* White background for tiles for contrast */
@@ -56,11 +60,11 @@ a {
 }
 
 .add-btn {
-    background-color: #f15a24; /* Retain the delete button color for clarity */
+    background-color: #008080; /* Retain the delete button color for clarity */
     color: white;
 }
 
 .delete-btn {
-    background-color: #f15a24; /* Retain the delete button color for clarity */
+    background-color: #008080; /* Retain the delete button color for clarity */
     color: white;
 }
