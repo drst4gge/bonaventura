@@ -52,9 +52,9 @@
                     <p class="cs-text"> {{ property['bathrooms'] }} BATHROOMS</p>
                     <p class="cs-text">{{ property['livingArea'] }} INTERIOR SQFT</p>
                     <p class="cs-text">{{ property['lotSize'] }} SQFT OF LAND</p>
-                    <p class="cs-text">{{ property['foreclosureAuctionLocation'] }}</p>
+                    
 
-                    <a class="cs-button-solid" href="{{ url_for('bid', id=property['id']) }}" class="btn">PLACE BID</a>
+                    <a class="cs-button-solid" href="{{ url_for('bid', id=property['id'], address=property['address']) }}" class="btn">PLACE BID</a>
 
 
                 </div>

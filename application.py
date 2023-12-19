@@ -512,7 +512,7 @@ def bid(id):
             'email': session.get('user_email', ''),
             'phone': session.get('user_phone', '')
         }
-        return render_template('bid.html', property_id=id, user=user_details)
+        return render_template('bid.html', property = property,property_id=id, user=user_details)
     else:
         return 'Property not found', 404
 

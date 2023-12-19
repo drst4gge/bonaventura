@@ -54,8 +54,8 @@ a {
     margin: 0 5px;
     border: none;
     cursor: pointer;
-    border-radius: 10px;
-    opacity: 0.98; /* Makes the tile slightly transparent */
+    border-radius: 6px;
+    opacity: 0.90; /* Makes the tile slightly transparent */
     text-transform: capitalize;
     background-color: #000000; /* Dark blue background for individual buttons */
     color: white; /* White text on buttons */
@@ -77,6 +77,6 @@ a {
 }
 
 .edit-btn:hover {
-    transform: scale(1.02); /* Scales up the tile by 5% on hover */
+    transform: scale(1.01); /* Scales up the tile by 5% on hover */
     opacity: 1; /* Full opacity on hover */
 }

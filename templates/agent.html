@@ -65,11 +65,16 @@
                 <a href="{{ url_for('property_details', id=property['id']) }}" class="property-link">
                     <img class="property-image" src="{{ property['photo_url'] }}" alt="Property Image">
                     <div class="property-content">
-                        <h3>{{ property['address'] }}</h3>
-                        <h4>- DETAILS -</h4>
-                        <p>LISTING PRICE ${{ property['price'] }}</p>
-                        <p>TAX ASSESSED VALUE ${{ property['taxAssessedValue'] }}</p>
-                        <p>TAX ASSESSED YEAR {{ property['taxAssessedYear'] }}</p>
+                        <span class="cs-topper">{{ property['addresses'] }}</span>
+                        <p class="cs-text"> {{ property['bedrooms'] }} BEDROOMS</p>
+                        <p class="cs-text"> {{ property['bathrooms'] }} BATHROOMS</p>
+                        <p class="cs-text">{{ property['livingArea'] }} INTERIOR SQFT</p>
+                        <p class="cs-text">{{ property['lotSize'] }} SQFT OF LAND</p>
+                        <p class="cs-text">{{ property['county'] }}</p>
+                        <p class="cs-text">LISTING PRICE ${{ property['price'] }}</p>
+                        <p class="cs-text">TAX ASSESSED VALUE ${{ property['taxAssessedValue'] }}</p>
+                        <p class="cs-text">TAX ASSESSED YEAR {{ property['taxAssessedYear'] }}</p>
+                        <p class="cs-text">AUCTION LOCATION {{ property['foreclosureAuctionLocation'] }}</p>
                     </div>
                 </a>
                 <div class="property-buttons">

@@ -1,6 +1,7 @@
 <!-- templates/bid.html -->
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>BID</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background_color.css') }}">
@@ -19,45 +20,51 @@
 
 
 </head>
+
 <body>
 
+    <div class="wrapper">
+        <section id="contact-718">
+            <div class="cs-container">
+                <!-- Optional picture section here, if you want to include an image -->
+                <div class="cs-content">
+                    <span class="cs-topper">BID ON {{ property['address'] }}</span>
 
-    <section id="contact-718">
-        <div class="cs-container">
-            <!-- Optional picture section here, if you want to include an image -->
-            <div class="cs-content">
-                <span class="cs-topper">Bonaventura Bidding</span>
-                
-                <form class="cs-form" action="/submit_bid/{{ property_id }}" method="post">
-                    <!-- Hidden ID Field -->
-                    
-    
-                    <!-- Address Field -->
-                    <label for="username">
-                        <input class="cs-input" type="text" id="username" name="username" value="{{ user['username'] }}" placeholder="user" required>
-                    </label>
-    
-                    <!-- ZPID Field -->
-                    <label for="email">
-                        <input class="cs-input" type="text" id="email" name="email" value="{{ user['email'] }}" placeholder="email">
-                    </label>
-    
-                    <!-- Bedrooms Field -->
-                    <label for="phone">
-                        <input class="cs-input" type="number" id="phone" name="phone" value="{{ user['phone'] }}" placeholder="phone">
-                    </label>
-    
-                    <!-- Bathrooms Field -->
-                    <label for="bid">
-                        <input class="cs-input" type="number" id="bid" name="bid"  placeholder="bid">
-                    </label>
+                    <form class="cs-form" action="/submit_bid/{{ property_id }}" method="post">
+                        <!-- Hidden ID Field -->
+                        <input type="hidden" name="id" value="{{ user['user_id'] }}">
 
-    
-                    <!-- Submit Button -->
-                    <button class="cs-button-solid cs-submit" type="submit">Bid</button>
-                </form>
+                        <!-- Address Field -->
+                        <label for="username">
+                            <input class="cs-input" type="text" id="username" name="username"
+                                value="{{ user['username'] }}" placeholder="Username" required>
+                        </label>
+
+                        <!-- ZPID Field -->
+                        <label for="email">
+                            <input class="cs-input" type="text" id="email" name="email" value="{{ user['email'] }}"
+                                placeholder="email">
+                        </label>
+
+                        <!-- Bedrooms Field -->
+                        <label for="phone">
+                            <input class="cs-input" type="number" id="phone" name="phone" value="{{ user['phone'] }}"
+                                placeholder="phone">
+                        </label>
+
+                        <!-- Bathrooms Field -->
+                        <label for="bid">
+                            <input class="cs-input" type="number" id="bid" name="bid" placeholder="bid">
+                        </label>
+
+
+                        <!-- Submit Button -->
+                        <button class="cs-button-solid cs-submit" type="submit">Bid</button>
+                    </form>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
+    </div>
 </body>
+
 </html>

@@ -77,13 +77,13 @@
                 <a href="{{ url_for('property_details', id=property['id']) }}" class="property-link">
                     <img class="property-image" src="{{ property['photo_url'] }}" alt="Property Image">
                     <div class="property-content">
-                        <h3>{{ property['addresses'] }}</h3>
-                        <h4>- DETAILS -</h4>
-                        <p> {{ property['bedrooms'] }} BEDROOMS</p>
-                        <p> {{ property['bathrooms'] }} BATHROOMS</p>
-                        <p>{{ property['livingArea'] }} INTERIOR SQFT</p>
-                        <p>{{ property['lotSize'] }} SQFT OF LAND</p>
-                        <p>{{ property['county'] }}</p>
+                        
+                        <span class="cs-topper">{{ property['addresses'] }}</span>
+                        <p class="cs-text"> {{ property['bedrooms'] }} BEDROOMS</p>
+                        <p class="cs-text"> {{ property['bathrooms'] }} BATHROOMS</p>
+                        <p class="cs-text">{{ property['livingArea'] }} INTERIOR SQFT</p>
+                        <p class="cs-text">{{ property['lotSize'] }} SQFT OF LAND</p>
+                        <p class="cs-text">{{ property['county'] }}</p>
                     </div>
                 </a>
             </div>
