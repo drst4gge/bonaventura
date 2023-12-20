@@ -4,83 +4,90 @@ th {
 
 .property-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    grid-gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    grid-gap: 13px;
     padding: 10px;
 }
 
-p {
-    padding-bottom: 3px;
-}
 
 .property-tile {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    border: 1px solid #008080; /* Light blue border for contrast */
+    border: 1px solid #000000;
+    /* Light blue border for contrast */
     border-radius: 10px;
     overflow: hidden;
-    background: #ffffff; /* White background for tiles for contrast */
-    color: #272343; /* Dark text in tiles */
+    background: #ffffff;
+    /* White background for tiles for contrast */
+    color: #272343;
+    /* Dark text in tiles */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    opacity: 0.98; /* Makes the tile slightly transparent */
+    opacity: 0.98;
+    /* Makes the tile slightly transparent */
     transition: transform 0.3s ease, opacity 0.3s ease;
-    
+
 }
+
 .property-tile:hover {
-    transform: scale(1.02); /* Scales up the tile by 5% on hover */
-    opacity: 1; /* Full opacity on hover */
+    transform: scale(1.02);
+    /* Scales up the tile by 5% on hover */
+    opacity: 1;
+    /* Full opacity on hover */
 }
 
 .property-image {
     width: 100%;
-    height: 200px;
+    height: 250px;
     object-fit: cover;
 }
 
 .property-content {
-    padding: 10px;
+    padding: 5px;
 }
+
 a {
     text-decoration: none;
     color: black;
 }
 .property-buttons {
     display: flex;
-    justify-content: space-evenly;
+    justify-content: center; /* Center buttons horizontally */
+    align-items: center; /* Align buttons vertically */
     padding: 10px;
-    background: #ffffff; /* Dark blue background for buttons */
-
+    
 }
 
-.add-btn, .edit-btn, .delete-btn {
-    padding: 5px 10px;
-    margin: 0 5px;
-    border: none;
-    cursor: pointer;
-    border-radius: 6px;
-    opacity: 0.90; /* Makes the tile slightly transparent */
-    text-transform: capitalize;
-    background-color: #000000; /* Dark blue background for individual buttons */
-    color: white; /* White text on buttons */
+.cs-button-4 {
+    text-align: center;
+    align-items: center; /* Align buttons vertically */
+    font-size: 1rem;
+    /* Adjust line-height to be half - assuming the original min and max values are 2.875rem and 3.5rem */
+    line-height: clamp(1.4375rem, 4vw, 1.75rem);
+    text-decoration: none;
+    font-weight: 700;
+    /* Set min-width to half */
+    min-width: 5.4375rem;
+    margin: auto;
+    color: #fff;
+    /* Adjust padding, especially the vertical padding if needed */
+    padding: 0 1.5rem;
+    box-sizing: border-box;
+    background-color: #f15a24;
+    box-shadow: 4px 4px 0px 0px #1a1a1a;
+    display: inline-block;
+    position: relative;
+    z-index: 1;
+    transition:
+        background-color 0.3s,
+        box-shadow 0.3s;
 }
 
-.add-btn {
-    background-color: #008080; /* Retain the delete button color for clarity */
-    color: white;
+.cs-button-4:hover {
+    background-color: #1a1a1a;
+    box-shadow: 0px 0px 0px 0px var(--primary);
 }
 
-.delete-btn {
-    background-color: #008080; /* Retain the delete button color for clarity */
-    color: white;
-}
-
-.delete-btn:hover {
-    transform: scale(1.02); /* Scales up the tile by 5% on hover */
-    opacity: 1; /* Full opacity on hover */
-}
-
-.edit-btn:hover {
-    transform: scale(1.01); /* Scales up the tile by 5% on hover */
-    opacity: 1; /* Full opacity on hover */
+.property-content tr {
+    padding-bottom: 20px; /* Adjust as needed */
 }

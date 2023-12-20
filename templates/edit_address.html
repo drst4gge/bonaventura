@@ -28,72 +28,78 @@
                     <h2 class="cs-title">Update Property Details in the Bonaventura Dashboard.</h2>
                     <form class="cs-form" action="/update_address" method="post">
                         <!-- Hidden ID Field -->
-                        <input type="hidden" name="id" value="{{ property[0] }}">
-
+                        <input type="hidden" name="id" value="{{ property['id'] }}">
                         <!-- Address Field -->
+                        
                         <label for="address">
+                            <p class="cs-topper">Address</p>
                             <input class="cs-input" type="text" id="address" name="address"
-                                value="{{ property['address'] }}" placeholder="Address" required>
+                                value="{{ property['addresses'] }}" placeholder="Address" required>
                         </label>
 
                         <!-- ZPID Field -->
+                        
                         <label for="zpid">
-                            <input class="cs-input" type="text" id="zpid" name="zpid" value="{{ property[2] }}"
+                            <p class="cs-topper">ZillowPID</p>
+                            <input class="cs-input" type="text" id="zpid" name="zpid" value="{{ property['zpid'] }}"
                                 placeholder="ZPID">
                         </label>
 
                         <!-- Bedrooms Field -->
                         <label for="bedrooms">
+                            <p class="cs-topper">Bedrooms</p>
                             <input class="cs-input" type="number" id="bedrooms" name="bedrooms"
-                                value="{{ property[3] }}" placeholder="Bedrooms">
+                                value="{{ property['bedrooms'] }}" placeholder="Bedrooms">
                         </label>
 
                         <!-- Bathrooms Field -->
                         <label for="bathrooms">
+                            <p class="cs-topper">Bathrooms</p>
                             <input class="cs-input" type="number" id="bathrooms" name="bathrooms"
-                                value="{{ property[4] }}" placeholder="Bathrooms">
+                                value="{{ property['bathrooms'] }}" placeholder="Bathrooms">
                         </label>
 
                         <!-- Living Area Field -->
                         <label for="livingArea">
+                            <p class="cs-topper">Home SQFT</p>
                             <input class="cs-input" type="number" id="livingArea" name="livingArea"
-                                value="{{ property[5] }}" placeholder="Living Area">
+                                value="{{ property['livingArea'] }}" placeholder="Living Area">
                         </label>
 
                         <!-- Lot Size Field -->
                         <label for="lotSize">
-                            <input class="cs-input" type="number" id="lotSize" name="lotSize" value="{{ property[6] }}"
+                            <p class="cs-topper">Lot SQFT</p>
+                            <input class="cs-input" type="number" id="lotSize" name="lotSize" value="{{ property['lotSize'] }}"
                                 placeholder="Lot Size">
                         </label>
 
                         <!-- Price Field -->
                         <label for="price">
-                            <input class="cs-input" type="number" id="price" name="price" value="{{ property[7] }}"
+                            <p class="cs-topper">Price</p>
+                            <input class="cs-input" type="number" id="price" name="price" value="{{ property['price'] }}"
                                 placeholder="Price">
                         </label>
 
                         <!-- Tax Assessed Value Field -->
                         <label for="taxAssessedValue">
+                            <p class="cs-topper">Tax Assessed Value</p>
                             <input class="cs-input" type="number" id="taxAssessedValue" name="taxAssessedValue"
-                                value="{{ property[8] }}" placeholder="Tax Assessed Value">
+                                value="{{ property['taxAssessedValue'] }}" placeholder="Tax Assessed Value">
                         </label>
 
                         <!-- Tax Assessed Year Field -->
                         <label for="taxAssessedYear">
+                            <p class="cs-topper">Tax Assessed Year</p>
                             <input class="cs-input" type="number" id="taxAssessedYear" name="taxAssessedYear"
-                                value="{{ property[9] }}" placeholder="Tax Assessed Year">
-                        </label>
-
-                        <label for="taxAssessedYear">
-                            <input class="cs-input" type="number" id="taxAssessedYear" name="taxAssessedYear"
-                                value="{{ property[9] }}" placeholder="Tax Assessed Year">
+                                value="{{ property['taxAssessedYear'] }}" placeholder="Tax Assessed Year">
                         </label>
 
                         <!-- County Field -->
-                        <label for="foreclosureAuctionLocation">
-                            <input class="cs-input" type="text" id="foreclosureAuctionLocation"
-                                name="foreclosureAuctionLocation" value="{{ property[11] }}"
-                                placeholder="Auction Location">
+                        <label for="county">
+                            <p class="cs-topper">County</p>
+                            <input class="cs-input" type="text" id="county"
+                                name="county" value="{{ property['county'] }}"
+                                placeholder="County">
                         </label>
 
                         <!-- Submit Button -->
@@ -102,6 +108,9 @@
                 </div>
             </div>
         </section>
+        <footer>
+            <p>© Bonaventura</p>
+        </footer>
     </div>
 </body>
 

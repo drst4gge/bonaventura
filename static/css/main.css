@@ -1,3 +1,5 @@
+@import url('https://cdn-uicons.flaticon.com/2.0.0/uicons-thin-straight/css/uicons-thin-straight.css');
+
 :root {
     /* Add these styles to your global stylesheet, which is used across all site pages. You only need to do this once. All elements in the library derive their variables and base styles from this central sheet, simplifying site-wide edits. For instance, if you want to modify how your h2's appear across the site, you just update it once in the global styles, and the changes apply everywhere. */
     --primary: #ff6a3e;
@@ -36,7 +38,7 @@ body {
     color: var(--primary);
     margin-bottom: 0.25rem;
     display: block;
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Roboto', serif;
 }
 
 .cs-title {
@@ -59,6 +61,7 @@ body {
     max-width: 40.625rem;
     margin: 0;
     color: var(--bodyTextColor);
-    font-family: 'Nunito', sans-serif;
+    font-family: 'Roboto', serif;
+    
 }
 

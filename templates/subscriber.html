@@ -77,13 +77,46 @@
                 <a href="{{ url_for('property_details', id=property['id']) }}" class="property-link">
                     <img class="property-image" src="{{ property['photo_url'] }}" alt="Property Image">
                     <div class="property-content">
-                        
-                        <span class="cs-topper">{{ property['addresses'] }}</span>
-                        <p class="cs-text"> {{ property['bedrooms'] }} BEDROOMS</p>
-                        <p class="cs-text"> {{ property['bathrooms'] }} BATHROOMS</p>
-                        <p class="cs-text">{{ property['livingArea'] }} INTERIOR SQFT</p>
-                        <p class="cs-text">{{ property['lotSize'] }} SQFT OF LAND</p>
-                        <p class="cs-text">{{ property['county'] }}</p>
+                        <table style="width: 100%;">
+                            <tbody>
+                                <tr>
+                                    <td style="text-align: left; color: #ff6a3e; font-weight: bolder;">Address</td>
+                                    <td style="text-align: right; font-weight: bold;">{{ property['addresses'] }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left; color: #ff6a3e; font-weight: bold;">Bedrooms</td>
+                                    <td style="text-align: right;">{{ property['bedrooms'] }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left; color: #ff6a3e; font-weight: bold;">Bathrooms</td>
+                                    <td style="text-align: right;">{{ property['bathrooms'] }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left; color: #ff6a3e; font-weight: bold;">Home SQFT</td>
+                                    <td style="text-align: right;">{{ property['livingArea'] }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left; color: #ff6a3e; font-weight: bold;">Lot Size SQFT</td>
+                                    <td style="text-align: right;">{{ property['lotSize'] }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left; color: #ff6a3e; font-weight: bold;">County</td>
+                                    <td style="text-align: right;">{{ property['county'] }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left; color: #ff6a3e; font-weight: bold;">Price</td>
+                                    <td style="text-align: right;">${{ property['price'] }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left; color: #ff6a3e; font-weight: bold;">Tax Assessed Year</td>
+                                    <td style="text-align: right;">{{ property['taxAssessedYear'] }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left; color: #ff6a3e; font-weight: bold;">Tax Assessed Value</td>
+                                    <td style="text-align: right;">${{ property['taxAssessedValue'] }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </a>
             </div>

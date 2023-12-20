@@ -62,7 +62,7 @@ def get_all_properties():
 def get_property_by_id(property_id):
     conn = get_db_connection()
     try:
-        with conn.cursor(pymysql.cursors.DictCursor) as cursor:  # Use DictCursor here
+        with conn.cursor(pymysql.cursors.DictCursor) as cursor:
             cursor.execute("SELECT * FROM all_properties WHERE id = %s", (property_id,))
             return cursor.fetchone()
     finally:
@@ -452,14 +452,15 @@ def submit_user():
 def edit_address(id):
     property = get_property_by_id(id)
     if property:
+        print(property)  # Debugging statement to check the property details
         return render_template('edit_address.html', property=property)
     return 'Property not found', 404
 
 @application.route('/update_address', methods=['POST'])
 def update_address():
+    # Retrieve the form data
     property_id = request.form['id']
     address = request.form['address']
-    # Assuming you have form fields for these values
     zpid = request.form['zpid']
     bedrooms = request.form['bedrooms']
     bathrooms = request.form['bathrooms']
@@ -470,8 +471,31 @@ def update_address():
     taxAssessedYear = request.form['taxAssessedYear']
     county = request.form['county']
 
-    update_property(property_id, address, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear, county)
-    return redirect(url_for('home'))
+    # Update the property in the database
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            update_sql = """
+            UPDATE all_properties 
+            SET addresses = %s, zpid = %s, bedrooms = %s, bathrooms = %s, livingArea = %s, 
+                lotSize = %s, price = %s, taxAssessedValue = %s, taxAssessedYear = %s, county = %s 
+            WHERE id = %s
+            """
+            cursor.execute(update_sql, (address, zpid, bedrooms, bathrooms, livingArea, lotSize, price, 
+                                        taxAssessedValue, taxAssessedYear, county, property_id))
+        conn.commit()
+    finally:
+        conn.close()
+
+    # Redirect to the admin page or another appropriate page
+    user_role = session.get('user_role')
+    if user_role == 2:
+        return redirect(url_for('admin'))
+    elif user_role == 1:
+        return redirect(url_for('agent'))
+    else:
+        # Handle unexpected roles or if the user is not logged in
+        return 'Unauthorized', 401
 
 @application.route('/delete/<int:id>', methods=['GET'])
 def delete_address(id):

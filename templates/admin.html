@@ -16,6 +16,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/services.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/table.css') }}">
     <script src="{{ url_for('static', filename='js/header.js') }}"></script>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.0.0/uicons-thin-straight/css/uicons-thin-straight.css'>
 </head>
 
 <body>
@@ -40,13 +41,13 @@
                     <div class="cs-ul-wrapper">
                         <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
                             <li class="cs-li">
-                                <a href="{{ url_for('add_address') }}" class="cs-li-link cs-active">
-                                    Add an Address
+                                <a href="{{ url_for('add_address') }}" class="cs-li-link">
+                                    <p class="cs-topper">Add Address</p>
                                 </a>
                             </li>
                             <li class="cs-li">
                                 <a href="{{ url_for('add_user') }}" class="cs-li-link">
-                                    Add a User
+                                    <p class="cs-topper">Add User</p>
                                 </a>
                             </li>
                         </ul>
@@ -67,24 +68,51 @@
                 <a href="{{ url_for('property_details', id = property['id']) }}" class="property-link">
                     <img class="property-image" src="{{ property['photo_url'] }}" alt="Property Image">
                     <div class="property-content">
-                        <span class="cs-topper">{{ property['addresses'] }}</span>
-                        <p class="cs-text"> {{ property['bedrooms'] }} BEDROOMS</p>
-                        <p class="cs-text"> {{ property['bathrooms'] }} BATHROOMS</p>
-                        <p class="cs-text">{{ property['livingArea'] }} INTERIOR SQFT</p>
-                        <p class="cs-text">{{ property['lotSize'] }} SQFT OF LAND</p>
-                        <p class="cs-text">{{ property['county'] }}</p>
-                        <p class="cs-text">LISTING PRICE ${{ property['price'] }}</p>
-                        <p class="cs-text">TAX ASSESSED VALUE ${{ property['taxAssessedValue'] }}</p>
-                        <p class="cs-text">TAX ASSESSED YEAR {{ property['taxAssessedYear'] }}</p>
-                        <p class="cs-text">AUCTION LOCATION {{ property['foreclosureAuctionLocation'] }}</p>
+                        <table style="width: 100%;">
+                            <tbody>
+                                <tr>
+                                    <td style="text-align: left; color: #ff6a3e; font-weight: bolder;">Address</td>
+                                    <td style="text-align: right; font-weight: bold;">{{ property['addresses'] }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left; color: #ff6a3e; font-weight: bold;">Bedrooms</td>
+                                    <td style="text-align: right;">{{ property['bedrooms'] }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left; color: #ff6a3e; font-weight: bold;">Bathrooms</td>
+                                    <td style="text-align: right;">{{ property['bathrooms'] }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left; color: #ff6a3e; font-weight: bold;">Home SQFT</td>
+                                    <td style="text-align: right;">{{ property['livingArea'] }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left; color: #ff6a3e; font-weight: bold;">Lot Size SQFT</td>
+                                    <td style="text-align: right;">{{ property['lotSize'] }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left; color: #ff6a3e; font-weight: bold;">County</td>
+                                    <td style="text-align: right;">{{ property['county'] }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left; color: #ff6a3e; font-weight: bold;">Price</td>
+                                    <td style="text-align: right;">${{ property['price'] }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left; color: #ff6a3e; font-weight: bold;">Tax Assessed Year</td>
+                                    <td style="text-align: right;">{{ property['taxAssessedYear'] }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left; color: #ff6a3e; font-weight: bold;">Tax Assessed Value</td>
+                                    <td style="text-align: right;">${{ property['taxAssessedValue'] }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </a>
                 <div class="property-buttons">
-                    <!-- Pass the property ID in the URL for the Edit button -->
-                    <button onclick="location.href='/edit/{{ property['id'] }}';" class="edit-btn">EDIT</button>
-                    
-                    <!-- Delete button with confirmation dialog -->
-                    <button onclick="if(confirm('Are you sure you want to delete this property?')) location.href='/delete/{{ property['id'] }}';" class="delete-btn">DELETE</button>
+                    <a href="{{ url_for('edit_address', id=property['id']) }}" class="cs-button-4" aria-label="read more about us">Edit</a>
+                    <a href="{{ url_for('delete_address', id=property['id']) }}" class="cs-button-4" aria-label="read more about us">Delete</a>
                 </div>
             </div>
             {% endfor %}
@@ -119,7 +147,7 @@
                                 <td class="cs-td">{{ user['email'] }}</td>
                                 <td class="cs-td">{{ user['phone'] }}</td>
                                 <td class="cs-td">{{ user['role'] }}</td>
-                                <td class="cs-td"><a href="{{ url_for('edit_user', user_id=user.id) }}" class="btn">Edit</a></td>
+                                <td class="cs-td"><a href="{{ url_for('edit_profile', user_id=user.id) }}" class="btn">Edit</a></td>
                                 <td class="cs-td"><a href="{{ url_for('delete_user', user_id=user.id) }}" class="btn" onclick="return confirm('Are you sure?')">Delete</a></td>
                             </tr>
                             {% endfor %}
@@ -128,10 +156,10 @@
                 </div>
             </div>
         </section>
-        
-        <br>
-        <br>
-        <br>
+    
+        <footer>
+            <p>© Bonaventura</p>
+        </footer>
 
     </div>
 </body>

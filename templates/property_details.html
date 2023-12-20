@@ -38,7 +38,6 @@
                         </div>
                     </button>
 
-
             </div>
         </header>
 
@@ -46,17 +45,16 @@
             <div class="cs-container">
                 <div class="cs-content">
                     <h2 class="cs-title"><span class="cs-color">{{ property['addresses'] }}</span></h2>
-
-                    <p class="cs-text">LISTING PRICE ${{ property['price'] }}</p>
-                    <p class="cs-text"> {{ property['bedrooms'] }} BEDROOMS</p>
-                    <p class="cs-text"> {{ property['bathrooms'] }} BATHROOMS</p>
-                    <p class="cs-text">{{ property['livingArea'] }} INTERIOR SQFT</p>
-                    <p class="cs-text">{{ property['lotSize'] }} SQFT OF LAND</p>
-                    
-
-                    <a class="cs-button-solid" href="{{ url_for('bid', id=property['id'], address=property['address']) }}" class="btn">PLACE BID</a>
-
-
+                    <p class="cs-text">${{ property['price'] }}</p>
+                    <p class="cs-text"> {{ property['bedrooms'] }} Bedrooms</p>
+                    <p class="cs-text"> {{ property['bathrooms'] }} Bathrooms</p>
+                    <p class="cs-text">{{ property['livingArea'] }} Home Sqft</p>
+                    <p class="cs-text">{{ property['lotSize'] }} Lot Sqft</p>
+                    <p class="cs-text">Tax Assessed ${{ property['taxAssessedValue'] }}</p>
+                    <p class="cs-text">Assessed in {{ property['taxAssessedYear'] }}</p>
+                    <a class="cs-button-solid"
+                        href="{{ url_for('bid', id=property['id'], address=property['address']) }}" class="btn">PLACE
+                        BID</a>
                 </div>
                 <div class="cs-stat-group">
                     <picture class="cs-background">
@@ -65,18 +63,6 @@
                         <img loading="lazy" decoding="async" src="{{ property['photo_url'] }}" alt="photo" width="842"
                             height="737" aria-hidden="true">
                     </picture>
-                    <div class="cs-stat-box">
-                        <span class="cs-stat">
-                            ${{ property['taxAssessedValue'] }}
-                            <span class="cs-desc">TAX ASSESSED VALUE</span>
-                        </span>
-                    </div>
-                    <div class="cs-stat-box">
-                        <span class="cs-stat">
-                            {{ property['taxAssessedYear'] }}
-                            <span class="cs-desc">TAX ASSESSED YEAR</span>
-                        </span>
-                    </div>
                 </div>
             </div>
         </section>
