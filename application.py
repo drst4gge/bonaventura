@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, redirect, url_for
 from werkzeug.security import generate_password_hash
 from werkzeug.security import check_password_hash
+from werkzeug.utils import secure_filename
 import pymysql
 import http.client
 import json
@@ -9,12 +10,19 @@ from functools import wraps
 from dotenv import load_dotenv
 import os
 import stripe
+import re
+from PyPDF2 import PdfReader
 
 application = Flask(__name__)
 load_dotenv()
 
 stripe.api_key = 'your_stripe_secret_key'
 application.secret_key = os.environ.get('SECRET_KEY')
+
+UPLOAD_FOLDER = 'static/pdfs' 
+ALLOWED_EXTENSIONS = {'pdf'}
+
+application.config['UPLOAD_FOLDER'] = 'static/pdfs'
 
 def requires_roles(*roles):
     def wrapper(f):
@@ -132,17 +140,20 @@ def get_property_details(zpid):
     data = res.read()
     response_json = json.loads(data.decode("utf-8"))
 
-    # Extract the desired details from the response
-    # This depends on the structure of the response and what information you need
-    bedrooms = response_json.get('bedrooms', 'N/A')
-    bathrooms = response_json.get('bathrooms', 'N/A')
-    livingArea = response_json.get('livingArea', 'N/A')
-    lotSize = response_json.get('lotSize', 'N/A')
-    price = response_json.get('price', 'N/A')
-    taxAssessedValue = response_json.get('taxAssessedValue', 'N/A')
-    taxAssessedYear = response_json.get('taxAssessedYear', 'N/A')
-    county = response_json.get('county', 'N/A')
-    foreclosureAuctionLocation = response_json.get('foreclosureAuctionLocation', 'N/A')
+    # Define a helper function to handle None values
+    def get_value_or_placeholder(key, placeholder='--'):
+        value = response_json.get(key)
+        return value if value is not None else placeholder
+
+    bedrooms = get_value_or_placeholder('bedrooms')
+    bathrooms = get_value_or_placeholder('bathrooms')
+    livingArea = get_value_or_placeholder('livingArea')
+    lotSize = get_value_or_placeholder('lotSize')
+    price = get_value_or_placeholder('price')
+    taxAssessedValue = get_value_or_placeholder('taxAssessedValue')
+    taxAssessedYear = get_value_or_placeholder('taxAssessedYear')
+    county = get_value_or_placeholder('county')
+    foreclosureAuctionLocation = get_value_or_placeholder('foreclosureAuctionLocation')
 
     return {
         'bedrooms': bedrooms,
@@ -155,6 +166,7 @@ def get_property_details(zpid):
         'county': county,
         'foreclosureAuctionLocation': foreclosureAuctionLocation
     }
+
 
 @application.route('/')
 def home():
@@ -201,12 +213,18 @@ def agent():
 @application.route('/admin')
 @requires_roles(2)
 def admin():
+    county_filter = request.args.get('county')
     properties = get_all_properties()
     users = get_all_users()
     # Convert 'id' to integer if necessary
     for property in properties:
         property['id'] = int(property['id'])
-    return render_template('admin.html', properties=properties, users=users)
+    if county_filter:
+        properties = [prop for prop in properties if prop.get('county') == county_filter]
+    counties = get_unique_counties()
+    
+    return render_template('admin.html', properties=properties, users=users, counties=counties)
+    
 
 @application.route('/edit_profile', methods=['GET', 'POST'])
 def edit_profile():
@@ -532,7 +550,7 @@ def bid(id):
     property = get_property_by_id(id)
     if property:
         user_details = {
-            'username': session.get('username', ''),
+            'username': session.get('user_username', ''),
             'email': session.get('user_email', ''),
             'phone': session.get('user_phone', '')
         }
@@ -554,6 +572,81 @@ def submit_bid(id):
 
     # Redirect to a confirmation page or back to the property details
     return redirect(url_for('property_details', id=id))
+
+def extract_text_from_pdf(file_path):
+    text = ""
+    with open(file_path, 'rb') as file:
+        pdf_reader = PdfReader(file)
+        for page in pdf_reader.pages:
+            text += page.extract_text() + "\n"
+    return text
+
+def extract_addresses(pdf_text):
+    # Regular expression pattern to extract addresses
+    # Adjust the pattern as per the specific format of addresses in your PDF
+    address_pattern = r'\d+\s[\w\s]+(?=\nPLACE)'
+    addresses = re.findall(address_pattern, pdf_text)
+    return addresses
+
+def add_address_to_database(address):
+    # Function to add an address to the database
+    # You will need to modify this based on how your database and tables are set up
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            insert_sql = """
+            INSERT INTO all_properties (addresses) VALUES (%s)
+            """
+            cursor.execute(insert_sql, (address,))
+        conn.commit()
+    finally:
+        conn.close()
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@application.route('/upload_pdf', methods=['GET', 'POST'])
+def upload_pdf():
+    if request.method == 'POST':
+        file = request.files['file']
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(application.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+
+            # Process the PDF and extract addresses
+            process_pdf(file_path)
+
+            flash('File successfully uploaded and processed')
+            return redirect(url_for('admin'))
+    
+    return render_template('upload_pdf.html')
+
+def process_pdf(file_path):
+    pdf_text = extract_text_from_pdf(file_path)
+    addresses = extract_addresses(pdf_text)
+
+    for address in addresses:
+        # Use your existing functions to get details and add to database
+        zpid = get_zpid_from_address(address)
+        if zpid:
+            details = get_property_details(zpid)
+            photo_url = get_photos(zpid)
+            insert_address(
+                address, 
+                zpid, 
+                details.get('bedrooms', '--'),
+                details.get('bathrooms', '--'),
+                details.get('livingArea', '--'),
+                details.get('lotSize', '--'),
+                details.get('price', '--'),
+                details.get('taxAssessedValue', '--'),
+                details.get('taxAssessedYear', '--'),
+                details.get('county', '--'),
+                photo_url
+            )
+
 
 if __name__ == "__main__":
     application.run()

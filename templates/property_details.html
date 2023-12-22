@@ -16,6 +16,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/services.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/table.css') }}">
     <script src="{{ url_for('static', filename='js/header.js') }}"></script>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.0.0/uicons-solid-straight/css/uicons-solid-straight.css'>
 </head>
 
 <body>
@@ -44,10 +45,12 @@
         <section id="hero-408">
             <div class="cs-container">
                 <div class="cs-content">
-                    <h2 class="cs-title"><span class="cs-color">{{ property['addresses'] }}</span></h2>
+                    
+                    <p class="cs-topper" style="font-weight: bolder; font-size:xx-large;">{{ property['addresses'] }}</p>
                     <p class="cs-text">${{ property['price'] }}</p>
-                    <p class="cs-text"> {{ property['bedrooms'] }} Bedrooms</p>
-                    <p class="cs-text"> {{ property['bathrooms'] }} Bathrooms</p>
+                    <p class="cs-text"> {{ property['bedrooms'] }} <i class="fi fi-ss-bed-empty"></i></p>
+                    <p class="cs-text"> {{ property['bathrooms'] }} <i class="fi fi-ss-shower"></i></p>
+                    <p class="cs-text"> {{ property['price'] }} <i class="fi fi-ss-tags"></i></p>
                     <p class="cs-text">{{ property['livingArea'] }} Home Sqft</p>
                     <p class="cs-text">{{ property['lotSize'] }} Lot Sqft</p>
                     <p class="cs-text">Tax Assessed ${{ property['taxAssessedValue'] }}</p>
