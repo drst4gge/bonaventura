@@ -47,14 +47,11 @@
                 <div class="cs-content">
                     
                     <p class="cs-topper" style="font-weight: bolder; font-size:xx-large;">{{ property['addresses'] }}</p>
-                    <p class="cs-text">${{ property['price'] }}</p>
                     <p class="cs-text"> {{ property['bedrooms'] }} <i class="fi fi-ss-bed-empty"></i></p>
                     <p class="cs-text"> {{ property['bathrooms'] }} <i class="fi fi-ss-shower"></i></p>
-                    <p class="cs-text"> {{ property['price'] }} <i class="fi fi-ss-tags"></i></p>
                     <p class="cs-text">{{ property['livingArea'] }} Home Sqft</p>
-                    <p class="cs-text">{{ property['lotSize'] }} Lot Sqft</p>
-                    <p class="cs-text">Tax Assessed ${{ property['taxAssessedValue'] }}</p>
-                    <p class="cs-text">Assessed in {{ property['taxAssessedYear'] }}</p>
+                    <p class="cs-text">{{ "%.2f"|format((property['lotSize']) / 43560) }} Acres</p>
+
                     <a class="cs-button-solid"
                         href="{{ url_for('bid', id=property['id'], address=property['address']) }}" class="btn">PLACE
                         BID</a>

@@ -44,15 +44,16 @@ def get_db_connection():
         port=3306
     )
 
-def insert_address(address, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear,foreclosureAuctionLocation, county, photo_url):
+def insert_address(address, zpid, bedrooms, bathrooms, livingArea, lotSize, county, photo_url):
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
             insert_sql = """
-            INSERT INTO all_properties (addresses, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear, county, foreclosureAuctionLocation, photo_url) 
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO all_properties 
+            (addresses, zpid, bedrooms, bathrooms, livingArea, lotSize, county, photo_url) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """
-            cursor.execute(insert_sql, (address, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear, county, foreclosureAuctionLocation, photo_url))
+            cursor.execute(insert_sql, (address, zpid, bedrooms, bathrooms, livingArea, lotSize, county, photo_url))
         conn.commit()
     finally:
         conn.close()
@@ -61,7 +62,7 @@ def get_all_properties():
     conn = get_db_connection()
     try:
         with conn.cursor(pymysql.cursors.DictCursor) as cursor:  # Ensure DictCursor is used
-            cursor.execute("SELECT id, addresses, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear, foreclosureAuctionLocation, county, photo_url FROM all_properties")
+            cursor.execute("SELECT id, addresses, bedrooms, bathrooms, livingArea, lotSize, county, photo_url FROM all_properties")
             return cursor.fetchall()
     finally:
         conn.close()
@@ -86,16 +87,16 @@ def get_unique_counties():
         conn.close()
 
 
-def update_property(property_id, address, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, foreclosureAuctionLocation, county, taxAssessedYear):
+def update_property(property_id, address, zpid, bedrooms, bathrooms, livingArea, lotSize, county):
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
             update_sql = """
             UPDATE all_properties 
-            SET addresses = %s, zpid = %s, bedrooms = %s, bathrooms = %s, livingArea = %s, lotSize = %s, price = %s, taxAssessedValue = %s, county = %s, taxAssessedYear = %s, foreclosureAuctionLocation= %s
+            SET addresses = %s, zpid = %s, bedrooms = %s, bathrooms = %s, livingArea = %s, lotSize = %s, county = %s
             WHERE id = %s
             """
-            cursor.execute(update_sql, (address, zpid, bedrooms, bathrooms, livingArea, lotSize, price, taxAssessedValue, taxAssessedYear, foreclosureAuctionLocation, county, property_id))
+            cursor.execute(update_sql, (address, zpid, bedrooms, bathrooms, livingArea, lotSize, county, property_id))
         conn.commit()
     finally:
         conn.close()
@@ -117,7 +118,10 @@ def get_zpid_from_address(address):
         'X-RapidAPI-Host': "zillow56.p.rapidapi.com"
     }
 
-    formatted_address = address.replace(" ", "%20")
+    # Clean the address by removing newline characters and other potential control characters
+    cleaned_address = re.sub(r'\s+', ' ', address.strip())
+    formatted_address = cleaned_address.replace(" ", "%20")
+
     conn.request("GET", f"/search_address?address={formatted_address}", headers=headers)
 
     res = conn.getresponse()
@@ -126,6 +130,7 @@ def get_zpid_from_address(address):
 
     zpid = response_json.get("zpid", None)
     return zpid
+
 
 def get_property_details(zpid):
     conn = http.client.HTTPSConnection("zillow56.p.rapidapi.com")
@@ -149,22 +154,14 @@ def get_property_details(zpid):
     bathrooms = get_value_or_placeholder('bathrooms')
     livingArea = get_value_or_placeholder('livingArea')
     lotSize = get_value_or_placeholder('lotSize')
-    price = get_value_or_placeholder('price')
-    taxAssessedValue = get_value_or_placeholder('taxAssessedValue')
-    taxAssessedYear = get_value_or_placeholder('taxAssessedYear')
     county = get_value_or_placeholder('county')
-    foreclosureAuctionLocation = get_value_or_placeholder('foreclosureAuctionLocation')
 
     return {
         'bedrooms': bedrooms,
         'bathrooms': bathrooms,
         'livingArea': livingArea,
         'lotSize': lotSize,
-        'price': price,
-        'taxAssessedValue': taxAssessedValue,
-        'taxAssessedYear': taxAssessedYear,
         'county': county,
-        'foreclosureAuctionLocation': foreclosureAuctionLocation
     }
 
 
@@ -424,17 +421,13 @@ def submit_address():
             details.get('bathrooms', None),
             details.get('livingArea', None),
             details.get('lotSize', None),
-            details.get('price', None),
-            details.get('taxAssessedValue', None),
-            details.get('taxAssessedYear', None),
-            details.get('foreclosureAuctionLocation', None),
             details.get('county', None),
             photo_url
         )
 
     else:
         # Handle the case where no details are available
-        insert_address(address, None, None, None, None, None, None, None, None, None, None, None)
+        insert_address(address, None, None, None, None, None, None, None)
 
     return redirect(url_for('admin'))
 
@@ -484,9 +477,6 @@ def update_address():
     bathrooms = request.form['bathrooms']
     livingArea = request.form['livingArea']
     lotSize = request.form['lotSize']
-    price = request.form['price']
-    taxAssessedValue = request.form['taxAssessedValue']
-    taxAssessedYear = request.form['taxAssessedYear']
     county = request.form['county']
 
     # Update the property in the database
@@ -496,11 +486,10 @@ def update_address():
             update_sql = """
             UPDATE all_properties 
             SET addresses = %s, zpid = %s, bedrooms = %s, bathrooms = %s, livingArea = %s, 
-                lotSize = %s, price = %s, taxAssessedValue = %s, taxAssessedYear = %s, county = %s 
+                lotSize = %s, county = %s 
             WHERE id = %s
             """
-            cursor.execute(update_sql, (address, zpid, bedrooms, bathrooms, livingArea, lotSize, price, 
-                                        taxAssessedValue, taxAssessedYear, county, property_id))
+            cursor.execute(update_sql, (address, zpid, bedrooms, bathrooms, livingArea, lotSize, county, property_id))
         conn.commit()
     finally:
         conn.close()
@@ -582,11 +571,11 @@ def extract_text_from_pdf(file_path):
     return text
 
 def extract_addresses(pdf_text):
-    # Regular expression pattern to extract addresses
-    # Adjust the pattern as per the specific format of addresses in your PDF
-    address_pattern = r'\d+\s[\w\s]+(?=\nPLACE)'
+    address_pattern = r'\d+\s[\w\s]+-\s[\w\s]+(?=\nPLACE)'
     addresses = re.findall(address_pattern, pdf_text)
     return addresses
+
+
 
 def add_address_to_database(address):
     # Function to add an address to the database
@@ -628,7 +617,6 @@ def process_pdf(file_path):
     addresses = extract_addresses(pdf_text)
 
     for address in addresses:
-        # Use your existing functions to get details and add to database
         zpid = get_zpid_from_address(address)
         if zpid:
             details = get_property_details(zpid)
@@ -636,16 +624,57 @@ def process_pdf(file_path):
             insert_address(
                 address, 
                 zpid, 
-                details.get('bedrooms', '--'),
-                details.get('bathrooms', '--'),
-                details.get('livingArea', '--'),
-                details.get('lotSize', '--'),
-                details.get('price', '--'),
-                details.get('taxAssessedValue', '--'),
-                details.get('taxAssessedYear', '--'),
-                details.get('county', '--'),
-                photo_url
+                details.get('bedrooms', None),
+                details.get('bathrooms', None),
+                details.get('livingArea', None),
+                details.get('lotSize', None),
+                details.get('county', None),
+                photo_url,
+
             )
+        else:
+            # Insert the address with default values when ZPID is not found
+            insert_address(
+                address, 
+                None, 
+                None, 
+                None, 
+                None, 
+                None, 
+                None, 
+                None  
+            )
+
+@application.route('/upload_photo/<int:id>', methods=['POST'])
+def upload_photo(id):
+    if 'photo' not in request.files:
+        flash('No file part')
+        return redirect(request.url)
+    file = request.files['photo']
+    if file.filename == '':
+        flash('No selected file')
+        return redirect(request.url)
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
+
+        update_photo_url(id, file_path)
+        return redirect(url_for('admin'))
+
+def update_photo_url(property_id, photo_url):
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            sql = "UPDATE all_properties SET photo_url = %s WHERE id = %s"
+            cursor.execute(sql, (photo_url, property_id))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+
+
 
 
 if __name__ == "__main__":
