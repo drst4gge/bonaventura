@@ -672,11 +672,6 @@ def update_photo_url(property_id, photo_url):
     finally:
         conn.close()
 
-
-
-
-
-
 if __name__ == "__main__":
     application.run()
 
