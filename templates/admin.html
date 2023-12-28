@@ -98,10 +98,11 @@
 
         </div>
 
+        <!--
         <div class="property-grid">
             {% for property in properties %}
             <div class="property-tile">
-                <!-- Wrap the contents in an anchor tag -->
+                
                 <a href="{{ url_for('property_details', id = property['id']) }}" class="property-link">
                     <img class="property-image" src="{{ property['photo_url'] }}" alt="Agent Uploading Image Soon">
                     <div class="property-content">
@@ -158,13 +159,14 @@
                     <a href="{{ url_for('delete_address', id=property['id']) }}" class="cs-button-4"
                         aria-label="read more about us">Delete</a>
                     <a href="" class="cs-button-4" aria-label="read more about us">Add Photos</a>
-                    <a href="" class="cs-button-4" aria-label="read more about us">Bid</a>
+                    
 
                 </div>
 
             </div>
             {% endfor %}
         </div>
+        -->
 
         <div class="calendar-grid">
             {% for date, properties_on_date in properties_by_date.items() %}
@@ -229,7 +231,9 @@
                                     aria-label="read more about us">Edit</a>
                                 <a href="{{ url_for('delete_address', id=property['id']) }}" class="cs-button-4"
                                     aria-label="read more about us">Delete</a>
-                                <a href="" class="cs-button-4" aria-label="read more about us">Photos</a>
+                                <a href="" class="cs-button-4" aria-label="read more about us">Add Photos</a>
+                                <a href="{{ url_for('bid', id=property['id'], address=property['address']) }}" class="cs-button-4" aria-label="read more about us">Place Bid</a>
+                                
             
                             </div>
             

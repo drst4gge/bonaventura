@@ -30,7 +30,7 @@ th {
 }
 
 .property-tile:hover {
-    transform: scale(1.02);
+    transform: scale(1.005);
     /* Scales up the tile by 5% on hover */
     opacity: 1;
     /* Full opacity on hover */
@@ -110,12 +110,25 @@ a {
     width: 100%;
     padding: 10px;
     text-align: center;
+    display: flex;
     height: 100px;
     background: #ff6a3e;
     color: white;
-    border: none;
+    border: 1px solid #000000;
+    border-radius: 10px;
     cursor: pointer;
     outline: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    opacity: 0.98;
+    /* Makes the tile slightly transparent */
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.dropdown-btn:hover {
+    transform: scale(1.02);
+    /* Scales up the tile by 5% on hover */
+    opacity: 1;
+    /* Full opacity on hover */
 }
 
 .dropdown-content {
@@ -127,7 +140,7 @@ a {
 
 .property-tile {
     padding: 10px;
-    background-color: #fcddca;
+    background-color: #dfd0c7;
     
     border-bottom: 1px solid #ddd;
 }

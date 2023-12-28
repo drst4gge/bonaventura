@@ -669,6 +669,12 @@ def upload_photo(id):
         update_photo_url(id, file_path)
         return redirect(url_for('admin'))
 
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 def update_photo_url(property_id, photo_url):
     conn = get_db_connection()
     try:
