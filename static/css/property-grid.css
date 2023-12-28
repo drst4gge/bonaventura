@@ -37,9 +37,9 @@ th {
 }
 
 .property-image {
-    width: 100%;
-    height: 250px;
-    object-fit: cover;
+    width: 50%;
+    display: block; /* Ensures the image is treated as a block element */
+    margin: 0 auto; /* Centers the image within its container */
 }
 
 .property-content {
@@ -90,4 +90,44 @@ a {
 
 .property-content tr {
     padding-bottom: 20px; /* Adjust as needed */
+}
+
+.calendar-grid {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    
+}
+
+.day-dropdown {
+    width: 40%;
+    margin-bottom: 10px;
+    
+}
+
+.dropdown-btn {
+    width: 100%;
+    padding: 10px;
+    text-align: center;
+    height: 100px;
+    background: #ff6a3e;
+    color: white;
+    border: none;
+    cursor: pointer;
+    outline: none;
+}
+
+.dropdown-content {
+    display: none;
+    width: 100%;
+    border: 1px solid #ddd;
+    z-index: 1;
+}
+
+.property-tile {
+    padding: 10px;
+    background-color: #fcddca;
+    
+    border-bottom: 1px solid #ddd;
 }

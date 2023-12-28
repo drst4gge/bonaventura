@@ -12,6 +12,7 @@ import os
 import stripe
 import re
 from PyPDF2 import PdfReader
+from datetime import datetime, date
 
 application = Flask(__name__)
 load_dotenv()
@@ -44,25 +45,26 @@ def get_db_connection():
         port=3306
     )
 
-def insert_address(address, zpid, bedrooms, bathrooms, livingArea, lotSize, county, photo_url):
+def insert_address(address, zpid, bedrooms, bathrooms, livingArea, lotSize, county, photo_url, date_of_sale, time_of_sale):
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
             insert_sql = """
             INSERT INTO all_properties 
-            (addresses, zpid, bedrooms, bathrooms, livingArea, lotSize, county, photo_url) 
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            (addresses, zpid, bedrooms, bathrooms, livingArea, lotSize, county, photo_url, dateOfSale, timeOfSale) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
-            cursor.execute(insert_sql, (address, zpid, bedrooms, bathrooms, livingArea, lotSize, county, photo_url))
+            cursor.execute(insert_sql, (address, zpid, bedrooms, bathrooms, livingArea, lotSize, county, photo_url, date_of_sale, time_of_sale))
         conn.commit()
     finally:
         conn.close()
+
 
 def get_all_properties():
     conn = get_db_connection()
     try:
         with conn.cursor(pymysql.cursors.DictCursor) as cursor:  # Ensure DictCursor is used
-            cursor.execute("SELECT id, addresses, bedrooms, bathrooms, livingArea, lotSize, county, photo_url FROM all_properties")
+            cursor.execute("SELECT id, addresses, bedrooms, bathrooms, livingArea, lotSize, county, dateOfSale, timeOfSale, photo_url FROM all_properties")
             return cursor.fetchall()
     finally:
         conn.close()
@@ -87,16 +89,16 @@ def get_unique_counties():
         conn.close()
 
 
-def update_property(property_id, address, zpid, bedrooms, bathrooms, livingArea, lotSize, county):
+def update_property(property_id, address, zpid, bedrooms, bathrooms, livingArea, lotSize, county, dateOfSale, timeOfSale):
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
             update_sql = """
             UPDATE all_properties 
-            SET addresses = %s, zpid = %s, bedrooms = %s, bathrooms = %s, livingArea = %s, lotSize = %s, county = %s
+            SET addresses = %s, zpid = %s, bedrooms = %s, bathrooms = %s, livingArea = %s, lotSize = %s, county = %s, dateOfSale = %s, timeOfSale = %s
             WHERE id = %s
             """
-            cursor.execute(update_sql, (address, zpid, bedrooms, bathrooms, livingArea, lotSize, county, property_id))
+            cursor.execute(update_sql, (address, zpid, bedrooms, bathrooms, livingArea, lotSize, county, property_id, dateOfSale, timeOfSale))
         conn.commit()
     finally:
         conn.close()
@@ -156,6 +158,8 @@ def get_property_details(zpid):
     lotSize = get_value_or_placeholder('lotSize')
     county = get_value_or_placeholder('county')
 
+
+
     return {
         'bedrooms': bedrooms,
         'bathrooms': bathrooms,
@@ -212,15 +216,25 @@ def agent():
 def admin():
     county_filter = request.args.get('county')
     properties = get_all_properties()
+    # Filter out past dates and handle 'dateOfSale' appropriately
+    properties = [prop for prop in properties if (prop['dateOfSale'] if isinstance(prop['dateOfSale'], date) else datetime.strptime(prop['dateOfSale'], '%Y-%m-%d').date()) >= datetime.now().date()]
+
+    # Sort the properties by 'dateOfSale'
+    properties.sort(key=lambda x: x['dateOfSale'])
+
+    # Group properties by 'dateOfSale'
+    properties_by_date = {}
+    for prop in properties:
+        properties_by_date.setdefault(prop['dateOfSale'], []).append(prop)
+
     users = get_all_users()
-    # Convert 'id' to integer if necessary
     for property in properties:
         property['id'] = int(property['id'])
     if county_filter:
         properties = [prop for prop in properties if prop.get('county') == county_filter]
     counties = get_unique_counties()
     
-    return render_template('admin.html', properties=properties, users=users, counties=counties)
+    return render_template('admin.html', properties_by_date=properties_by_date, users=users, counties=counties)
     
 
 @application.route('/edit_profile', methods=['GET', 'POST'])
@@ -408,6 +422,8 @@ def add_user():
 @application.route('/submit_address', methods=['POST'])
 def submit_address():
     address = request.form['address']
+    dateOfSale = None
+    timeOfSale = None
     zpid = get_zpid_from_address(address)
     photo_url = None
 
@@ -422,12 +438,14 @@ def submit_address():
             details.get('livingArea', None),
             details.get('lotSize', None),
             details.get('county', None),
+            dateOfSale,
+            timeOfSale,
             photo_url
         )
 
     else:
         # Handle the case where no details are available
-        insert_address(address, None, None, None, None, None, None, None)
+        insert_address(address, None, None, None, None, None, None, None, None, None)
 
     return redirect(url_for('admin'))
 
@@ -477,6 +495,8 @@ def update_address():
     bathrooms = request.form['bathrooms']
     livingArea = request.form['livingArea']
     lotSize = request.form['lotSize']
+    dateOfSale = request.form['dateOfSale']
+    timeOfSale = request.form['timeOfSale']
     county = request.form['county']
 
     # Update the property in the database
@@ -486,7 +506,7 @@ def update_address():
             update_sql = """
             UPDATE all_properties 
             SET addresses = %s, zpid = %s, bedrooms = %s, bathrooms = %s, livingArea = %s, 
-                lotSize = %s, county = %s 
+                lotSize = %s, county = %s , timeOfSale = %s, dateOFSale = %s
             WHERE id = %s
             """
             cursor.execute(update_sql, (address, zpid, bedrooms, bathrooms, livingArea, lotSize, county, property_id))
@@ -570,26 +590,24 @@ def extract_text_from_pdf(file_path):
             text += page.extract_text() + "\n"
     return text
 
-def extract_addresses(pdf_text):
-    address_pattern = r'\d+\s[\w\s]+-\s[\w\s]+(?=\nPLACE)'
-    addresses = re.findall(address_pattern, pdf_text)
-    return addresses
+def extract_auction_details(pdf_text):
+    # Revised regex pattern to capture date (rescheduled or date of sale), time, and address
+    pattern = r'(DATE OF SALE: \d{1,2}/\d{1,2}/\d{2,4}|RESCHEDULED: \d{1,2}/\d{1,2}/\d{2,4})\s+Action:.*?\nTIME: (\d{1,2}:\d{2} (AM|PM)) Premises: (.*?) - (.*?)\n'
+    matches = re.findall(pattern, pdf_text, re.DOTALL)
 
+    auction_details = []
+    for date, time, am_pm, address_part1, address_part2 in matches:
+        # Cleaning and converting the extracted data
+        cleaned_date = date.replace("DATE OF SALE: ", "").replace("RESCHEDULED: ", "").strip()
+        # Convert date format from MM/DD/YY to YYYY-MM-DD
+        cleaned_date = datetime.strptime(cleaned_date, '%m/%d/%y').strftime('%Y-%m-%d')
+        cleaned_time = f"{time} {am_pm}".strip()
+        cleaned_address = f"{address_part1} - {address_part2}".strip()
 
+        auction_details.append((cleaned_address, cleaned_date, cleaned_time))
 
-def add_address_to_database(address):
-    # Function to add an address to the database
-    # You will need to modify this based on how your database and tables are set up
-    conn = get_db_connection()
-    try:
-        with conn.cursor() as cursor:
-            insert_sql = """
-            INSERT INTO all_properties (addresses) VALUES (%s)
-            """
-            cursor.execute(insert_sql, (address,))
-        conn.commit()
-    finally:
-        conn.close()
+    return auction_details
+
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -604,46 +622,35 @@ def upload_pdf():
             file_path = os.path.join(application.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
 
-            # Process the PDF and extract addresses
+            print(f"File saved at {file_path}")  # Debug print
             process_pdf(file_path)
 
             flash('File successfully uploaded and processed')
             return redirect(url_for('admin'))
-    
     return render_template('upload_pdf.html')
 
 def process_pdf(file_path):
     pdf_text = extract_text_from_pdf(file_path)
-    addresses = extract_addresses(pdf_text)
+    #print(f"Extracted PDF Text:\n{pdf_text[:500]}")  # Debug print for first 500 characters of the extracted text
 
-    for address in addresses:
+    auction_details = extract_auction_details(pdf_text)
+    #print(f"Auction Details: {auction_details}")  # Debug print
+
+
+    for address, date_of_sale, time_of_sale in auction_details:
+        print(f"Address: {address}, Date: {date_of_sale}, Time: {time_of_sale}")
         zpid = get_zpid_from_address(address)
         if zpid:
             details = get_property_details(zpid)
             photo_url = get_photos(zpid)
             insert_address(
-                address, 
-                zpid, 
-                details.get('bedrooms', None),
-                details.get('bathrooms', None),
-                details.get('livingArea', None),
-                details.get('lotSize', None),
-                details.get('county', None),
-                photo_url,
-
+                address, zpid, details.get('bedrooms', None), details.get('bathrooms', None),
+                details.get('livingArea', None), details.get('lotSize', None),
+                details.get('county', None), photo_url, date_of_sale, time_of_sale
             )
         else:
-            # Insert the address with default values when ZPID is not found
-            insert_address(
-                address, 
-                None, 
-                None, 
-                None, 
-                None, 
-                None, 
-                None, 
-                None  
-            )
+            insert_address(address, None, None, None, None, None, None, None, date_of_sale, time_of_sale)
+
 
 @application.route('/upload_photo/<int:id>', methods=['POST'])
 def upload_photo(id):
@@ -656,7 +663,7 @@ def upload_photo(id):
         return redirect(request.url)
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file_path = os.path.join(application.config['UPLOAD_FOLDER'], filename)
         file.save(file_path)
 
         update_photo_url(id, file_path)
