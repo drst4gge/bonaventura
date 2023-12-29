@@ -17,7 +17,21 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/services.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/table.css') }}">
     <script src="{{ url_for('static', filename='js/header.js') }}"></script>
-
+    <script>
+        function updateTotalAmount() {
+            const originalPrice = parseFloat(document.getElementById('original-price').value) || 0;
+            const feeAmount = parseFloat(document.getElementById('fee-amount').value) || 0;
+            const totalAmount = originalPrice + feeAmount;
+    
+            // Update the total amount field
+            document.getElementById('total-amount').value = totalAmount.toFixed(2);
+        }
+    
+        // Call the function on page load
+        window.onload = updateTotalAmount;
+    </script>
+    
+    
 
 </head>
 
@@ -28,7 +42,7 @@
             <div class="cs-container">
                 <!-- Optional picture section here, if you want to include an image -->
                 <div class="cs-content">
-                    <span class="cs-topper">BID ON {{ property['address'] }}</span>
+                    <span class="cs-topper">BID ON {{ property['addresses'] }}</span>
 
                     <form class="cs-form" action="/submit_bid/{{ property_id }}" method="post">
                         <!-- Hidden ID Field -->
@@ -52,14 +66,26 @@
                                 placeholder="phone">
                         </label>
 
-                        <!-- Bathrooms Field -->
-                        <label for="bid">
-                            <input class="cs-input" type="number" id="bid" name="bid" placeholder="bid">
+                        <label for="phone">
+                            <input class="cs-input" type="number" id="phone" name="phone" value="{{ user['phone'] }}"
+                                placeholder="phone">
                         </label>
 
+                        <!-- Original Price Input -->
+                        <label for="original-price">Price of Bid:</label>
+                        <input class="cs-input" type="number" id="original-price" name="price" value="{{ property['price'] }}" readonly>
+
+                        <!-- Fee Amount Input -->
+                        <label for="fee-amount">Fee Amount:</label>
+                        <input class="cs-input" type="number" id="fee-amount" name="fee" value="{{ (property['price'])/10 }}" readonly>
+
+                        <!-- Total Amount Input -->
+                        <label for="total-amount">Total Amount:</label>
+                        <input class="cs-input" type="number" id="total-amount" name="total_amount" readonly>
 
                         <!-- Submit Button -->
                         <button class="cs-button-solid cs-submit" type="submit">Bid</button>
+
                     </form>
                 </div>
             </div>

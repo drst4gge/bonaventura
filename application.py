@@ -45,16 +45,16 @@ def get_db_connection():
         port=3306
     )
 
-def insert_address(address, zpid, bedrooms, bathrooms, livingArea, lotSize, county, photo_url, date_of_sale, time_of_sale):
+def insert_address(address, zpid, bedrooms, bathrooms, livingArea, lotSize, county, photo_url, date_of_sale, time_of_sale, price):
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
             insert_sql = """
             INSERT INTO all_properties 
-            (addresses, zpid, bedrooms, bathrooms, livingArea, lotSize, county, photo_url, dateOfSale, timeOfSale) 
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            (addresses, zpid, bedrooms, bathrooms, livingArea, lotSize, county, photo_url, dateOfSale, timeOfSale, price) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
-            cursor.execute(insert_sql, (address, zpid, bedrooms, bathrooms, livingArea, lotSize, county, photo_url, date_of_sale, time_of_sale))
+            cursor.execute(insert_sql, (address, zpid, bedrooms, bathrooms, livingArea, lotSize, county, photo_url, date_of_sale, time_of_sale, price))
         conn.commit()
     finally:
         conn.close()
@@ -62,8 +62,9 @@ def insert_address(address, zpid, bedrooms, bathrooms, livingArea, lotSize, coun
 def get_all_properties():
     conn = get_db_connection()
     try:
-        with conn.cursor(pymysql.cursors.DictCursor) as cursor:  # Ensure DictCursor is used
-            cursor.execute("SELECT id, addresses, bedrooms, bathrooms, livingArea, lotSize, county, dateOfSale, timeOfSale, photo_url FROM all_properties")
+        with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+            # Include price in the SELECT query
+            cursor.execute("SELECT id, addresses, bedrooms, bathrooms, livingArea, lotSize, county, dateOfSale, timeOfSale, photo_url, price FROM all_properties")
             return cursor.fetchall()
     finally:
         conn.close()
@@ -638,22 +639,23 @@ def extract_text_from_pdf(file_path):
     return text
 
 def extract_auction_details(pdf_text):
-    # Revised regex pattern to capture date (rescheduled or date of sale), time, and address
-    pattern = r'(DATE OF SALE: \d{1,2}/\d{1,2}/\d{2,4}|RESCHEDULED: \d{1,2}/\d{1,2}/\d{2,4})\s+Action:.*?\nTIME: (\d{1,2}:\d{2} (AM|PM)) Premises: (.*?) - (.*?)\n'
+    pattern = r'(DATE OF SALE: \d{1,2}/\d{1,2}/\d{2,4}|RESCHEDULED: \d{1,2}/\d{1,2}/\d{2,4})\s+Action:.*?\nTIME: (\d{1,2}:\d{2} (AM|PM)) Premises: (.*?) - (.*?)\n.*?FINAL JUDGMENT AS OF .*? - \$(\d{1,3}(?:,\d{3})*)'
     matches = re.findall(pattern, pdf_text, re.DOTALL)
 
     auction_details = []
-    for date, time, am_pm, address_part1, address_part2 in matches:
-        # Cleaning and converting the extracted data
-        cleaned_date = date.replace("DATE OF SALE: ", "").replace("RESCHEDULED: ", "").strip()
-        # Convert date format from MM/DD/YY to YYYY-MM-DD
-        cleaned_date = datetime.strptime(cleaned_date, '%m/%d/%y').strftime('%Y-%m-%d')
+    for date, time, am_pm, address_part1, address_part2, final_judgment in matches:
+        cleaned_date = datetime.strptime(date.split(': ')[1], '%m/%d/%y').strftime('%Y-%m-%d')
         cleaned_time = f"{time} {am_pm}".strip()
         cleaned_address = f"{address_part1} - {address_part2}".strip()
+        cleaned_final_judgment = int(final_judgment.replace(',', ''))  # Convert to integer
 
-        auction_details.append((cleaned_address, cleaned_date, cleaned_time))
+        auction_details.append((cleaned_address, cleaned_date, cleaned_time, cleaned_final_judgment))
 
     return auction_details
+
+@application.template_filter('format_currency')
+def format_currency(value):
+    return "${:,.2f}".format(value) if value else 'N/A'
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -680,9 +682,9 @@ def process_pdf(file_path):
     print(pdf_text)
     auction_details = extract_auction_details(pdf_text)
 
-    for address, date_of_sale, time_of_sale in auction_details:
+    for address, date_of_sale, time_of_sale, price in auction_details:
         try:
-            print(f"Processing Address: {address}, Date: {date_of_sale}, Time: {time_of_sale}")
+            print(f"Processing Address: {address}, Date: {date_of_sale}, Time: {time_of_sale}, Price: {price}")
             zpid = get_zpid_from_address(address)
             if zpid:
                 details = get_property_details(zpid)
@@ -690,16 +692,16 @@ def process_pdf(file_path):
                 insert_address(
                     address, zpid, details.get('bedrooms', None), details.get('bathrooms', None),
                     details.get('livingArea', None), details.get('lotSize', None),
-                    details.get('county', None), photo_url, date_of_sale, time_of_sale
+                    details.get('county', None), photo_url, date_of_sale, time_of_sale, price
                 )
             else:
-                insert_address(address, None, None, None, None, None, None, None, date_of_sale, time_of_sale)
+                insert_address(address, None, None, None, None, None, None, None, date_of_sale, time_of_sale, price)
         except Exception as e:
             print(f"Error processing address {address}: {e}")
-            # Optionally, log the error details to a file or error monitoring service
-            continue  # Skip to the next iteration
+            continue
 
     print("Processing of PDF completed.")
+
 
 @application.route('/upload_photo/<int:id>', methods=['POST'])
 def upload_photo(id):
