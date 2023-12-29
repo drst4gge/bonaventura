@@ -51,17 +51,17 @@
                     </button>
                     <div class="cs-ul-wrapper">
                         <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
-                            
-                            <li class="cs-li">
-                                <a href="{{ url_for('add_user') }}" class="cs-li-link">
-                                    <p class="cs-topper">Add User</p>
-                                </a>
-                            </li>
                             <li class="cs-li">
                                 <a href="{{ url_for('upload_pdf') }}" class="cs-li-link">
                                     <p class="cs-topper">Upload PDF</p>
                                 </a>
                             </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('add_user') }}" class="cs-li-link">
+                                    <p class="cs-topper">Add User</p>
+                                </a>
+                            </li>
+                            
 
 
                             <li class="cs-li">
@@ -89,8 +89,7 @@
                 <select name="county" id="county">
                     <option value="">All Counties</option>
                     {% for county in counties %}
-                    <option value="{{ county }}" {% if request.args.get('county')==county %}selected{% endif %}>{{
-                        county }}</option>
+                    <option value="{{ county }}" {% if selected_county == county %}selected{% endif %}>{{ county }}</option>
                     {% endfor %}
                 </select>
                 <button type="submit">SORT</button>
@@ -169,9 +168,9 @@
         -->
 
         <div class="calendar-grid">
-            {% for date, properties_on_date in properties_by_date.items() %}
+            {% for formatted_date, properties_on_date in properties_by_date.items() %}
                 <div class="day-dropdown">
-                    <button class="dropdown-btn">{{ date }}</button>
+                    <button class="dropdown-btn">{{ formatted_date }} ({{ properties_on_date|length }} Properties)</button>
                     <div class="dropdown-content">
                         {% for property in properties_on_date %}
                         <div class="property-tile">
@@ -182,29 +181,24 @@
                                     <table style="width: 100%;">
                                         <tbody>
                                             <tr>
-                                                <td style="text-align: left; color: #ff6a3e; font-weight: bolder;">Address</td>
+                                                <td style="text-align: left; color: #808080;">Address</td>
                                                 <td style="text-align: right; font-weight: bold;">{{ property['addresses'] }}</td>
                                             </tr>
                                             <tr>
-                                                <td style="text-align: left; color: #ff6a3e; font-weight: bold;">County</td>
-                                                <td style="text-align: right;">{{ property['county'] }}</td>
+                                                <td style="text-align: left; color: #808080;">Time of Sale</td>
+                                                <td style="text-align: right; font-weight: bold;">{{ property['timeOfSale'] }}</td>
                                             </tr>
                                             <tr>
-                                                <td><i class="fi fi-ss-bed-empty"></i></td>
-                                                <td style="text-align: right;">{{ property['bedrooms'] }}</td>
+                                                <td style="text-align: left; color: #808080;">County</td>
+                                                <td style="text-align: right; font-weight: bold;">{{ property['county'] }}</td>
                                             </tr>
                                             <tr>
-                                                <td><i class="fi fi-ss-shower"></i></td>
-                                                <td style="text-align: right;">{{ property['bathrooms'] }}</td>
-                                            </tr>
-                                            <br>
-                                            <tr>
-                                                <td style="text-align: left; color: #ff6a3e; font-weight: bold;">Sqft</td>
-                                                <td style="text-align: right;">{{ property['livingArea'] }}</td>
+                                                <td style="text-align: left; color: #808080;">Sqft</td>
+                                                <td style="text-align: right; font-weight: bold;">{{ property['livingArea'] }}</td>
                                             </tr>
                                             <tr>
-                                                <td style="text-align: left; color: #ff6a3e; font-weight: bold;">Acres</td>
-                                                <td style="text-align: right;">
+                                                <td style="text-align: left; color: #808080;">Acres</td>
+                                                <td style="text-align: right; font-weight: bold;">
                                                     {% if property['lotSize'] %}
                                                     {{ "%.2f"|format((property['lotSize']) / 43560) }}
                                                     {% else %}
@@ -213,15 +207,13 @@
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td style="text-align: left; color: #ff6a3e; font-weight: bold;">Date of Sale</td>
-                                                <td style="text-align: right;">{{ property['dateOfSale'] }}</td>
+                                                <td><i style="text-align: left;" class="fi fi-ss-bed-empty"></i></td>
+                                                <td style="text-align: right; font-weight: bold;">{{ property['bedrooms'] }}</td>
                                             </tr>
                                             <tr>
-                                                <td style="text-align: left; color: #ff6a3e; font-weight: bold;">Time of Sale</td>
-                                                <td style="text-align: right;">{{ property['timeOfSale'] }}</td>
+                                                <td><i style="text-align: left;" class="fi fi-ss-shower"></i></td>
+                                                <td style="text-align: right; font-weight: bold;">{{ property['bathrooms'] }}</td>
                                             </tr>
-            
-            
                                         </tbody>
                                     </table>
                                 </div>
@@ -231,8 +223,8 @@
                                     aria-label="read more about us">Edit</a>
                                 <a href="{{ url_for('delete_address', id=property['id']) }}" class="cs-button-4"
                                     aria-label="read more about us">Delete</a>
-                                <a href="" class="cs-button-4" aria-label="read more about us">Add Photos</a>
-                                <a href="{{ url_for('bid', id=property['id'], address=property['address']) }}" class="cs-button-4" aria-label="read more about us">Place Bid</a>
+                                <a href="" class="cs-button-4" aria-label="read more about us">Photos</a>
+                                <a href="{{ url_for('bid', id=property['id'], address=property['address']) }}" class="cs-button-4" aria-label="read more about us">Bid</a>
                                 
             
                             </div>
@@ -260,6 +252,8 @@
                                 <th class="cs-th">Username</th>
                                 <th class="cs-th">Email</th>
                                 <th class="cs-th">Phone</th>
+                                <th class="cs-th">User's Counties</th>
+                                <th class="cs-th">User's Favorites</th>
                                 <th class="cs-th">Role</th>
                                 <th class="cs-th">Edit</th>
                                 <th class="cs-th">Delete</th>
@@ -272,7 +266,26 @@
                                 <td class="cs-td">{{ user['username'] }}</td>
                                 <td class="cs-td">{{ user['email'] }}</td>
                                 <td class="cs-td">{{ user['phone'] }}</td>
-                                <td class="cs-td">{{ user['role'] }}</td>
+                                <td class="cs-td">
+                                    {% for county in counties %}
+                                        <div class="checkbox-container">
+                                            <input type="checkbox" id="county-{{ loop.index }}" name="counties" value="{{ county }}">
+                                            <label for="county-{{ loop.index }}">{{ county }}</label>
+                                        </div>
+                                    {% endfor %}
+                                </td>
+                                <td class="cs-td"> -- </td>
+                                <td class="cs-td">
+                                    {% if user['role'] == 0 %}
+                                        Subscriber
+                                    {% elif user['role'] == 1 %}
+                                        Agent
+                                    {% elif user['role'] == 2 %}
+                                        Admin
+                                    {% else %}
+                                        Unknown Role
+                                    {% endif %}
+                                </td>
                                 <td class="cs-td"><a href="{{ url_for('edit_profile', user_id=user.id) }}"
                                         class="btn">Edit</a></td>
                                 <td class="cs-td"><a href="{{ url_for('delete_user', user_id=user.id) }}" class="btn"

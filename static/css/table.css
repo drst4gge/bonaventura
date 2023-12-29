@@ -36,7 +36,7 @@
     }
     #table-1669 .cs-th,
     #table-1669 .cs-td {
-      border: 1px solid #ddd;
+      border: 1px solid #000000;
       text-align: center;
     }
     #table-1669 .cs-color .cs-th:first-child {
@@ -50,7 +50,7 @@
       z-index: 100;
       /* Make sure it sits above the other cells */
       background-color: #f2f2f2;
-      border: 1px solid #ddd;
+      border: 1px solid #000000;
       text-align: left;
     }
     #table-1669 .cs-th {

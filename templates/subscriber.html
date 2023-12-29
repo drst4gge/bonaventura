@@ -16,6 +16,36 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/services.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/table.css') }}">
     <script src="{{ url_for('static', filename='js/header.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdowns = document.querySelectorAll('.dropdown-btn');
+            dropdowns.forEach(dropdown => {
+                dropdown.addEventListener('click', function() {
+                    this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block';
+                });
+            });
+        });
+    </script>
+    <script>
+        function toggleFavorite(button) {
+            button.classList.toggle('favorited');
+        }
+    </script>
+    <link rel='stylesheet'
+        href='https://cdn-uicons.flaticon.com/2.0.0/uicons-solid-straight/css/uicons-solid-straight.css'>
+    <style>
+        .favorite-button {
+            border: none;
+            background-color: transparent;
+            cursor: pointer;
+            font-size: 1.5em; /* Adjust size as needed */
+        }
+    
+        .favorited {
+            color: red; /* Change as desired, e.g., to a filled heart or different color */
+        }
+    </style>
+        
 </head>
 
 <body>
@@ -43,6 +73,16 @@
                                     <p class="cs-topper">Account</p>
                                 </a>
                             </li>
+                            <li class="cs-li">
+                                <a href="" class="cs-li-link">
+                                    <p class="cs-topper">Favorites</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
+                                <a href="" class="cs-li-link">
+                                    <p class="cs-topper">Bids</p>
+                                </a>
+                            </li>
 
                         </ul>
                     </div>
@@ -57,60 +97,65 @@
         <br>
         <br>
 
-        <div style="text-align: center; margin-bottom: 20px;">
-            <form action="{{ url_for('subscriber') }}" method="get">
-                <label for="county">Select County:</label>
-                <select name="county" id="county">
-                    <option value="">All Counties</option>
-                    {% for county in counties %}
-                    <option value="{{ county }}" {% if request.args.get('county') == county %}selected{% endif %}>{{ county }}</option>
-                    {% endfor %}
-                </select>
-                <button type="submit">SORT</button>
-            </form>
-            
-        </div>
-
-        <div class="property-grid">
-            {% for property in properties %}
-            <div class="property-tile">
-                <a href="{{ url_for('property_details', id=property['id']) }}" class="property-link">
-                    <img class="property-image" src="{{ property['photo_url'] }}" alt="Property Image">
-                    <div class="property-content">
-                        <table style="width: 100%;">
-                            <tbody>
-                                <tr>
-                                    <td style="text-align: left; color: #ff6a3e; font-weight: bolder;">Address</td>
-                                    <td style="text-align: right; font-weight: bold;">{{ property['addresses'] }}</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: left; color: #ff6a3e; font-weight: bold;">County</td>
-                                    <td style="text-align: right;">{{ property['county'] }}</td>
-                                </tr>
-
-                                <tr>
-                                    <td><i class="fi fi-ss-bed-empty"></i></td>
-                                    <td style="text-align: right;">{{ property['bedrooms'] }}</td>
-                                </tr>
-                                <tr>
-                                    <td><i class="fi fi-ss-shower"></i></td>
-                                    <td style="text-align: right;">{{ property['bathrooms'] }}</td>
-                                </tr>
-                                <br>
-                                <tr>
-                                    <td style="text-align: left; color: #ff6a3e; font-weight: bold;">Sqft</td>
-                                    <td style="text-align: right;">{{ property['livingArea'] }}</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: left; color: #ff6a3e; font-weight: bold;">Acres</td>
-                                    <td style="text-align: right;"> {{ "%.2f"|format((property['lotSize']) / 43560) }} </td> 
-                                </tr>
-                                
-                            </tbody>
-                        </table>
+        <div class="calendar-grid">
+            {% for formatted_date, properties_on_date in properties_by_date.items() %}
+                <div class="day-dropdown">
+                    <button class="dropdown-btn">{{ formatted_date }} ({{ properties_on_date|length }} Properties)</button>
+                    <div class="dropdown-content">
+                        {% for property in properties_on_date %}
+                        <div class="property-tile">
+                            <!-- Wrap the contents in an anchor tag -->
+                            <a href="{{ url_for('property_details', id = property['id']) }}" class="property-link">
+                                <img class="property-image" src="{{ property['photo_url'] }}" alt="Agent Uploading Image Soon">
+                                <div class="property-content">
+                                    <table style="width: 100%;">
+                                        <tbody>
+                                            <tr>
+                                                <td style="text-align: left; color: #808080;">Address</td>
+                                                <td style="text-align: right; font-weight: bold;">{{ property['addresses'] }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="text-align: left; color: #808080;">Time of Sale</td>
+                                                <td style="text-align: right; font-weight: bold;">{{ property['timeOfSale'] }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="text-align: left; color: #808080;">County</td>
+                                                <td style="text-align: right; font-weight: bold;">{{ property['county'] }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="text-align: left; color: #808080;">Sqft</td>
+                                                <td style="text-align: right; font-weight: bold;">{{ property['livingArea'] }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="text-align: left; color: #808080;">Acres</td>
+                                                <td style="text-align: right; font-weight: bold;">
+                                                    {% if property['lotSize'] %}
+                                                    {{ "%.2f"|format((property['lotSize']) / 43560) }}
+                                                    {% else %}
+                                                    Not Available
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><i style="text-align: left;" class="fi fi-ss-bed-empty"></i></td>
+                                                <td style="text-align: right; font-weight: bold;">{{ property['bedrooms'] }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><i style="text-align: left;" class="fi fi-ss-shower"></i></td>
+                                                <td style="text-align: right; font-weight: bold;">{{ property['bathrooms'] }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </a>
+                            <div class="property-buttons">
+                                <a href="{{ url_for('bid', id=property['id'], address=property['address']) }}" class="cs-button-4" aria-label="read more about us">Bid</a>
+                                <button class="favorite-button" onclick="toggleFavorite(this)">❤</button>      
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
-                </a>
-            </div>
+                </div>
             {% endfor %}
         </div>
         <footer>

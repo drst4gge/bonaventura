@@ -12,7 +12,7 @@ import os
 import stripe
 import re
 from PyPDF2 import PdfReader
-from datetime import datetime, date
+from datetime import datetime
 
 application = Flask(__name__)
 load_dotenv()
@@ -59,7 +59,6 @@ def insert_address(address, zpid, bedrooms, bathrooms, livingArea, lotSize, coun
     finally:
         conn.close()
 
-
 def get_all_properties():
     conn = get_db_connection()
     try:
@@ -68,7 +67,6 @@ def get_all_properties():
             return cursor.fetchall()
     finally:
         conn.close()
-
 
 def get_property_by_id(property_id):
     conn = get_db_connection()
@@ -87,7 +85,6 @@ def get_unique_counties():
             return [row['county'] for row in cursor.fetchall()]
     finally:
         conn.close()
-
 
 def update_property(property_id, address, zpid, bedrooms, bathrooms, livingArea, lotSize, county, dateOfSale, timeOfSale):
     conn = get_db_connection()
@@ -119,20 +116,16 @@ def get_zpid_from_address(address):
         'X-RapidAPI-Key': "d0464de0f3msh4f7ea52273787c1p12b945jsn3e3da4819696",
         'X-RapidAPI-Host': "zillow56.p.rapidapi.com"
     }
-
     # Clean the address by removing newline characters and other potential control characters
     cleaned_address = re.sub(r'\s+', ' ', address.strip())
     formatted_address = cleaned_address.replace(" ", "%20")
-
     conn.request("GET", f"/search_address?address={formatted_address}", headers=headers)
-
     res = conn.getresponse()
     data = res.read()
     response_json = json.loads(data.decode("utf-8"))
 
     zpid = response_json.get("zpid", None)
     return zpid
-
 
 def get_property_details(zpid):
     conn = http.client.HTTPSConnection("zillow56.p.rapidapi.com")
@@ -142,7 +135,6 @@ def get_property_details(zpid):
     }
 
     conn.request("GET", f"/property?zpid={zpid}", headers=headers)
-
     res = conn.getresponse()
     data = res.read()
     response_json = json.loads(data.decode("utf-8"))
@@ -158,8 +150,6 @@ def get_property_details(zpid):
     lotSize = get_value_or_placeholder('lotSize')
     county = get_value_or_placeholder('county')
 
-
-
     return {
         'bedrooms': bedrooms,
         'bathrooms': bathrooms,
@@ -167,7 +157,6 @@ def get_property_details(zpid):
         'lotSize': lotSize,
         'county': county,
     }
-
 
 @application.route('/')
 def home():
@@ -195,47 +184,111 @@ def properties_page():
 def subscriber():
     county_filter = request.args.get('county')
     properties = get_all_properties()
-    if county_filter:
-        properties = [prop for prop in properties if prop.get('county') == county_filter]
 
-    counties = get_unique_counties()  # Function to get unique counties from the database
-    return render_template('subscriber.html', properties=properties, counties=counties)
+    # Filter properties by date and county if selected
+    filtered_properties = []
+    for prop in properties:
+        prop_date = prop['dateOfSale']
+        if isinstance(prop_date, str):
+            prop_date = datetime.strptime(prop_date, '%Y-%m-%d').date()
+
+        if prop_date >= datetime.now().date():
+            if not county_filter or (county_filter and prop.get('county') == county_filter):
+                filtered_properties.append(prop)
+
+    # Sort the filtered properties by 'dateOfSale'
+    filtered_properties.sort(key=lambda x: x['dateOfSale'])
+
+    # Group properties by 'dateOfSale' and include the day of the week
+    properties_by_date_with_day = {}
+    for prop in filtered_properties:
+        prop_date = prop['dateOfSale']
+        if isinstance(prop_date, str):
+            prop_date = datetime.strptime(prop_date, '%Y-%m-%d').date()
+
+        day_name = prop_date.strftime('%A')  # Gets the day name (e.g., 'Monday')
+        formatted_date = f"{day_name}, {prop_date.strftime('%Y-%m-%d')}"  # Format: 'Day, YYYY-MM-DD'
+        properties_by_date_with_day.setdefault(formatted_date, []).append(prop)
+
+    # Get unique counties for the filter dropdown
+    counties = get_unique_counties()
+    
+    return render_template('subscriber.html', properties_by_date=properties_by_date_with_day, counties=counties, selected_county=county_filter)
 
 @application.route('/agent')
 @requires_roles(1)
 def agent():
+    county_filter = request.args.get('county')
     properties = get_all_properties()
-    users = get_all_users()
-    # Convert 'id' to integer if necessary
-    for property in properties:
-        property['id'] = int(property['id'])
-    return render_template('agent.html', properties=properties)
+
+    # Filter properties by date and county if selected
+    filtered_properties = []
+    for prop in properties:
+        prop_date = prop['dateOfSale']
+        if isinstance(prop_date, str):
+            prop_date = datetime.strptime(prop_date, '%Y-%m-%d').date()
+
+        if prop_date >= datetime.now().date():
+            if not county_filter or (county_filter and prop.get('county') == county_filter):
+                filtered_properties.append(prop)
+
+    # Sort the filtered properties by 'dateOfSale'
+    filtered_properties.sort(key=lambda x: x['dateOfSale'])
+
+    # Group properties by 'dateOfSale' and include the day of the week
+    properties_by_date_with_day = {}
+    for prop in filtered_properties:
+        prop_date = prop['dateOfSale']
+        if isinstance(prop_date, str):
+            prop_date = datetime.strptime(prop_date, '%Y-%m-%d').date()
+
+        day_name = prop_date.strftime('%A')  # Gets the day name (e.g., 'Monday')
+        formatted_date = f"{day_name}, {prop_date.strftime('%Y-%m-%d')}"  # Format: 'Day, YYYY-MM-DD'
+        properties_by_date_with_day.setdefault(formatted_date, []).append(prop)
+
+    # Get unique counties for the filter dropdown
+    counties = get_unique_counties()
+    
+    return render_template('agent.html', properties_by_date=properties_by_date_with_day, counties=counties, selected_county=county_filter)
 
 @application.route('/admin')
 @requires_roles(2)
 def admin():
     county_filter = request.args.get('county')
     properties = get_all_properties()
-    # Filter out past dates and handle 'dateOfSale' appropriately
-    properties = [prop for prop in properties if (prop['dateOfSale'] if isinstance(prop['dateOfSale'], date) else datetime.strptime(prop['dateOfSale'], '%Y-%m-%d').date()) >= datetime.now().date()]
 
-    # Sort the properties by 'dateOfSale'
-    properties.sort(key=lambda x: x['dateOfSale'])
-
-    # Group properties by 'dateOfSale'
-    properties_by_date = {}
+    # Filter properties by date and county if selected
+    filtered_properties = []
     for prop in properties:
-        properties_by_date.setdefault(prop['dateOfSale'], []).append(prop)
+        prop_date = prop['dateOfSale']
+        if isinstance(prop_date, str):
+            prop_date = datetime.strptime(prop_date, '%Y-%m-%d').date()
 
-    users = get_all_users()
-    for property in properties:
-        property['id'] = int(property['id'])
-    if county_filter:
-        properties = [prop for prop in properties if prop.get('county') == county_filter]
+        if prop_date >= datetime.now().date():
+            if not county_filter or (county_filter and prop.get('county') == county_filter):
+                filtered_properties.append(prop)
+
+    # Sort the filtered properties by 'dateOfSale'
+    filtered_properties.sort(key=lambda x: x['dateOfSale'])
+
+    # Group properties by 'dateOfSale' and include the day of the week
+    properties_by_date_with_day = {}
+    for prop in filtered_properties:
+        prop_date = prop['dateOfSale']
+        if isinstance(prop_date, str):
+            prop_date = datetime.strptime(prop_date, '%Y-%m-%d').date()
+
+        day_name = prop_date.strftime('%A')  # Gets the day name (e.g., 'Monday')
+        formatted_date = f"{day_name}, {prop_date.strftime('%Y-%m-%d')}"  # Format: 'Day, YYYY-MM-DD'
+        properties_by_date_with_day.setdefault(formatted_date, []).append(prop)
+
+    # Get unique counties for the filter dropdown
     counties = get_unique_counties()
+
+    # Get all users if needed for the page
+    users = get_all_users()
     
-    return render_template('admin.html', properties_by_date=properties_by_date, users=users, counties=counties)
-    
+    return render_template('admin.html', properties_by_date=properties_by_date_with_day, users=users, counties=counties, selected_county=county_filter)
 
 @application.route('/edit_profile', methods=['GET', 'POST'])
 def edit_profile():
@@ -255,7 +308,6 @@ def edit_profile():
         # Update user information in the database
         update_user(user_id, username, email, phone)
         return redirect(url_for('profile'))
-
 
 @application.route('/delete_user/<int:user_id>', methods=['GET'])
 def delete_user(user_id):
@@ -327,7 +379,6 @@ def get_user_by_id(user_id):
     finally:
         conn.close()
 
-
 @application.route('/property/<int:id>')
 def property_details(id):
     property = get_property_by_id(id)
@@ -382,7 +433,6 @@ def login():
     else:
         return 'Invalid credentials', 401
 
-    
 @application.route('/create_user', methods=['GET', 'POST'])
 def create_user():
     if request.method == 'GET':
@@ -475,8 +525,6 @@ def submit_user():
     flash('User created successfully!')
     return redirect(url_for('admin'))
 
-
-
 @application.route('/edit/<int:id>', methods=['GET'])
 def edit_address(id):
     property = get_property_by_id(id)
@@ -506,10 +554,10 @@ def update_address():
             update_sql = """
             UPDATE all_properties 
             SET addresses = %s, zpid = %s, bedrooms = %s, bathrooms = %s, livingArea = %s, 
-                lotSize = %s, county = %s , timeOfSale = %s, dateOFSale = %s
+                lotSize = %s, county = %s , timeOfSale = %s, dateOfSale = %s
             WHERE id = %s
             """
-            cursor.execute(update_sql, (address, zpid, bedrooms, bathrooms, livingArea, lotSize, county, property_id))
+            cursor.execute(update_sql, (address, zpid, bedrooms, bathrooms, livingArea, lotSize, county, dateOfSale, timeOfSale, property_id))
         conn.commit()
     finally:
         conn.close()
@@ -528,7 +576,6 @@ def update_address():
 def delete_address(id):
     delete_property(id)
     return redirect(url_for('admin'))
-
 
 def get_photos(zpid):
     conn = http.client.HTTPSConnection("zillow56.p.rapidapi.com")
@@ -608,7 +655,6 @@ def extract_auction_details(pdf_text):
 
     return auction_details
 
-
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -631,26 +677,29 @@ def upload_pdf():
 
 def process_pdf(file_path):
     pdf_text = extract_text_from_pdf(file_path)
-    #print(f"Extracted PDF Text:\n{pdf_text[:500]}")  # Debug print for first 500 characters of the extracted text
-
+    print(pdf_text)
     auction_details = extract_auction_details(pdf_text)
-    #print(f"Auction Details: {auction_details}")  # Debug print
-
 
     for address, date_of_sale, time_of_sale in auction_details:
-        print(f"Address: {address}, Date: {date_of_sale}, Time: {time_of_sale}")
-        zpid = get_zpid_from_address(address)
-        if zpid:
-            details = get_property_details(zpid)
-            photo_url = get_photos(zpid)
-            insert_address(
-                address, zpid, details.get('bedrooms', None), details.get('bathrooms', None),
-                details.get('livingArea', None), details.get('lotSize', None),
-                details.get('county', None), photo_url, date_of_sale, time_of_sale
-            )
-        else:
-            insert_address(address, None, None, None, None, None, None, None, date_of_sale, time_of_sale)
+        try:
+            print(f"Processing Address: {address}, Date: {date_of_sale}, Time: {time_of_sale}")
+            zpid = get_zpid_from_address(address)
+            if zpid:
+                details = get_property_details(zpid)
+                photo_url = get_photos(zpid)
+                insert_address(
+                    address, zpid, details.get('bedrooms', None), details.get('bathrooms', None),
+                    details.get('livingArea', None), details.get('lotSize', None),
+                    details.get('county', None), photo_url, date_of_sale, time_of_sale
+                )
+            else:
+                insert_address(address, None, None, None, None, None, None, None, date_of_sale, time_of_sale)
+        except Exception as e:
+            print(f"Error processing address {address}: {e}")
+            # Optionally, log the error details to a file or error monitoring service
+            continue  # Skip to the next iteration
 
+    print("Processing of PDF completed.")
 
 @application.route('/upload_photo/<int:id>', methods=['POST'])
 def upload_photo(id):
@@ -668,12 +717,6 @@ def upload_photo(id):
 
         update_photo_url(id, file_path)
         return redirect(url_for('admin'))
-
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def update_photo_url(property_id, photo_url):
     conn = get_db_connection()

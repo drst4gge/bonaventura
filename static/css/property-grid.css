@@ -73,8 +73,8 @@ a {
     /* Adjust padding, especially the vertical padding if needed */
     padding: 0 1.5rem;
     box-sizing: border-box;
-    background-color: #f15a24;
-    box-shadow: 4px 4px 0px 0px #1a1a1a;
+    background-color: #808080;
+    box-shadow: 1x 1px 0px 0px #C0C0C0;
     display: inline-block;
     position: relative;
     z-index: 1;
@@ -84,7 +84,7 @@ a {
 }
 
 .cs-button-4:hover {
-    background-color: #1a1a1a;
+    background-color: #b7b7b7;
     box-shadow: 0px 0px 0px 0px var(--primary);
 }
 
@@ -107,28 +107,22 @@ a {
 }
 
 .dropdown-btn {
-    width: 100%;
-    padding: 10px;
-    text-align: center;
-    display: flex;
-    height: 100px;
-    background: #ff6a3e;
-    color: white;
-    border: 1px solid #000000;
-    border-radius: 10px;
-    cursor: pointer;
-    outline: none;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    opacity: 0.98;
-    /* Makes the tile slightly transparent */
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    font-size: 1.2em; /* Adjust for bigger text */
+    color: white; /* Text color */
+    font-weight: bold; /* Make text bold */
+    text-align: center; /* Center the text */
+    background-color: #8d8d8d; /* Background color of the button, adjust as needed */
+    border: none; /* Remove border if present */
+    padding: 10px 20px; /* Adjust padding as needed, ensures the text is about a third of the button height */
+    width: 100%; /* Optional: if you want the button to take the full width of its container */
+    cursor: pointer; /* Change cursor to pointer to indicate it's clickable */
+    border-radius: 5px; /* Optional: if you want rounded corners */
+    transition: background-color 0.3s ease; /* Smooth transition for hover effect */
 }
 
 .dropdown-btn:hover {
-    transform: scale(1.02);
-    /* Scales up the tile by 5% on hover */
-    opacity: 1;
-    /* Full opacity on hover */
+    background-color: #a8a8a8; /* Slightly darker shade on hover, adjust as needed */
+    transform: scale(1.005);
 }
 
 .dropdown-content {
@@ -140,7 +134,7 @@ a {
 
 .property-tile {
     padding: 10px;
-    background-color: #dfd0c7;
+    background-color: #f4f4f4;
     
     border-bottom: 1px solid #ddd;
 }
