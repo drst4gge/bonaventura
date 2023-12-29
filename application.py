@@ -679,7 +679,6 @@ def upload_pdf():
 
 def process_pdf(file_path):
     pdf_text = extract_text_from_pdf(file_path)
-    print(pdf_text)
     auction_details = extract_auction_details(pdf_text)
 
     for address, date_of_sale, time_of_sale, price in auction_details:
