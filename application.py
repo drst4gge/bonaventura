@@ -12,7 +12,7 @@ import os
 import stripe
 import re
 from PyPDF2 import PdfReader
-from datetime import datetime
+from datetime import datetime, timedelta
 
 application = Flask(__name__)
 load_dotenv()
@@ -255,6 +255,28 @@ def agent():
 @application.route('/admin')
 @requires_roles(2)
 def admin():
+    today = datetime.today()
+    current_date = today.date()
+    current_month = today.strftime('%B %Y')
+    first_day_of_month = datetime(today.year, today.month, 1)
+    
+    # Calculate the first weekday (Python's `weekday()` returns Monday as 0)
+    first_weekday = first_day_of_month.weekday()
+
+    # Adjust the start position for CSS grid (grid starts at 1, and we want Monday to be 1)
+    start_position = first_weekday + 1
+    
+    # If the first day of the month is Sunday, start_position should be 7
+    if first_weekday == 6:
+        start_position = 7
+
+    # Calculate last day of the month
+    next_month = first_day_of_month.replace(day=28) + timedelta(days=4)
+    last_day_of_month = next_month - timedelta(days=next_month.day)
+
+    # Generate a list of all days in the current month
+    date_list = [first_day_of_month + timedelta(days=x) for x in range((last_day_of_month - first_day_of_month).days + 1)]
+    
     county_filter = request.args.get('county')
     properties = get_all_properties()
 
@@ -262,23 +284,21 @@ def admin():
     filtered_properties = []
     for prop in properties:
         prop_date = prop['dateOfSale']
+        # Check if the date is a string and convert to date object if necessary
         if isinstance(prop_date, str):
             prop_date = datetime.strptime(prop_date, '%Y-%m-%d').date()
-
-        if prop_date >= datetime.now().date():
+        
+        if prop_date >= current_date:
             if not county_filter or (county_filter and prop.get('county') == county_filter):
                 filtered_properties.append(prop)
 
     # Sort the filtered properties by 'dateOfSale'
-    filtered_properties.sort(key=lambda x: x['dateOfSale'])
+    filtered_properties.sort(key=lambda x: datetime.strptime(x['dateOfSale'], '%Y-%m-%d') if isinstance(x['dateOfSale'], str) else x['dateOfSale'])
 
     # Group properties by 'dateOfSale' and include the day of the week
     properties_by_date_with_day = {}
     for prop in filtered_properties:
-        prop_date = prop['dateOfSale']
-        if isinstance(prop_date, str):
-            prop_date = datetime.strptime(prop_date, '%Y-%m-%d').date()
-
+        prop_date = datetime.strptime(prop['dateOfSale'], '%Y-%m-%d') if isinstance(prop['dateOfSale'], str) else prop['dateOfSale']
         day_name = prop_date.strftime('%A')  # Gets the day name (e.g., 'Monday')
         formatted_date = f"{day_name}, {prop_date.strftime('%Y-%m-%d')}"  # Format: 'Day, YYYY-MM-DD'
         properties_by_date_with_day.setdefault(formatted_date, []).append(prop)
@@ -289,7 +309,16 @@ def admin():
     # Get all users if needed for the page
     users = get_all_users()
     
-    return render_template('admin.html', properties_by_date=properties_by_date_with_day, users=users, counties=counties, selected_county=county_filter)
+    return render_template('admin.html', current_month=current_month, first_weekday=first_weekday, start_position=start_position, current_date=current_date, date_list=date_list, properties_by_date=properties_by_date_with_day, users=users, counties=counties, selected_county=county_filter)
+
+
+
+@application.route('/admin_usercontrol', methods=['GET'])
+def admin_usercontrol():
+    users = get_all_users()
+    county_filter = request.args.get('county')
+    counties = get_unique_counties()
+    return render_template('admin_usercontrol.html', users=users, counties=counties, selected_county=county_filter)
 
 @application.route('/edit_profile', methods=['GET', 'POST'])
 def edit_profile():
@@ -470,6 +499,8 @@ def add_address():
 def add_user():
     return render_template('add_user.html')
 
+
+
 @application.route('/submit_address', methods=['POST'])
 def submit_address():
     address = request.form['address']
@@ -602,16 +633,25 @@ def get_photos(zpid):
 
     return None  # Return None if no photo URL is found
 
-@application.route('/bid/<int:id>', methods=['GET'])
+@application.route('/bid/<int:id>')
 def bid(id):
     property = get_property_by_id(id)
     if property:
+        formatted_price = "${:,.2f}".format(property['price'])
+        fee_amount = property['price'] / 10
+        formatted_fee = "${:,.2f}".format(fee_amount)
+        total_amount = property['price'] + fee_amount
+        formatted_total = "${:,.2f}".format(total_amount)
+
         user_details = {
             'username': session.get('user_username', ''),
             'email': session.get('user_email', ''),
             'phone': session.get('user_phone', '')
+            # Your user details logic
         }
-        return render_template('bid.html', property = property,property_id=id, user=user_details)
+        return render_template('bid.html', property=property, property_id=id, user=user_details,
+                               formatted_price=formatted_price, formatted_fee=formatted_fee,
+                               formatted_total=formatted_total)
     else:
         return 'Property not found', 404
 
@@ -728,6 +768,29 @@ def update_photo_url(property_id, photo_url):
         conn.commit()
     finally:
         conn.close()
+
+@application.route('/properties/<date>')
+def properties_for_day(date):
+    try:
+        # Convert string date to datetime object
+        selected_date = datetime.strptime(date, '%Y-%m-%d')
+    except ValueError:
+        return 'Invalid date format', 400
+
+    # Fetch properties for the selected date
+    properties = get_properties_for_date(selected_date)
+    return render_template('propertiesforday.html', properties=properties, selected_date=selected_date)
+
+def get_properties_for_date(selected_date):
+    conn = get_db_connection()
+    try:
+        with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+            cursor.execute("SELECT * FROM all_properties WHERE dateOfSale = %s", (selected_date,))
+            return cursor.fetchall()
+    finally:
+        conn.close()
+
+
 
 if __name__ == "__main__":
     application.run()

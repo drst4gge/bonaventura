@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>DAILY PROPERTIES</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background_color.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/contact-718.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/cs-button-6.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/footer.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/gallery-45.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/header.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/hero-82.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/hero-408.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/property-grid.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/services.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/table.css') }}">
+    <script src="{{ url_for('static', filename='js/header.js') }}"></script>
+</head>
+<body>
+    <div class="wrapper">
+        <header id="cs-navigation">
+            <div class="cs-container">
+                <!--Nav Logo-->
+                <a href="{{ url_for('home') }}" class="cs-logo" aria-label="back to home">
+                    <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="logo" width="210"
+                        height="29" aria-hidden="true" decoding="async">
+                </a>
+                <!--Navigation List-->
+                <nav class="cs-nav" role="navigation">
+                    <!--Mobile Nav Toggle-->
+                    <button class="cs-toggle" aria-label="mobile menu toggle">
+                        <div class="cs-box" aria-hidden="true">
+                            <span class="cs-line cs-line1" aria-hidden="true"></span>
+                            <span class="cs-line cs-line2" aria-hidden="true"></span>
+                            <span class="cs-line cs-line3" aria-hidden="true"></span>
+                        </div>
+                    </button>
+                    <div class="cs-ul-wrapper">
+                        <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
+
+                            
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </header>
+        <br>
+        <br>
+        <br>
+        
+        
+        
+        <div class="property-grid">
+            {% for property in properties %}
+                <div class="property-tile">       
+                    <a href="{{ url_for('property_details', id=property['id']) }}" class="property-link">
+                        <img class="property-image" src="{{ property['photo_url'] }}" alt="Property Image">
+                        <div class="property-content">
+                            <table style="width: 100%;">
+                                <tbody>
+                                    <tr>
+                                        <td style="text-align: left; color: #ff6a3e; font-weight: bolder;">Address</td>
+                                        <td style="text-align: right; font-weight: bold;">{{ property['addresses'] }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: left; color: #ff6a3e; font-weight: bold;">County</td>
+                                        <td style="text-align: right;">{{ property['county'] }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fi fi-ss-bed-empty"></i></td>
+                                        <td style="text-align: right;">{{ property['bedrooms'] }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fi fi-ss-shower"></i></td>
+                                        <td style="text-align: right;">{{ property['bathrooms'] }}</td>
+                                    </tr>
+                                    <br>
+                                    <tr>
+                                        <td style="text-align: left; color: #ff6a3e; font-weight: bold;">Sqft</td>
+                                        <td style="text-align: right;">{{ property['livingArea'] }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: left; color: #ff6a3e; font-weight: bold;">Acres</td>
+                                        <td style="text-align: right;">
+                                            {% if property['lotSize'] %}
+                                            {{ "%.2f"|format((property['lotSize']) / 43560) }}
+                                            {% else %}
+                                            Not Available
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: left; color: #ff6a3e; font-weight: bold;">Date of Sale</td>
+                                        <td style="text-align: right;">{{ property['dateOfSale'] }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: left; color: #ff6a3e; font-weight: bold;">Time of Sale</td>
+                                        <td style="text-align: right;">{{ property['timeOfSale'] }}</td>
+                                    </tr>
+    
+    
+                                </tbody>
+                            </table>
+                        </div>
+                    </a>
+                    <div class="property-buttons">
+                        <!-- Buttons for edit, delete, and add photos -->
+                        <a href="{{ url_for('edit_address', id=property['id']) }}" class="cs-button-4">Edit</a>
+                        <a href="{{ url_for('delete_address', id=property['id']) }}" class="cs-button-4">Delete</a>
+                        <a href="" class="cs-button-4">Photos</a>
+                    </div>
+                </div>
+            {% else %}
+                <p>No properties available for this day.</p>
+            {% endfor %}
+        </div>
+
+        <!-- Optional: Pagination or navigation links -->
+
+    </div>
+
+    <!-- Optional: JavaScript files inclusion -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <!-- Include other necessary JavaScript files here -->
+</body>
+</html>

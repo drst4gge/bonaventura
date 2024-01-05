@@ -16,16 +16,19 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/services.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/table.css') }}">
     <script src="{{ url_for('static', filename='js/header.js') }}"></script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const dropdowns = document.querySelectorAll('.dropdown-btn');
-            dropdowns.forEach(dropdown => {
-                dropdown.addEventListener('click', function() {
-                    this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block';
-                });
+        $(document).ready(function () {
+            $('.day-dropdown').on('click', function () {
+                var date = $(this).data('date');
+                var formattedDate = date.split(', ')[1]; // Extract only the 'YYYY-MM-DD' part
+                var url = '/properties/' + formattedDate;
+                window.location.href = url;
             });
         });
     </script>
+
     <link rel='stylesheet'
         href='https://cdn-uicons.flaticon.com/2.0.0/uicons-solid-straight/css/uicons-solid-straight.css'>
 </head>
@@ -57,19 +60,11 @@
                                 </a>
                             </li>
                             <li class="cs-li">
-                                <a href="{{ url_for('add_user') }}" class="cs-li-link">
-                                    <p class="cs-topper">Add User</p>
+                                <a href="{{ url_for('admin_usercontrol') }}" class="cs-li-link">
+                                    <p class="cs-topper">User Manager</p>
                                 </a>
                             </li>
-                            
 
-
-                            <li class="cs-li">
-                                <a href="https://salesweb.civilview.com/Sales/SalesSearch?countyId=7" target="_blank"
-                                    class="cs-li-link">
-                                    <p class="cs-topper">Bergen County Addresses</p>
-                                </a>
-                            </li>
                         </ul>
                     </div>
                 </nav>
@@ -89,7 +84,8 @@
                 <select name="county" id="county">
                     <option value="">All Counties</option>
                     {% for county in counties %}
-                    <option value="{{ county }}" {% if selected_county == county %}selected{% endif %}>{{ county }}</option>
+                    <option value="{{ county }}" {% if selected_county==county %}selected{% endif %}>{{ county }}
+                    </option>
                     {% endfor %}
                 </select>
                 <button type="submit">SORT</button>
@@ -166,141 +162,136 @@
             {% endfor %}
         </div>
         -->
-
+        <!-- 
         <div class="calendar-grid">
             {% for formatted_date, properties_on_date in properties_by_date.items() %}
-                <div class="day-dropdown">
-                    <button class="dropdown-btn">{{ formatted_date }} ({{ properties_on_date|length }} Properties)</button>
-                    <div class="dropdown-content">
-                        {% for property in properties_on_date %}
-                        <div class="property-tile">
-                            <!-- Wrap the contents in an anchor tag -->
-                            <a href="{{ url_for('property_details', id = property['id']) }}" class="property-link">
-                                <img class="property-image" src="{{ property['photo_url'] }}" alt="Agent Uploading Image Soon">
-                                <div class="property-content">
-                                    <table style="width: 100%;">
-                                        <tbody>
-                                            <tr>
-                                                <td style="text-align: left; color: #808080;">Address</td>
-                                                <td style="text-align: right; font-weight: bold;">{{ property['addresses'] }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td style="text-align: left; color: #808080;">Time of Sale</td>
-                                                <td style="text-align: right; font-weight: bold;">{{ property['timeOfSale'] }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td style="text-align: left; color: #808080;">Final Judgement ($)</td>
-                                                <td style="text-align: right; font-weight: bold;">{{ property['price'] | format_currency }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td style="text-align: left; color: #808080;">County</td>
-                                                <td style="text-align: right; font-weight: bold;">{{ property['county'] }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td style="text-align: left; color: #808080;">Sqft</td>
-                                                <td style="text-align: right; font-weight: bold;">{{ property['livingArea'] }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td style="text-align: left; color: #808080;">Acres</td>
-                                                <td style="text-align: right; font-weight: bold;">
-                                                    {% if property['lotSize'] %}
-                                                    {{ "%.2f"|format((property['lotSize']) / 43560) }}
-                                                    {% else %}
-                                                    Not Available
-                                                    {% endif %}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td><i style="text-align: left;" class="fi fi-ss-bed-empty"></i></td>
-                                                <td style="text-align: right; font-weight: bold;">{{ property['bedrooms'] }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><i style="text-align: left;" class="fi fi-ss-shower"></i></td>
-                                                <td style="text-align: right; font-weight: bold;">{{ property['bathrooms'] }}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </a>
-                            <div class="property-buttons">
-                                <a href="{{ url_for('edit_address', id=property['id']) }}" class="cs-button-4"
-                                    aria-label="read more about us">Edit</a>
-                                <a href="{{ url_for('delete_address', id=property['id']) }}" class="cs-button-4"
-                                    aria-label="read more about us">Delete</a>
-                                <a href="" class="cs-button-4" aria-label="read more about us">Photos</a>
-                                <a href="{{ url_for('bid', id=property['id'], address=property['address']) }}" class="cs-button-4" aria-label="read more about us">Bid</a>
-                                
-            
+            <div class="day-dropdown">
+                <button class="dropdown-btn">{{ formatted_date }} ({{ properties_on_date|length }} Properties)</button>
+                <div class="dropdown-content">
+                    {% for property in properties_on_date %}
+                    <div class="property-tile">
+                        
+                        <a href="{{ url_for('property_details', id = property['id']) }}" class="property-link">
+                            <img class="property-image" src="{{ property['photo_url'] }}"
+                                alt="Agent Uploading Image Soon">
+                            <div class="property-content">
+                                <table style="width: 100%;">
+                                    <tbody>
+                                        <tr>
+                                            <td style="text-align: left; color: #808080;">Address</td>
+                                            <td style="text-align: right; font-weight: bold;">{{ property['addresses']
+                                                }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="text-align: left; color: #808080;">Time of Sale</td>
+                                            <td style="text-align: right; font-weight: bold;">{{ property['timeOfSale']
+                                                }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="text-align: left; color: #808080;">Final Judgement ($)</td>
+                                            <td style="text-align: right; font-weight: bold;">{{ property['price'] |
+                                                format_currency }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="text-align: left; color: #808080;">County</td>
+                                            <td style="text-align: right; font-weight: bold;">{{ property['county'] }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="text-align: left; color: #808080;">Sqft</td>
+                                            <td style="text-align: right; font-weight: bold;">{{ property['livingArea']
+                                                }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="text-align: left; color: #808080;">Acres</td>
+                                            <td style="text-align: right; font-weight: bold;">
+                                                {% if property['lotSize'] %}
+                                                {{ "%.2f"|format((property['lotSize']) / 43560) }}
+                                                {% else %}
+                                                Not Available
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><i style="text-align: left;" class="fi fi-ss-bed-empty"></i></td>
+                                            <td style="text-align: right; font-weight: bold;">{{ property['bedrooms'] }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><i style="text-align: left;" class="fi fi-ss-shower"></i></td>
+                                            <td style="text-align: right; font-weight: bold;">{{ property['bathrooms']
+                                                }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
-            
+                        </a>
+                        <div class="property-buttons">
+                            <a href="{{ url_for('edit_address', id=property['id']) }}" class="cs-button-4"
+                                aria-label="read more about us">Edit</a>
+                            <a href="{{ url_for('delete_address', id=property['id']) }}" class="cs-button-4"
+                                aria-label="read more about us">Delete</a>
+                            <a href="" class="cs-button-4" aria-label="read more about us">Photos</a>
+                            <a href="{{ url_for('bid', id=property['id'], address=property['address']) }}"
+                                class="cs-button-4" aria-label="read more about us">Bid</a>
+
+
                         </div>
-                        {% endfor %}
+
                     </div>
-                </div>
-            {% endfor %}
-        </div>
-        <br>
-        <br>
-        <br>
-        <section id="table-1669">
-            <div class="cs-container">
-                <div class="cs-content">
-                    <span class="cs-topper">User Management Table</span>
-
-
-
-                    <table class="cs-table">
-                        <thead>
-                            <tr class="cs-color">
-
-                                <th class="cs-th">Username</th>
-                                <th class="cs-th">Email</th>
-                                <th class="cs-th">Phone</th>
-                                <th class="cs-th">User's Counties</th>
-                                <th class="cs-th">User's Favorites</th>
-                                <th class="cs-th">Role</th>
-                                <th class="cs-th">Edit</th>
-                                <th class="cs-th">Delete</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for user in users %}
-                            <tr class="cs-tr">
-
-                                <td class="cs-td">{{ user['username'] }}</td>
-                                <td class="cs-td">{{ user['email'] }}</td>
-                                <td class="cs-td">{{ user['phone'] }}</td>
-                                <td class="cs-td">
-                                    {% for county in counties %}
-                                        <div class="checkbox-container">
-                                            <input type="checkbox" id="county-{{ loop.index }}" name="counties" value="{{ county }}">
-                                            <label for="county-{{ loop.index }}">{{ county }}</label>
-                                        </div>
-                                    {% endfor %}
-                                </td>
-                                <td class="cs-td"> -- </td>
-                                <td class="cs-td">
-                                    {% if user['role'] == 0 %}
-                                        Subscriber
-                                    {% elif user['role'] == 1 %}
-                                        Agent
-                                    {% elif user['role'] == 2 %}
-                                        Admin
-                                    {% else %}
-                                        Unknown Role
-                                    {% endif %}
-                                </td>
-                                <td class="cs-td"><a href="{{ url_for('edit_profile', user_id=user.id) }}"
-                                        class="btn">Edit</a></td>
-                                <td class="cs-td"><a href="{{ url_for('delete_user', user_id=user.id) }}" class="btn"
-                                        onclick="return confirm('Are you sure?')">Delete</a></td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    {% endfor %}
                 </div>
             </div>
-        </section>
+            {% endfor %}
+        </div>
+        -->
+        <div class="month-header">
+            <h1>{{ current_month }}</h1>
+        </div>
+        {% set start_position = first_weekday + 1 %} <!-- Assuming first_weekday is 0 for Monday -->
+        <div class="calendar-grid">
+            <!-- Calendar Header -->
+            <div class="calendar-header">
+                <div class="calender-header-content">Mon</div>
+                <div class="calender-header-content">Tue</div>
+                <div class="calender-header-content">Wed</div>
+                <div class="calender-header-content">Thu</div>
+                <div class="calender-header-content">Fri</div>
+                <div class="calender-header-content">Sat</div>
+                <div class="calender-header-content">Sun</div>
+            </div>
+        
+            <!-- Empty Cells Before Start of Month -->
+            {% for _ in range(start_position - 1) %}
+                <div class="day-dropdown tile empty"></div>
+            {% endfor %}
+        
+            <!-- Calendar Days -->
+            {% for date in date_list %}
+                {% set formatted_date = date.strftime('%A, %Y-%m-%d') %}
+                {% set is_today = (date.date() == current_date) %}
+                
+                <!-- Check if there are properties for the date -->
+                {% if formatted_date in properties_by_date %}
+                    <!-- Day with Properties -->
+                    <a href="{{ url_for('properties_for_day', date=date.strftime('%Y-%m-%d')) }}"
+                       class="day-dropdown tile {{ 'highlight-today' if is_today else '' }}">
+                        {{ date.day }} ({{ properties_by_date[formatted_date] | length }} Properties)
+                    </a>
+                {% else %}
+                    <!-- Day Without Properties -->
+                    <div class="day-dropdown tile no-properties {{ 'highlight-today' if is_today else '' }}">
+                        {{ date.day }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+
+
+        <br>
+        <br>
+        <br>
 
         <footer>
             <p>© Bonaventura</p>

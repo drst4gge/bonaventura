@@ -19,68 +19,133 @@
     <script src="{{ url_for('static', filename='js/header.js') }}"></script>
     <script>
         function updateTotalAmount() {
-            const originalPrice = parseFloat(document.getElementById('original-price').value) || 0;
-            const feeAmount = parseFloat(document.getElementById('fee-amount').value) || 0;
+            // Function to clean and parse the currency formatted values
+            function parseCurrency(value) {
+                return parseFloat(value.replace(/[^0-9.-]+/g, "")) || 0;
+            }
+
+            // Function to format number as currency
+            function formatCurrency(number) {
+                return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(number);
+            }
+
+            // Get the values from the inputs
+            const originalPrice = parseCurrency(document.getElementById('original-price').value);
+            const feeAmount = parseCurrency(document.getElementById('fee-amount').value);
+
+            // Calculate the total
             const totalAmount = originalPrice + feeAmount;
-    
-            // Update the total amount field
-            document.getElementById('total-amount').value = totalAmount.toFixed(2);
+
+            // Update the total amount field with formatted currency
+            document.getElementById('total-amount').value = formatCurrency(totalAmount);
         }
-    
+
         // Call the function on page load
         window.onload = updateTotalAmount;
     </script>
-    
-    
+    <script>
+        function formatPhoneNumber(phoneNumber) {
+            const cleaned = ('' + phoneNumber).replace(/\D/g, '');
+            const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+            if (match) {
+                return '(' + match[1] + ') ' + match[2] + '-' + match[3];
+            }
+            return null;
+        }
+
+        window.onload = function () {
+            const phoneInput = document.getElementById('phone');
+            if (phoneInput) {
+                phoneInput.addEventListener('input', function (e) {
+                    const formatted = formatPhoneNumber(e.target.value);
+                    e.target.value = formatted ? formatted : e.target.value;
+                });
+
+                // Apply initial formatting
+                phoneInput.value = formatPhoneNumber(phoneInput.value);
+            }
+
+            updateTotalAmount();
+        };
+    </script>
+
+
 
 </head>
 
 <body>
 
     <div class="wrapper">
+        <header id="cs-navigation">
+            <div class="cs-container">
+                <!--Nav Logo-->
+                <a href="{{ url_for('home') }}" class="cs-logo" aria-label="back to home">
+                    <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="logo" width="210"
+                        height="29" aria-hidden="true" decoding="async">
+                </a>
+                <!--Navigation List-->
+                <nav class="cs-nav" role="navigation">
+                    <!--Mobile Nav Toggle-->
+                    <button class="cs-toggle" aria-label="mobile menu toggle">
+                        <div class="cs-box" aria-hidden="true">
+                            <span class="cs-line cs-line1" aria-hidden="true"></span>
+                            <span class="cs-line cs-line2" aria-hidden="true"></span>
+                            <span class="cs-line cs-line3" aria-hidden="true"></span>
+                        </div>
+                    </button>
+                    <div class="cs-ul-wrapper">
+                        <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
+
+
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </header>
+        <br>
+        <br>
+
         <section id="contact-718">
             <div class="cs-container">
-                <!-- Optional picture section here, if you want to include an image -->
                 <div class="cs-content">
                     <span class="cs-topper">BID ON {{ property['addresses'] }}</span>
-
                     <form class="cs-form" action="/submit_bid/{{ property_id }}" method="post">
                         <!-- Hidden ID Field -->
                         <input type="hidden" name="id" value="{{ user['user_id'] }}">
 
-                        <!-- Address Field -->
+                        <!-- User Field -->
                         <label for="username">User
                             <input class="cs-input" type="text" id="username" name="username"
                                 value="{{ user['username'] }}" placeholder="Username" required>
                         </label>
 
-                        <!-- ZPID Field -->
+                        <!-- Email Field -->
                         <label for="email">Email
                             <input class="cs-input" type="text" id="email" name="email" value="{{ user['email'] }}"
                                 placeholder="email">
                         </label>
 
-                        <!-- Bedrooms Field -->
+                        <!-- Phone Field -->
                         <label for="phone">Phone
-                            <input class="cs-input" type="number" id="phone" name="phone" value="{{ user['phone'] }}"
+                            <input class="cs-input" type="text" id="phone" name="phone" value="{{ user['phone'] }}"
                                 placeholder="phone">
                         </label>
 
-                        <!-- Original Price Input -->
+                        <!-- Price and Fee Fields -->
                         <label for="original-price">Price of Bid:</label>
-                        <input class="cs-input" type="number" id="original-price" name="price" value="{{ property['price'] }}" readonly>
+                        <input class="cs-input" type="text" id="original-price" name="price"
+                            value="{{ formatted_price }}" readonly>
 
-                        <!-- Fee Amount Input -->
                         <label for="fee-amount">Fee Amount:</label>
-                        <input class="cs-input" type="number" id="fee-amount" name="fee" value="{{ (property['price'])/10 }}" readonly>
+                        <input class="cs-input" type="text" id="fee-amount" name="fee" value="{{ formatted_fee }}"
+                            readonly>
 
-                        <!-- Total Amount Input -->
                         <label for="total-amount">Total Amount:</label>
-                        <input class="cs-input" type="number" id="total-amount" name="total_amount" readonly>
+                        <input class="cs-input" type="text" id="total-amount" name="total_amount"
+                            value="{{ formatted_total }}" readonly>
 
                         <!-- Submit Button -->
                         <button class="cs-button-solid cs-submit" type="submit">Bid</button>
-
                     </form>
                 </div>
             </div>

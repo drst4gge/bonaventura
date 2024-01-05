@@ -93,17 +93,51 @@ a {
 }
 
 .calendar-grid {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7 columns for 7 days of the week */
+    grid-gap: 1px; /* Adjust if you want wider/narrower lines */
+    background-color: #ccc; /* Color of the lines */
 }
 
 .day-dropdown {
-    width: 40%;
-    margin-bottom: 10px;
+    background-color: #fff; /* Background color of day tiles */
+    /* Rest of your styles */
+    /* ... */
+}
+
+.calendar-header {
+    display: contents; /* This makes it part of the grid */
+    padding: 10px;
+
+}
+
+
+.calendar-header div {
+    text-align: center;
+    background-color: #f0f0f0; /* Slightly different background for headers */
+    padding: 10px 0; /* Adjust padding to your liking */
     
+    font-weight: bold;
+
+}
+
+
+.day-dropdown {
+    border: 2px solid #000000;
+    border-radius: 5px;
+    background-color: #f9f9f9; /* Light background for each day */
+    cursor: pointer; /* Change cursor to pointer to indicate it's clickable */
+    transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+    font-weight: bold; /* Make text bold */
+    text-align: center; /* Center the text */
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 30px;
+    padding-bottom: 30px;
+}
+
+.day-dropdown:hover {
+    background-color: #eaeaea; /* Slightly darker on hover */
 }
 
 .dropdown-btn {
@@ -127,14 +161,35 @@ a {
 
 .dropdown-content {
     display: none;
-    width: 100%;
-    border: 1px solid #ddd;
-    z-index: 1;
+    padding: 10px;
 }
 
 .property-tile {
     padding: 10px;
     background-color: #f4f4f4;
     
-    border-bottom: 1px solid #ddd;
+    border: 2px solid #000000;
+}
+
+.no-properties {
+    background-color: #757575; /* Slightly darker shade for days without properties */
+}
+
+.no-properties:hover {
+    background-color: #757575; /* Keep the same color on hover */
+    transform: none; /* Remove any transformation if applied on hover */
+    opacity: 0.98; /* Maintain the same opacity */
+}
+
+.highlight-today {
+    background-color: #bababa; /* Slightly darker shade for the current day */
+}
+
+/* Optionally, you might want to keep the hover effect for today */
+.highlight-today:hover {
+    background-color: #eaeaea; /* Even darker on hover for the current day */
+}
+
+.month-header {
+    text-align: center;
 }
