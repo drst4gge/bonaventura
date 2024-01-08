@@ -95,12 +95,15 @@
                                 <td class="cs-td">{{ user['phone'] }}</td>
                                 <td class="cs-td">
                                     {% for county in counties %}
-                                        <div class="checkbox-container">
-                                            <input type="checkbox" id="county-{{ loop.index }}" name="counties" value="{{ county }}">
-                                            <label for="county-{{ loop.index }}">{{ county }}</label>
-                                        </div>
+                                        {% if county != "--" %} <!-- Check to exclude '--' -->
+                                            <div class="checkbox-container">
+                                                <input type="checkbox" id="county-{{ loop.index }}" name="counties" value="{{ county }}">
+                                                <label for="county-{{ loop.index }}">{{ county }}</label>
+                                            </div>
+                                        {% endif %}
                                     {% endfor %}
                                 </td>
+                                
                                 <td class="cs-td"> -- </td>
                                 <td class="cs-td">
                                     {% if user['role'] == 0 %}

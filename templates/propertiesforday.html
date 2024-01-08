@@ -54,16 +54,21 @@
             {% for property in properties %}
                 <div class="property-tile">       
                     <a href="{{ url_for('property_details', id=property['id']) }}" class="property-link">
+                        {% if property['photo_url'] %}
                         <img class="property-image" src="{{ property['photo_url'] }}" alt="Property Image">
+                        {% else %}
+                            <!-- Display logo if no photo_url is present -->
+                            <img class="property-image" src="{{ url_for('static', filename='images/background.jpg') }}" alt="Default Image">
+                        {% endif %}
                         <div class="property-content">
                             <table style="width: 100%;">
                                 <tbody>
                                     <tr>
-                                        <td style="text-align: left; color: #ff6a3e; font-weight: bolder;">Address</td>
+                                        <td style="text-align: left; color: #000000; font-weight: bolder;">Address</td>
                                         <td style="text-align: right; font-weight: bold;">{{ property['addresses'] }}</td>
                                     </tr>
                                     <tr>
-                                        <td style="text-align: left; color: #ff6a3e; font-weight: bold;">County</td>
+                                        <td style="text-align: left; color: #000000; font-weight: bold;">County</td>
                                         <td style="text-align: right;">{{ property['county'] }}</td>
                                     </tr>
                                     <tr>
@@ -76,11 +81,11 @@
                                     </tr>
                                     <br>
                                     <tr>
-                                        <td style="text-align: left; color: #ff6a3e; font-weight: bold;">Sqft</td>
+                                        <td style="text-align: left; color: #000000; font-weight: bold;">Sqft</td>
                                         <td style="text-align: right;">{{ property['livingArea'] }}</td>
                                     </tr>
                                     <tr>
-                                        <td style="text-align: left; color: #ff6a3e; font-weight: bold;">Acres</td>
+                                        <td style="text-align: left; color: #000000; font-weight: bold;">Acres</td>
                                         <td style="text-align: right;">
                                             {% if property['lotSize'] %}
                                             {{ "%.2f"|format((property['lotSize']) / 43560) }}
@@ -90,11 +95,11 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td style="text-align: left; color: #ff6a3e; font-weight: bold;">Date of Sale</td>
+                                        <td style="text-align: left; color: #000000; font-weight: bold;">Date of Sale</td>
                                         <td style="text-align: right;">{{ property['dateOfSale'] }}</td>
                                     </tr>
                                     <tr>
-                                        <td style="text-align: left; color: #ff6a3e; font-weight: bold;">Time of Sale</td>
+                                        <td style="text-align: left; color: #000000; font-weight: bold;">Time of Sale</td>
                                         <td style="text-align: right;">{{ property['timeOfSale'] }}</td>
                                     </tr>
     

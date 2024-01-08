@@ -38,7 +38,7 @@
         <header id="cs-navigation">
             <div class="cs-container">
                 <!--Nav Logo-->
-                <a href="{{ url_for('home') }}" class="cs-logo" aria-label="back to home">
+                <a href="{{ url_for('admin') }}" class="cs-logo" aria-label="back to home">
                     <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="logo" width="210"
                         height="29" aria-hidden="true" decoding="async">
                 </a>
@@ -54,6 +54,11 @@
                     </button>
                     <div class="cs-ul-wrapper">
                         <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
+                            <li class="cs-li">
+                                <a href="{{ url_for('home') }}" class="cs-li-link">
+                                    <p class="cs-topper">Home</p>
+                                </a>
+                            </li>
                             <li class="cs-li">
                                 <a href="{{ url_for('upload_pdf') }}" class="cs-li-link">
                                     <p class="cs-topper">Upload PDF</p>
@@ -84,13 +89,13 @@
                 <select name="county" id="county">
                     <option value="">All Counties</option>
                     {% for county in counties %}
-                    <option value="{{ county }}" {% if selected_county==county %}selected{% endif %}>{{ county }}
-                    </option>
+                        {% if county != "--" %} <!-- Check to exclude '--' -->
+                            <option value="{{ county }}" {% if selected_county == county %}selected{% endif %}>{{ county }}</option>
+                        {% endif %}
                     {% endfor %}
                 </select>
                 <button type="submit">SORT</button>
             </form>
-
         </div>
 
         <!--
@@ -245,6 +250,8 @@
             {% endfor %}
         </div>
         -->
+        
+        <br>
         <div class="month-header">
             <h1>{{ current_month }}</h1>
         </div>
@@ -252,13 +259,13 @@
         <div class="calendar-grid">
             <!-- Calendar Header -->
             <div class="calendar-header">
-                <div class="calender-header-content">Mon</div>
-                <div class="calender-header-content">Tue</div>
-                <div class="calender-header-content">Wed</div>
-                <div class="calender-header-content">Thu</div>
-                <div class="calender-header-content">Fri</div>
-                <div class="calender-header-content">Sat</div>
-                <div class="calender-header-content">Sun</div>
+                <div class="calender-header-content">Monday</div>
+                <div class="calender-header-content">Tuesday</div>
+                <div class="calender-header-content">Wednesday</div>
+                <div class="calender-header-content">Thursday</div>
+                <div class="calender-header-content">Friday</div>
+                <div class="calender-header-content">Saturday</div>
+                <div class="calender-header-content">Sunday</div>
             </div>
         
             <!-- Empty Cells Before Start of Month -->
@@ -273,15 +280,14 @@
                 
                 <!-- Check if there are properties for the date -->
                 {% if formatted_date in properties_by_date %}
-                    <!-- Day with Properties -->
                     <a href="{{ url_for('properties_for_day', date=date.strftime('%Y-%m-%d')) }}"
-                       class="day-dropdown tile {{ 'highlight-today' if is_today else '' }}">
-                        {{ date.day }} ({{ properties_by_date[formatted_date] | length }} Properties)
+                    class="day-dropdown tile {{ 'current-day' if is_today else '' }}">
+                        <span class="day-date">{{ date.day }}</span> <!-- Separate element for the date -->
+                        {{ properties_by_date[formatted_date] | length }} Properties
                     </a>
                 {% else %}
-                    <!-- Day Without Properties -->
-                    <div class="day-dropdown tile no-properties {{ 'highlight-today' if is_today else '' }}">
-                        {{ date.day }}
+                    <div class="day-dropdown tile no-properties {{ 'current-day' if is_today else '' }}">
+                        <span class="day-date">{{ date.day }}</span> <!-- Separate element for the date -->
                     </div>
                 {% endif %}
             {% endfor %}

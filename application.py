@@ -790,8 +790,13 @@ def get_properties_for_date(selected_date):
     finally:
         conn.close()
 
+        
+
 
 
 if __name__ == "__main__":
     application.run()
+    #To the next developer,
+    #Good luck.. haha.
+    #From Drew
 

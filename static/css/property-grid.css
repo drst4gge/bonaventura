@@ -9,37 +9,29 @@ th {
     padding: 20px;
 }
 
-
 .property-tile {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    border: 1px solid #000000;
-    /* Light blue border for contrast */
+    border: 0.5px solid #000000;
     border-radius: 10px;
     overflow: hidden;
     background: #ffffff;
-    /* White background for tiles for contrast */
     color: #272343;
-    /* Dark text in tiles */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     opacity: 0.98;
-    /* Makes the tile slightly transparent */
     transition: transform 0.3s ease, opacity 0.3s ease;
-
 }
 
 .property-tile:hover {
     transform: scale(1.005);
-    /* Scales up the tile by 5% on hover */
     opacity: 1;
-    /* Full opacity on hover */
 }
 
 .property-image {
     width: 50%;
-    display: block; /* Ensures the image is treated as a block element */
-    margin: 0 auto; /* Centers the image within its container */
+    display: block;
+    margin: 0 auto;
 }
 
 .property-content {
@@ -50,37 +42,32 @@ a {
     text-decoration: none;
     color: black;
 }
+
 .property-buttons {
     display: flex;
-    justify-content: center; /* Center buttons horizontally */
-    align-items: center; /* Align buttons vertically */
+    justify-content: center;
+    align-items: center;
     padding: 10px;
-    
 }
 
 .cs-button-4 {
     text-align: center;
-    align-items: center; /* Align buttons vertically */
+    align-items: center;
     font-size: 1rem;
-    /* Adjust line-height to be half - assuming the original min and max values are 2.875rem and 3.5rem */
     line-height: clamp(1.4375rem, 4vw, 1.75rem);
     text-decoration: none;
     font-weight: 700;
-    /* Set min-width to half */
     min-width: 5.4375rem;
     margin: auto;
     color: #fff;
-    /* Adjust padding, especially the vertical padding if needed */
     padding: 0 1.5rem;
     box-sizing: border-box;
     background-color: #808080;
-    box-shadow: 1x 1px 0px 0px #C0C0C0;
+    box-shadow: 1px 1px 0px 0px #C0C0C0;
     display: inline-block;
     position: relative;
     z-index: 1;
-    transition:
-        background-color 0.3s,
-        box-shadow 0.3s;
+    transition: background-color 0.3s, box-shadow 0.3s;
 }
 
 .cs-button-4:hover {
@@ -89,73 +76,81 @@ a {
 }
 
 .property-content tr {
-    padding-bottom: 20px; /* Adjust as needed */
+    padding-bottom: 20px;
 }
 
 .calendar-grid {
+    width: 70%;
+    margin: 0 auto;
     display: grid;
-    grid-template-columns: repeat(7, 1fr); /* 7 columns for 7 days of the week */
-    grid-gap: 1px; /* Adjust if you want wider/narrower lines */
+    grid-template-columns: repeat(7, 1fr); 
+    grid-gap: 6px; /* Increase the gap between each tile */
     background-color: #ccc; /* Color of the lines */
+    grid-auto-rows: 150px;
 }
 
 .day-dropdown {
-    background-color: #fff; /* Background color of day tiles */
-    /* Rest of your styles */
-    /* ... */
-}
-
-.calendar-header {
-    display: contents; /* This makes it part of the grid */
-    padding: 10px;
-
-}
-
-
-.calendar-header div {
-    text-align: center;
-    background-color: #f0f0f0; /* Slightly different background for headers */
-    padding: 10px 0; /* Adjust padding to your liking */
-    
-    font-weight: bold;
-
-}
-
-
-.day-dropdown {
-    border: 2px solid #000000;
+    background-color: #fff;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #000000;
     border-radius: 5px;
-    background-color: #f9f9f9; /* Light background for each day */
-    cursor: pointer; /* Change cursor to pointer to indicate it's clickable */
-    transition: background-color 0.3s ease; /* Smooth transition for hover effect */
-    font-weight: bold; /* Make text bold */
-    text-align: center; /* Center the text */
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-top: 30px;
-    padding-bottom: 30px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-weight: bold;
+    text-align: center;
+    padding: 30px 10px;
+}
+
+.day-date {
+    position: absolute;
+    top: 10px; /* Adjust the position */
+    left: 10px;
+    font-weight: bold;
+    font-size: 1.4em; /* Increase the font size for readability */
+}
+
+.current-day .day-date {
+    /* Same styles as before */
+    background-color: rgb(195, 0, 0);
+    color: #fff;
+    border-radius: 50%;
+    width: 1.5em;
+    height: 1.5em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.2em;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: normal;
 }
 
 .day-dropdown:hover {
-    background-color: #eaeaea; /* Slightly darker on hover */
+    background-color: #eaeaea;
 }
 
 .dropdown-btn {
-    font-size: 1.2em; /* Adjust for bigger text */
-    color: white; /* Text color */
-    font-weight: bold; /* Make text bold */
-    text-align: center; /* Center the text */
-    background-color: #8d8d8d; /* Background color of the button, adjust as needed */
-    border: none; /* Remove border if present */
-    padding: 10px 20px; /* Adjust padding as needed, ensures the text is about a third of the button height */
-    width: 100%; /* Optional: if you want the button to take the full width of its container */
-    cursor: pointer; /* Change cursor to pointer to indicate it's clickable */
-    border-radius: 5px; /* Optional: if you want rounded corners */
-    transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+    /* Same styles as before */
+    font-size: 1.2em;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    background-color: #8d8d8d;
+    border: none;
+    padding: 10px 20px;
+    width: 100%;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
 }
 
 .dropdown-btn:hover {
-    background-color: #a8a8a8; /* Slightly darker shade on hover, adjust as needed */
+    background-color: #a8a8a8;
     transform: scale(1.005);
 }
 
@@ -165,31 +160,43 @@ a {
 }
 
 .property-tile {
+    /* Same styles as before */
     padding: 10px;
     background-color: #f4f4f4;
-    
-    border: 2px solid #000000;
+    border: 1px solid #000000;
 }
 
 .no-properties {
-    background-color: #757575; /* Slightly darker shade for days without properties */
+    background-color: #d7d7d7;
 }
 
 .no-properties:hover {
-    background-color: #757575; /* Keep the same color on hover */
-    transform: none; /* Remove any transformation if applied on hover */
-    opacity: 0.98; /* Maintain the same opacity */
+    background-color: #d7d7d7;
+    transform: none;
+    opacity: 0.98;
 }
 
 .highlight-today {
-    background-color: #bababa; /* Slightly darker shade for the current day */
+    background-color: #bababa;
 }
 
-/* Optionally, you might want to keep the hover effect for today */
 .highlight-today:hover {
-    background-color: #eaeaea; /* Even darker on hover for the current day */
+    background-color: #eaeaea;
 }
 
 .month-header {
     text-align: center;
 }
+
+.calendar-header {
+    display: contents;
+    padding: 2px;
+}
+
+.calendar-header div {
+    text-align: center;
+    background-color: #f0f0f0;
+    padding: 10px 0;
+    font-weight: bold;
+}
+
