@@ -87,19 +87,20 @@ def get_unique_counties():
     finally:
         conn.close()
 
-def update_property(property_id, address, zpid, bedrooms, bathrooms, livingArea, lotSize, county, dateOfSale, timeOfSale):
+def update_property(property_id, address, zpid, bedrooms, bathrooms, livingArea, lotSize, county, dateOfSale, timeOfSale, price):
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
             update_sql = """
             UPDATE all_properties 
-            SET addresses = %s, zpid = %s, bedrooms = %s, bathrooms = %s, livingArea = %s, lotSize = %s, county = %s, dateOfSale = %s, timeOfSale = %s
+            SET addresses = %s, zpid = %s, bedrooms = %s, bathrooms = %s, livingArea = %s, lotSize = %s, county = %s, dateOfSale = %s, timeOfSale = %s, price = %s
             WHERE id = %s
             """
-            cursor.execute(update_sql, (address, zpid, bedrooms, bathrooms, livingArea, lotSize, county, property_id, dateOfSale, timeOfSale))
+            cursor.execute(update_sql, (address, zpid, bedrooms, bathrooms, livingArea, lotSize, county, dateOfSale, timeOfSale, price, property_id))
         conn.commit()
     finally:
         conn.close()
+
 
 def delete_property(property_id):
     conn = get_db_connection()
@@ -723,23 +724,30 @@ def process_pdf(file_path):
 
     for address, date_of_sale, time_of_sale, price in auction_details:
         try:
+            property_id = check_address_exists(address)
             print(f"Processing Address: {address}, Date: {date_of_sale}, Time: {time_of_sale}, Price: {price}")
-            zpid = get_zpid_from_address(address)
-            if zpid:
-                details = get_property_details(zpid)
-                photo_url = get_photos(zpid)
-                insert_address(
-                    address, zpid, details.get('bedrooms', None), details.get('bathrooms', None),
-                    details.get('livingArea', None), details.get('lotSize', None),
-                    details.get('county', None), photo_url, date_of_sale, time_of_sale, price
+            zpid = get_zpid_from_address(address) if not property_id else None
+            details = get_property_details(zpid) if zpid else {}
+            photo_url = get_photos(zpid) if zpid else None
+
+            if property_id:
+                update_property(
+                    property_id, address, zpid, details.get('bedrooms', None), details.get('bathrooms', None),
+                    details.get('livingArea', None), details.get('lotSize', None), 
+                    details.get('county', None), date_of_sale, time_of_sale, price
                 )
             else:
-                insert_address(address, None, None, None, None, None, None, None, date_of_sale, time_of_sale, price)
+                insert_address(
+                    address, zpid, details.get('bedrooms', None), details.get('bathrooms', None),
+                    details.get('livingArea', None), details.get('lotSize', None), 
+                    details.get('county', None), photo_url, date_of_sale, time_of_sale, price
+                )
         except Exception as e:
             print(f"Error processing address {address}: {e}")
             continue
 
     print("Processing of PDF completed.")
+
 
 
 @application.route('/upload_photo/<int:id>', methods=['POST'])
@@ -789,6 +797,22 @@ def get_properties_for_date(selected_date):
             return cursor.fetchall()
     finally:
         conn.close()
+
+def check_address_exists(address):
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            query_sql = "SELECT id FROM all_properties WHERE addresses = %s"
+            cursor.execute(query_sql, (address,))
+            result = cursor.fetchone()
+            if result:
+                return result[0]  # Access the first element of the tuple
+            else:
+                return None
+    finally:
+        conn.close()
+
+
 
         
 
