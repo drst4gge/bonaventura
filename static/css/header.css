@@ -50,6 +50,11 @@
       justify-content: flex-end;
       align-items: center;
     }
+    .cs-container, .main-content-container {
+      max-width: 80rem; /* Example width - adjust as needed */
+      margin: auto; /* Centers the container */
+      width: 100%; /* Full width of the container */
+    }
     #cs-navigation .cs-logo {
       width: 40%;
       max-width: 9.125rem;
@@ -262,6 +267,11 @@
       justify-content: flex-end;
       align-items: center;
       gap: 1.5rem;
+    }
+    .cs-container, .main-content-container {
+      max-width: 80rem; /* Example width - adjust as needed */
+      margin: auto; /* Centers the container */
+      width: 100%; /* Full width of the container */
     }
     #cs-navigation .cs-toggle {
       display: none;

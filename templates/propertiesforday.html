@@ -54,11 +54,11 @@
             {% for property in properties %}
                 <div class="property-tile">       
                     <a href="{{ url_for('property_details', id=property['id']) }}" class="property-link">
-                        {% if property['photo_url'] %}
-                        <img class="property-image" src="{{ property['photo_url'] }}" alt="Property Image">
+                        {% if property['photo_url'] and 'maps.googleapis.com/maps/api/streetview' not in property['photo_url'] %}
+                            <img class="property-image" src="{{ property['photo_url'] }}" alt="Property Image">
                         {% else %}
-                            <!-- Display logo if no photo_url is present -->
-                            <img class="property-image" src="{{ url_for('static', filename='images/background.jpg') }}" alt="Default Image">
+                            <!-- Display logo if no valid photo_url is present or if it's a Google Street View URL -->
+                            <img class="property-image" style="opacity: 0.2;"src="{{ url_for('static', filename='images/background.jpg') }}" alt="Default Image">
                         {% endif %}
                         <div class="property-content">
                             <table style="width: 100%;">

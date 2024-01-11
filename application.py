@@ -13,7 +13,7 @@ import stripe
 import re
 from PyPDF2 import PdfReader
 from datetime import datetime, timedelta
-
+import calendar
 application = Flask(__name__)
 load_dotenv()
 
@@ -87,16 +87,16 @@ def get_unique_counties():
     finally:
         conn.close()
 
-def update_property(property_id, address, zpid, bedrooms, bathrooms, livingArea, lotSize, county, dateOfSale, timeOfSale, price):
+def update_property(property_id, dateOfSale, timeOfSale, price):
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
             update_sql = """
             UPDATE all_properties 
-            SET addresses = %s, zpid = %s, bedrooms = %s, bathrooms = %s, livingArea = %s, lotSize = %s, county = %s, dateOfSale = %s, timeOfSale = %s, price = %s
+            SET dateOfSale = %s, timeOfSale = %s, price = %s
             WHERE id = %s
             """
-            cursor.execute(update_sql, (address, zpid, bedrooms, bathrooms, livingArea, lotSize, county, dateOfSale, timeOfSale, price, property_id))
+            cursor.execute(update_sql, (dateOfSale, timeOfSale, price, property_id))
         conn.commit()
     finally:
         conn.close()
@@ -162,7 +162,37 @@ def get_property_details(zpid):
 
 @application.route('/')
 def home():
-    return render_template('index.html')
+    today = datetime.today()
+    current_date = today.strftime('%Y-%m-%d')
+    year = request.args.get('year', today.year, type=int)
+    month = request.args.get('month', today.month, type=int)
+    selected_county = request.args.get('county', type=str)
+
+    if month < 1:
+        month = 12
+        year -= 1
+    elif month > 12:
+        month = 1
+        year += 1
+
+    year = max(1900, min(year, 2100))
+    current_month = datetime(year, month, 1).strftime('%B')
+
+    properties = get_all_properties()  # Fetch all properties
+    counties = get_unique_counties()  # Fetch unique counties for filter dropdown
+
+    # Filter properties by selected county
+    if selected_county:
+        properties = [prop for prop in properties if prop.get('county') == selected_county]
+
+    calendar_data = generate_calendar(year, month, properties)
+
+    # Remove 'year' and 'month' from calendar_data to prevent duplication
+    calendar_data.pop('year', None)
+    calendar_data.pop('month', None)
+
+    return render_template('index.html', current_month=current_month, year=year, month=month, current_date=current_date, selected_county=selected_county, counties=counties, **calendar_data)
+    
 
 @application.route('/pricing')
 def pricing():
@@ -253,64 +283,75 @@ def agent():
     
     return render_template('agent.html', properties_by_date=properties_by_date_with_day, counties=counties, selected_county=county_filter)
 
-@application.route('/admin')
-@requires_roles(2)
-def admin():
-    today = datetime.today()
-    current_date = today.date()
-    current_month = today.strftime('%B %Y')
-    first_day_of_month = datetime(today.year, today.month, 1)
-    
-    # Calculate the first weekday (Python's `weekday()` returns Monday as 0)
+def generate_calendar(year, month, properties):
+    if month > 12:
+        year += 1
+        month = 1
+    elif month < 1:
+        year -= 1
+        month = 12
+
+    first_day_of_month = datetime(year, month, 1)
+    last_day_of_month = datetime(year, month, calendar.monthrange(year, month)[1])
+
     first_weekday = first_day_of_month.weekday()
+    days_in_month = (last_day_of_month - first_day_of_month).days + 1
 
-    # Adjust the start position for CSS grid (grid starts at 1, and we want Monday to be 1)
-    start_position = first_weekday + 1
-    
-    # If the first day of the month is Sunday, start_position should be 7
-    if first_weekday == 6:
-        start_position = 7
+    # Create a dictionary to hold property data for each day
+    properties_by_date = {day: [] for day in range(1, days_in_month + 1)}
 
-    # Calculate last day of the month
-    next_month = first_day_of_month.replace(day=28) + timedelta(days=4)
-    last_day_of_month = next_month - timedelta(days=next_month.day)
-
-    # Generate a list of all days in the current month
-    date_list = [first_day_of_month + timedelta(days=x) for x in range((last_day_of_month - first_day_of_month).days + 1)]
-    
-    county_filter = request.args.get('county')
-    properties = get_all_properties()
-
-    # Filter properties by date and county if selected
-    filtered_properties = []
+    # Populate the dictionary with property data
     for prop in properties:
         prop_date = prop['dateOfSale']
-        # Check if the date is a string and convert to date object if necessary
         if isinstance(prop_date, str):
             prop_date = datetime.strptime(prop_date, '%Y-%m-%d').date()
-        
-        if prop_date >= current_date:
-            if not county_filter or (county_filter and prop.get('county') == county_filter):
-                filtered_properties.append(prop)
+        if prop_date.year == year and prop_date.month == month:
+            properties_by_date[prop_date.day].append(prop)
 
-    # Sort the filtered properties by 'dateOfSale'
-    filtered_properties.sort(key=lambda x: datetime.strptime(x['dateOfSale'], '%Y-%m-%d') if isinstance(x['dateOfSale'], str) else x['dateOfSale'])
+    return {
+        "year": year,
+        "month": month,
+        "first_weekday": first_weekday,
+        "days_in_month": days_in_month,
+        "properties_by_date": properties_by_date
+    }
 
-    # Group properties by 'dateOfSale' and include the day of the week
-    properties_by_date_with_day = {}
-    for prop in filtered_properties:
-        prop_date = datetime.strptime(prop['dateOfSale'], '%Y-%m-%d') if isinstance(prop['dateOfSale'], str) else prop['dateOfSale']
-        day_name = prop_date.strftime('%A')  # Gets the day name (e.g., 'Monday')
-        formatted_date = f"{day_name}, {prop_date.strftime('%Y-%m-%d')}"  # Format: 'Day, YYYY-MM-DD'
-        properties_by_date_with_day.setdefault(formatted_date, []).append(prop)
+@application.route('/admin')
+def admin():
+    today = datetime.today()
+    current_date = today.strftime('%Y-%m-%d')
+    year = request.args.get('year', today.year, type=int)
+    month = request.args.get('month', today.month, type=int)
+    selected_county = request.args.get('county', type=str)
 
-    # Get unique counties for the filter dropdown
-    counties = get_unique_counties()
+    if month < 1:
+        month = 12
+        year -= 1
+    elif month > 12:
+        month = 1
+        year += 1
 
-    # Get all users if needed for the page
-    users = get_all_users()
-    
-    return render_template('admin.html', current_month=current_month, first_weekday=first_weekday, start_position=start_position, current_date=current_date, date_list=date_list, properties_by_date=properties_by_date_with_day, users=users, counties=counties, selected_county=county_filter)
+    year = max(1900, min(year, 2100))
+    current_month = datetime(year, month, 1).strftime('%B')
+
+    properties = get_all_properties()  # Fetch all properties
+    counties = get_unique_counties()  # Fetch unique counties for filter dropdown
+
+    # Filter properties by selected county
+    if selected_county:
+        properties = [prop for prop in properties if prop.get('county') == selected_county]
+
+    calendar_data = generate_calendar(year, month, properties)
+
+    # Remove 'year' and 'month' from calendar_data to prevent duplication
+    calendar_data.pop('year', None)
+    calendar_data.pop('month', None)
+
+    return render_template('admin.html', current_month=current_month, year=year, month=month, current_date=current_date, selected_county=selected_county, counties=counties, **calendar_data)
+
+
+
+
 
 
 
@@ -725,23 +766,23 @@ def process_pdf(file_path):
     for address, date_of_sale, time_of_sale, price in auction_details:
         try:
             property_id = check_address_exists(address)
-            print(f"Processing Address: {address}, Date: {date_of_sale}, Time: {time_of_sale}, Price: {price}")
+            
             zpid = get_zpid_from_address(address) if not property_id else None
             details = get_property_details(zpid) if zpid else {}
             photo_url = get_photos(zpid) if zpid else None
 
             if property_id:
                 update_property(
-                    property_id, address, zpid, details.get('bedrooms', None), details.get('bathrooms', None),
-                    details.get('livingArea', None), details.get('lotSize', None), 
-                    details.get('county', None), date_of_sale, time_of_sale, price
+                    property_id, date_of_sale, time_of_sale, price
                 )
+                print(f"Updating Address: {address}, Date: {date_of_sale}, Time: {time_of_sale}, Price: {price}")
             else:
                 insert_address(
                     address, zpid, details.get('bedrooms', None), details.get('bathrooms', None),
                     details.get('livingArea', None), details.get('lotSize', None), 
                     details.get('county', None), photo_url, date_of_sale, time_of_sale, price
                 )
+                print(f"Inserting New Address: {address}, Date: {date_of_sale}, Time: {time_of_sale}, Price: {price}")
         except Exception as e:
             print(f"Error processing address {address}: {e}")
             continue

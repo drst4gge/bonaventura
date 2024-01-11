@@ -205,6 +205,8 @@
         height: 100%;
         width: 100%;
         object-fit: cover;
+        border-radius: 20px; /* Adjust the radius as needed */
+        border: 4px solid black; 
     }
 }
 /* Tablet - 768px */
@@ -232,5 +234,6 @@
         height: clamp(7.875rem, 18vw, 13.8125rem);
     }
 }
+
 
                                 

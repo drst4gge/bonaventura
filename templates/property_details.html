@@ -47,16 +47,27 @@
                 <div class="cs-content">
                     
                     <p class="cs-topper" style="font-weight: bolder; font-size:xx-large;">{{ property['addresses'] }}</p>
-                    <p class="cs-text"> {{ property['bedrooms'] }} <i class="fi fi-ss-bed-empty"></i></p>
-                    <p class="cs-text"> {{ property['bathrooms'] }} <i class="fi fi-ss-shower"></i></p>
-                    <p class="cs-text">{{ property['livingArea'] }} Home Sqft</p>
-                    <p class="cs-text">{{ "%.2f"|format((property['lotSize']) / 43560) }} Acres</p>
+                    <p class="cs-text">Date of Sale | {{ property['dateOfSale'] }}</p>
+                    <p class="cs-text">Time of Sale | {{ property['timeOfSale'] }}</p>
+                    <p class="cs-text"> Beds | {{ property['bedrooms'] }} </p>
+                    <p class="cs-text"> Baths | {{ property['bathrooms'] }} </p>
+                    <p class="cs-text"> County | {{ property['county'] }}</p>
+                    <p class="cs-text">SQFT | {{ property['livingArea'] }} </p>
+                    <p class="cs-text">
+                        Acres | 
+                        {% if property['lotSize'] is not none %}
+                            {{ "%.2f"|format(property['lotSize'] / 43560) }}
+                        {% else %}
+                            Not Available
+                        {% endif %}
+                    </p>
 
                     <a class="cs-button-solid"
                         href="{{ url_for('bid', id=property['id'], address=property['address']) }}" class="btn">PLACE
                         BID</a>
                 </div>
                 <div class="cs-stat-group">
+                    
                     <picture class="cs-background">
                         <source media="(max-width: 600px)" src="{{ property['photo_url'] }}">
                         <source media="(min-width: 601px)" src="{{ property['photo_url'] }}">

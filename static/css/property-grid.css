@@ -29,10 +29,15 @@ th {
 }
 
 .property-image {
-    width: 50%;
+    width: 100%; /* Set the width of the image to cover the full width of its container */
+    height: 200px; /* Adjust this value based on your design requirements */
+    object-fit: contain; /* This will ensure that the image covers the allocated area without distortion */
     display: block;
     margin: 0 auto;
+    background-color: #f0f0f0; /* Optional: a background color for when the image is not available */
+    
 }
+
 
 .property-content {
     padding: 5px;
@@ -140,18 +145,19 @@ a {
     color: white;
     font-weight: bold;
     text-align: center;
-    background-color: #8d8d8d;
+    background-color: #000000;
     border: none;
     padding: 10px 20px;
     width: 100%;
     cursor: pointer;
-    border-radius: 5px;
+    border-radius: 6px;
     transition: background-color 0.3s ease;
 }
 
 .dropdown-btn:hover {
-    background-color: #a8a8a8;
+    background-color: #333333;
     transform: scale(1.005);
+    transition: background-color 0.3s ease;
 }
 
 .dropdown-content {
@@ -186,6 +192,9 @@ a {
 
 .month-header {
     text-align: center;
+    text-transform: capitalize;
+    
+    font-size: larger;
 }
 
 .calendar-header {
@@ -198,5 +207,28 @@ a {
     background-color: #f0f0f0;
     padding: 10px 0;
     font-weight: bold;
+}
+
+.month-nav {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.month-nav a {
+    text-decoration: none;
+    font-size: 24px;
+    margin: 0 15px;
+    color: black; /* Adjust color as needed */
+}
+
+.month-header {
+    text-align: center;
+    margin-bottom: 20px; /* Adjust as needed */
+}
+
+.month-nav span {
+    font-size: 24px; /* Increase font size */
+    font-weight: bold; /* Make text bold */
+    margin: 0 10px; /* Adjust spacing as needed */
 }
 

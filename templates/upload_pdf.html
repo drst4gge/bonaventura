@@ -24,7 +24,7 @@
         <header id="cs-navigation">
             <div class="cs-container">
                 <!--Nav Logo-->
-                <a href="{{ url_for('home') }}" class="cs-logo" aria-label="back to home">
+                <a href="{{ url_for('admin') }}" class="cs-logo" aria-label="back to home">
                     <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="logo" width="210"
                         height="29" aria-hidden="true" decoding="async">
                 </a>
@@ -41,28 +41,13 @@
                     <div class="cs-ul-wrapper">
                         <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
                             <li class="cs-li">
-                                <a href="{{ url_for('add_address') }}" class="cs-li-link">
-                                    <p class="cs-topper">Add Address</p>
-                                </a>
-                            </li>
-                            <li class="cs-li">
-                                <a href="{{ url_for('add_user') }}" class="cs-li-link">
-                                    <p class="cs-topper">Add User</p>
-                                </a>
-                            </li>
-                            <li class="cs-li">
-                                <a href="{{ url_for('upload_pdf') }}" class="cs-li-link">
-                                    <p class="cs-topper">Upload PDF</p>
+                                <a href="{{ url_for('home') }}" class="cs-li-link">
+                                    <p class="cs-topper">Home</p>
                                 </a>
                             </li>
 
 
-                            <li class="cs-li">
-                                <a href="https://salesweb.civilview.com/Sales/SalesSearch?countyId=7" target="_blank"
-                                    class="cs-li-link">
-                                    <p class="cs-topper">Bergen County Addresses</p>
-                                </a>
-                            </li>
+                            
                         </ul>
                     </div>
                 </nav>
