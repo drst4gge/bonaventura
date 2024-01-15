@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <title>DAILY PROPERTIES</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background_color.css') }}">
@@ -16,6 +17,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/table.css') }}">
     <script src="{{ url_for('static', filename='js/header.js') }}"></script>
 </head>
+
 <body>
     <div class="wrapper">
         <header id="cs-navigation">
@@ -38,7 +40,7 @@
                     <div class="cs-ul-wrapper">
                         <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
 
-                            
+
                         </ul>
                     </div>
                 </nav>
@@ -47,76 +49,79 @@
         <br>
         <br>
         <br>
-        
-        
-        
+
+
+
         <div class="property-grid">
             {% for property in properties %}
-                <div class="property-tile">       
-                    <a href="{{ url_for('property_details', id=property['id']) }}" class="property-link">
-                        {% if property['photo_url'] and 'maps.googleapis.com/maps/api/streetview' not in property['photo_url'] %}
-                            <img class="property-image" src="{{ property['photo_url'] }}" alt="Property Image">
-                        {% else %}
-                            <!-- Display logo if no valid photo_url is present or if it's a Google Street View URL -->
-                            <img class="property-image" style="opacity: 0.2;"src="{{ url_for('static', filename='images/background.jpg') }}" alt="Default Image">
-                        {% endif %}
-                        <div class="property-content">
-                            <table style="width: 100%;">
-                                <tbody>
-                                    <tr>
-                                        <td style="text-align: left; color: #000000; font-weight: bolder;">Address</td>
-                                        <td style="text-align: right; font-weight: bold;">{{ property['addresses'] }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td style="text-align: left; color: #000000; font-weight: bold;">County</td>
-                                        <td style="text-align: right;">{{ property['county'] }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fi fi-ss-bed-empty"></i></td>
-                                        <td style="text-align: right;">{{ property['bedrooms'] }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fi fi-ss-shower"></i></td>
-                                        <td style="text-align: right;">{{ property['bathrooms'] }}</td>
-                                    </tr>
-                                    <br>
-                                    <tr>
-                                        <td style="text-align: left; color: #000000; font-weight: bold;">Sqft</td>
-                                        <td style="text-align: right;">{{ property['livingArea'] }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td style="text-align: left; color: #000000; font-weight: bold;">Acres</td>
-                                        <td style="text-align: right;">
-                                            {% if property['lotSize'] %}
-                                            {{ "%.2f"|format((property['lotSize']) / 43560) }}
-                                            {% else %}
-                                            Not Available
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td style="text-align: left; color: #000000; font-weight: bold;">Date of Sale</td>
-                                        <td style="text-align: right;">{{ property['dateOfSale'] }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td style="text-align: left; color: #000000; font-weight: bold;">Time of Sale</td>
-                                        <td style="text-align: right;">{{ property['timeOfSale'] }}</td>
-                                    </tr>
-    
-    
-                                </tbody>
-                            </table>
-                        </div>
-                    </a>
+            <div class="property-tile">
+                <a href="{{ url_for('property_details', id=property['id']) }}" class="property-link">
+                    {% if property.display_photo_url %}
+                    <img class="property-image" src="{{ property.display_photo_url }}" alt="Property Image">
+                    {% else %}
+                    <!-- Display a default image -->
+                    <img class="property-image" src="{{ url_for('static', filename='images/background.jpg') }}"
+                        alt="Default Property Image">
+                    {% endif %}
+                    <div class="property-content">
+                        <table style="width: 100%;">
+                            <tbody>
+                                <tr>
+                                    <td style="text-align: left; color: #000000; font-weight: bolder;">Address</td>
+                                    <td style="text-align: right; font-weight: bold;">{{ property['addresses'] }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left; color: #000000; font-weight: bold;">County</td>
+                                    <td style="text-align: right;">{{ property['county'] }}</td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fi fi-ss-bed-empty"></i></td>
+                                    <td style="text-align: right;">{{ property['bedrooms'] }}</td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fi fi-ss-shower"></i></td>
+                                    <td style="text-align: right;">{{ property['bathrooms'] }}</td>
+                                </tr>
+                                <br>
+                                <tr>
+                                    <td style="text-align: left; color: #000000; font-weight: bold;">Sqft</td>
+                                    <td style="text-align: right;">{{ property['livingArea'] }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left; color: #000000; font-weight: bold;">Acres</td>
+                                    <td style="text-align: right;">
+                                        {% if property['lotSize'] %}
+                                        {{ "%.2f"|format((property['lotSize']) / 43560) }}
+                                        {% else %}
+                                        Not Available
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left; color: #000000; font-weight: bold;">Date of Sale</td>
+                                    <td style="text-align: right;">{{ property['dateOfSale'] }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left; color: #000000; font-weight: bold;">Time of Sale</td>
+                                    <td style="text-align: right;">{{ property['timeOfSale'] }}</td>
+                                </tr>
+
+
+                            </tbody>
+                        </table>
+                    </div>
+                </a>
+                {% if session['user_role'] == 1 or session['user_role'] == 2 %}
+                    <!-- Only display these buttons for agents (role 1) and admins (role 2) -->
                     <div class="property-buttons">
-                        <!-- Buttons for edit, delete, and add photos -->
                         <a href="{{ url_for('edit_address', id=property['id']) }}" class="cs-button-4">Edit</a>
                         <a href="{{ url_for('delete_address', id=property['id']) }}" class="cs-button-4">Delete</a>
-                        <a href="" class="cs-button-4">Photos</a>
+                        <a href="{{ url_for('manage_photos', property_id=property['id']) }}" class="cs-button-4">Photos</a>
                     </div>
-                </div>
+                {% endif %}
+            </div>
             {% else %}
-                <p>No properties available for this day.</p>
+            <p>No properties available for this day.</p>
             {% endfor %}
         </div>
 
@@ -128,4 +133,5 @@
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <!-- Include other necessary JavaScript files here -->
 </body>
+
 </html>

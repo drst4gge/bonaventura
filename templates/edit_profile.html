@@ -22,31 +22,28 @@
     <div class="wrapper">
         <section id="contact-718">
             <div class="cs-container">
-                <!-- Optional picture section here, if you want to include an image -->
                 <div class="cs-content">
                     <span class="cs-topper">Update your Bonaventura account.</span>
                     
-                    <form class="cs-form" action="/update_user" method="post">
-                        <!-- Hidden ID Field -->
-                        <input type="hidden" name="id" value="{{ user['user_id'] }}">
+                    <form class="cs-form" action="{{ url_for('update_user', user_id=user['id']) }}" method="post">
+                        <!-- Hidden Fields -->
+                        <input type="hidden" name="id" value="{{ user['id'] }}">
+                        <input type="hidden" name="username" value="{{ user['username'] }}">
+                        <input type="hidden" name="stripe_customer_id" value="{{ user['stripe_customer_id'] }}">
+                        <input type="hidden" name="role" value="{{ user['role'] }}">
 
-                        <label for="username">
-                            <p class="cs-topper">Username</p>
-                            <input class="cs-input" type="text" id="username" name="username"
-                                value="{{ user['username'] }}" placeholder="Username" required>
-                        </label>
-
+                        <!-- Email Field -->
                         <label for="email">
                             <p class="cs-topper">Email</p>
-                            <input class="cs-input" type="text" id="email" name="email" value="{{ user['email'] }}"
-                                placeholder="Email">
+                            <input class="cs-input" type="email" id="email" name="email" value="{{ user['email'] }}" placeholder="Email">
                         </label>
 
+                        <!-- Phone Field -->
                         <label for="phone">
                             <p class="cs-topper">Phone Number</p>
-                            <input class="cs-input" type="number" id="phone" name="phone"
-                                value="{{ user['phone'] }}" placeholder="Phone Number (Only digits, no seperators or extension.)">
+                            <input class="cs-input" type="tel" id="phone" name="phone" value="{{ user['phone'] }}" placeholder="Phone Number">
                         </label>
+
 
                         <!-- Submit Button -->
                         <button class="cs-button-solid cs-submit" type="submit">Update</button>

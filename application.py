@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template, redirect, url_for, flash, jsonify
 from werkzeug.security import generate_password_hash
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
@@ -14,14 +14,17 @@ import re
 from PyPDF2 import PdfReader
 from datetime import datetime, timedelta
 import calendar
+from stripe.error import InvalidRequestError
+
 application = Flask(__name__)
 load_dotenv()
 
-stripe.api_key = 'your_stripe_secret_key'
+stripe.api_key = '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'
 application.secret_key = os.environ.get('SECRET_KEY')
 
 UPLOAD_FOLDER = 'static/pdfs' 
 ALLOWED_EXTENSIONS = {'pdf'}
+ALLOWED_EXTENSIONS_PHOTO = {'png', 'jpg', 'jpeg', 'gif'}
 
 application.config['UPLOAD_FOLDER'] = 'static/pdfs'
 
@@ -75,6 +78,15 @@ def get_property_by_id(property_id):
         with conn.cursor(pymysql.cursors.DictCursor) as cursor:
             cursor.execute("SELECT * FROM all_properties WHERE id = %s", (property_id,))
             return cursor.fetchone()
+    finally:
+        conn.close()
+
+def get_photos_by_property_id(property_id):
+    conn = get_db_connection()
+    try:
+        with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+            cursor.execute("SELECT photo_url FROM property_photos WHERE property_id = %s", (property_id,))
+            return cursor.fetchall()
     finally:
         conn.close()
 
@@ -214,38 +226,46 @@ def properties_page():
 @application.route('/subscriber')
 @requires_roles(0)
 def subscriber():
-    county_filter = request.args.get('county')
-    properties = get_all_properties()
+    user_id = session.get('user_id')
+    if not user_id:
+        # Handle the case where there is no user logged in
+        flash('You need to be logged in to view this page.')
+        return redirect(url_for('login_form'))
+    today = datetime.today()
+    current_date = today.strftime('%Y-%m-%d')
+    year = request.args.get('year', today.year, type=int)
+    month = request.args.get('month', today.month, type=int)
+    selected_county = request.args.get('county', type=str)
 
-    # Filter properties by date and county if selected
-    filtered_properties = []
-    for prop in properties:
-        prop_date = prop['dateOfSale']
-        if isinstance(prop_date, str):
-            prop_date = datetime.strptime(prop_date, '%Y-%m-%d').date()
+    if month < 1:
+        month = 12
+        year -= 1
+    elif month > 12:
+        month = 1
+        year += 1
 
-        if prop_date >= datetime.now().date():
-            if not county_filter or (county_filter and prop.get('county') == county_filter):
-                filtered_properties.append(prop)
-
-    # Sort the filtered properties by 'dateOfSale'
-    filtered_properties.sort(key=lambda x: x['dateOfSale'])
-
-    # Group properties by 'dateOfSale' and include the day of the week
-    properties_by_date_with_day = {}
-    for prop in filtered_properties:
-        prop_date = prop['dateOfSale']
-        if isinstance(prop_date, str):
-            prop_date = datetime.strptime(prop_date, '%Y-%m-%d').date()
-
-        day_name = prop_date.strftime('%A')  # Gets the day name (e.g., 'Monday')
-        formatted_date = f"{day_name}, {prop_date.strftime('%Y-%m-%d')}"  # Format: 'Day, YYYY-MM-DD'
-        properties_by_date_with_day.setdefault(formatted_date, []).append(prop)
-
-    # Get unique counties for the filter dropdown
+    year = max(1900, min(year, 2100))
+    current_month = datetime(year, month, 1).strftime('%B')
+    properties = get_all_properties()  # Fetch all properties
     counties = get_unique_counties()
+    # Fetch all properties with their latest photo URLs
     
-    return render_template('subscriber.html', properties_by_date=properties_by_date_with_day, counties=counties, selected_county=county_filter)
+    
+    if selected_county:
+        properties = [prop for prop in properties if prop.get('county') == selected_county]
+
+    calendar_data = generate_calendar(year, month, properties)
+
+    # Remove 'year' and 'month' from calendar_data to prevent duplication
+    calendar_data.pop('year', None)
+    calendar_data.pop('month', None)
+
+    counties = get_unique_counties()  # Fetch unique counties for filter dropdown
+    user = get_user_by_id(user_id)
+    return render_template('subscriber.html', user=user, current_month=current_month, year=year, month=month, current_date=current_date, selected_county=selected_county, counties=counties, **calendar_data)
+    
+    
+    
 
 @application.route('/agent')
 @requires_roles(1)
@@ -333,11 +353,11 @@ def admin():
 
     year = max(1900, min(year, 2100))
     current_month = datetime(year, month, 1).strftime('%B')
-
     properties = get_all_properties()  # Fetch all properties
-    counties = get_unique_counties()  # Fetch unique counties for filter dropdown
-
-    # Filter properties by selected county
+    counties = get_unique_counties()
+    # Fetch all properties with their latest photo URLs
+    
+    
     if selected_county:
         properties = [prop for prop in properties if prop.get('county') == selected_county]
 
@@ -347,13 +367,9 @@ def admin():
     calendar_data.pop('year', None)
     calendar_data.pop('month', None)
 
+    counties = get_unique_counties()  # Fetch unique counties for filter dropdown
+
     return render_template('admin.html', current_month=current_month, year=year, month=month, current_date=current_date, selected_county=selected_county, counties=counties, **calendar_data)
-
-
-
-
-
-
 
 @application.route('/admin_usercontrol', methods=['GET'])
 def admin_usercontrol():
@@ -379,21 +395,69 @@ def edit_profile():
         phone = request.form['phone']
         # Update user information in the database
         update_user(user_id, username, email, phone)
-        return redirect(url_for('profile'))
+        return redirect(url_for('admin'))
+
+from stripe.error import StripeError
 
 @application.route('/delete_user/<int:user_id>', methods=['GET'])
 def delete_user(user_id):
-    # Delete user from the database
     conn = get_db_connection()
     try:
+        # Retrieve the user to get the Stripe customer ID
+        with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+            cursor.execute("SELECT * FROM users WHERE id = %s", (user_id,))
+            user = cursor.fetchone()
+
+        # Check if the user has a Stripe customer ID
+        if user and 'stripe_customer_id' in user and user['stripe_customer_id']:
+            try:
+                # Delete the Stripe customer
+                stripe.Customer.delete(user['stripe_customer_id'])
+            except StripeError as e:
+                # Handle errors from Stripe
+                flash(f"Stripe error: {e.user_message}")
+                return redirect(url_for('admin_usercontrol'))
+
+        # Now delete the user from the database
         with conn.cursor() as cursor:
             cursor.execute("DELETE FROM users WHERE id = %s", (user_id,))
         conn.commit()
+        flash('User and Stripe customer deleted successfully!')
+    except Exception as e:
+        flash(f"An error occurred: {e}")
     finally:
         conn.close()
 
-    flash('User deleted successfully!')
-    return redirect(url_for('admin'))
+    return redirect(url_for('admin_usercontrol'))
+
+@application.route('/delete_subscription/<int:user_id>', methods=['GET'])
+def delete_subscription(user_id):
+    if 'user_id' not in session or session['user_id'] != user_id:
+        flash('Unauthorized access.')
+        return redirect(url_for('home'))
+
+    try:
+        user = get_user_by_id(user_id)
+
+        # Delete the subscription from Stripe
+        delete_stripe_subscription(user['stripe_customer_id'])
+
+        # Delete the user from the database
+        delete_user(user_id)
+
+        flash('Subscription and user deleted successfully.')
+        return redirect(url_for('home'))
+    except Exception as e:
+        flash(f'Error: {e}')
+        return redirect(url_for('subscriber'))
+
+def delete_stripe_subscription(stripe_subscription_id):
+    try:
+        stripe.Subscription.delete(stripe_subscription_id)
+    except stripe.error.StripeError as e:
+        # Handle Stripe errors
+        print(f"Stripe Error: {e}")
+
 
 @application.route('/edit_user/<int:user_id>', methods=['GET'])
 def edit_user(user_id):
@@ -415,23 +479,35 @@ def edit_user(user_id):
 @application.route('/update_user/<int:user_id>', methods=['POST'])
 def update_user(user_id):
     # Extract form data
-    username = request.form['username']
     email = request.form['email']
     phone = request.form['phone']
-    role = request.form['role']
 
     # Update user details in the database
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
-            sql = "UPDATE users SET username = %s, email = %s, phone = %s WHERE id = %s"
-            cursor.execute(sql, (username, email, phone, user_id))
+            update_sql = "UPDATE users SET email = %s, phone = %s WHERE id = %s"
+            cursor.execute(update_sql, (email, phone, user_id))
         conn.commit()
     finally:
         conn.close()
 
     flash('User updated successfully!')
-    return redirect(url_for('subscriber'))
+
+    # Redirect based on user role
+    user_role = session.get('user_role')
+    if user_role == 0:
+        return redirect(url_for('subscriber'))
+    elif user_role == 1:
+        return redirect(url_for('agent'))
+    elif user_role == 2:
+        return redirect(url_for('admin'))
+    else:
+        # Default redirect if role is undefined or unexpected
+        return redirect(url_for('home'))
+
+
+
 
 def get_all_users():
     conn = get_db_connection()
@@ -454,9 +530,10 @@ def get_user_by_id(user_id):
 @application.route('/property/<int:id>')
 def property_details(id):
     property = get_property_by_id(id)
+    photos = get_photos_by_property_id(id)
 
     if property:
-        return render_template('property_details.html', property=property)
+        return render_template('property_details.html', property=property, photos=photos)
     else:
         return 'Property not found', 404
 
@@ -494,8 +571,13 @@ def login():
         session['user_username'] = user['username'] # Store user email in session
         session['user_phone'] = user['phone']  # Store user phone in session
         session['user_role'] = user['role']
-        if user['role'] == 0:
-            return redirect(url_for('subscriber'))
+        session['stripe_customer_id'] = user['stripe_customer_id']
+        if user['role'] == 0:  # Assuming 0 is the role for subscribers
+            if not check_active_subscription(user):
+                flash('Your subscription is inactive. Please renew to continue.')
+                return redirect(url_for('pricing'))  # Redirect to subscription page
+            else:
+                return redirect(url_for('subscriber'))
         elif user['role'] == 1:
             return redirect(url_for('agent'))
         elif user['role'] == 2:
@@ -505,28 +587,73 @@ def login():
     else:
         return 'Invalid credentials', 401
 
-@application.route('/create_user', methods=['GET', 'POST'])
-def create_user():
-    if request.method == 'GET':
-        return render_template('create_user.html')
-    else:
+def check_active_subscription(user):
+    stripe_customer_id = user.get('stripe_customer_id')
+    if not stripe_customer_id:
+        # Handle cases where stripe_customer_id is not available
+        application.logger.error("Stripe customer ID not found for user.")
+        return False
+
+    try:
+        subscriptions = stripe.Subscription.list(customer=stripe_customer_id, status='active')
+        return any(subscriptions.data)
+    except InvalidRequestError as e:
+        # Handle Stripe API errors
+        application.logger.error(f"Error checking active subscription: {e}")
+        return False
+
+
+@application.route('/register', methods=['GET'])
+def show_registration_form():
+    return render_template('create_user.html')
+
+from stripe.error import StripeError
+
+@application.route('/register_user', methods=['POST'])
+def register_user():
+    try:
         username = request.form['username']
         password = request.form['password']
         email = request.form['email']
         phone = request.form['phone']
-        role = request.form['role']  # Ensure this is properly validated and secured
+        role = request.form['role']
 
-        hashed_password = generate_password_hash(password)
+        # Create a new customer in Stripe
+        stripe_customer = stripe.Customer.create(
+            email=email,
+            name=username,
+            phone=phone
+        )
 
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO users (username, password, email, phone, role) VALUES (%s, %s,%s, %s, %s)",
-                       (username, hashed_password, email, phone, role))
-        conn.commit()
-        cursor.close()
-        conn.close()
+        # Get the Stripe customer ID
+        stripe_customer_id = stripe_customer["id"]
 
-        return redirect(url_for('login_form'))
+        # Create user in the database with Stripe customer ID
+        user_id = create_user_in_db(username, password, email, phone, role, stripe_customer_id)
+
+        return redirect(url_for('create_checkout_session', user_id=user_id), code=307)
+    except StripeError as e:
+        # Handle errors from Stripe
+        flash(f"Stripe error: {e.user_message}")
+        return redirect(url_for('show_registration_form'))
+    except Exception as e:
+        # Handle other errors
+        flash(f"An error occurred: {e}")
+        return redirect(url_for('show_registration_form'))
+
+def create_user_in_db(username, password, email, phone, role, stripe_customer_id):
+    # Your existing database logic to create a user, now including stripe_customer_id
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO users (username, password, email, phone, role, stripe_customer_id) VALUES (%s, %s,%s, %s, %s, %s)",
+                   (username, generate_password_hash(password), email, phone, role, stripe_customer_id))
+    conn.commit()
+    user_id = cursor.lastrowid
+    cursor.close()
+    conn.close()
+    return user_id
+
+
     
 @application.route('/logout')
 def logout():
@@ -680,7 +807,7 @@ def bid(id):
     property = get_property_by_id(id)
     if property:
         formatted_price = "${:,.2f}".format(property['price'])
-        fee_amount = property['price'] / 10
+        fee_amount = property['price'] / 5
         formatted_fee = "${:,.2f}".format(fee_amount)
         total_amount = property['price'] + fee_amount
         formatted_total = "${:,.2f}".format(total_amount)
@@ -699,18 +826,160 @@ def bid(id):
 
 @application.route('/submit_bid/<int:id>', methods=['POST'])
 def submit_bid(id):
-    # Here you would handle the bid submission
-    # For example, save the bid to the database
+    # Extract user ID from session or form
+    user_id = session['user_id']  # or from form data
 
-    username = request.form['username']
-    email = request.form['email']
-    phone = request.form['phone']
-    bid_amount = request.form['bid']
+    # Get the bid amount from the form data (replace 'form_field_name' with the actual field name)
+    bid_amount = request.form['bid_amount']
 
-    # Save the bid information to the database or process it as needed
+    # Insert bid into the database
+    insert_bid(user_id, id, bid_amount)
 
     # Redirect to a confirmation page or back to the property details
     return redirect(url_for('property_details', id=id))
+
+def insert_bid(user_id, property_id, bid_amount):
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            sql = """
+            INSERT INTO bids (user_id, property_id, bid_progress, bid_amount) 
+            VALUES (%s, %s, 'Pending', %s)
+            """
+            cursor.execute(sql, (user_id, property_id, bid_amount))
+        conn.commit()
+    finally:
+        conn.close()
+
+@application.route('/admin/bids')
+def admin_bids():
+    # Fetch bids from the database
+    bids = get_all_bids_with_progress()  # Ensure this function is implemented to fetch bids
+
+    return render_template('admin_bids.html', bids=bids)
+
+def get_all_bids_with_progress():
+    conn = get_db_connection()
+    try:
+        with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+            # Join the bids table with the users table
+            cursor.execute("""
+                SELECT b.id, b.property_id, b.bid_amount, b.bid_time, b.bid_progress, 
+                       u.username, u.email, u.phone
+            FROM bids b
+            INNER JOIN users u ON b.user_id = u.id
+            """)
+        return cursor.fetchall()
+    finally:
+        conn.close()
+
+@application.route('/delete_bid/<int:bid_id>', methods=['GET', 'POST'])
+@requires_roles(2)  # Ensure only admins can access this route
+def delete_bid(bid_id):
+    try:
+        conn = get_db_connection()
+        with conn.cursor() as cursor:
+            cursor.execute("DELETE FROM bids WHERE id = %s", (bid_id,))
+            conn.commit()
+        flash('Bid deleted successfully!', 'success')
+    except Exception as e:
+        application.logger.error(f"Error deleting bid: {e}")
+        flash('An error occurred while deleting the bid.', 'error')
+    finally:
+        if conn:
+            conn.close()
+        return redirect(url_for('admin_bids'))
+
+
+
+@application.route('/update_bid_progress', methods=['POST'])
+def update_bid_progress():
+    bid_id = request.form['bid_id']
+    new_status = request.form['new_status']
+
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            sql = "UPDATE bids SET bid_progress = %s WHERE id = %s"
+            cursor.execute(sql, (new_status, bid_id))
+        conn.commit()
+    finally:
+        conn.close()
+
+    return redirect(url_for('admin_bids'))
+
+@application.route('/my_bids')
+def my_bids():
+    if 'user_id' not in session:
+        return redirect(url_for('login_form'))  # Redirect to login if the user is not logged in
+
+    user_id = session['user_id']
+    bids = get_bids_by_user_id(user_id)  # Fetch bids for the logged-in user
+
+    # Add property details to each bid
+    for bid in bids:
+        property_id = bid['property_id']
+        property = get_property_by_id(property_id)
+        bid['property_address'] = property['addresses'] if property else 'Unknown'
+
+    return render_template('subscriber_bids.html', bids=bids)
+
+def get_bids_by_user_id(user_id):
+    conn = get_db_connection()
+    try:
+        with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+            # Assuming the table name is 'bids' and it has the columns 'id', 'user_id', 'property_id', etc.
+            sql = "SELECT * FROM bids WHERE user_id = %s"
+            cursor.execute(sql, (user_id,))
+        return cursor.fetchall()
+    finally:
+        conn.close()
+
+@application.route('/cancel_bid/<int:bid_id>', methods=['POST'])
+def cancel_bid(bid_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login_form'))  # Redirect to login if the user is not logged in
+
+    user_id = session['user_id']
+
+    # Check if the user has permission to cancel the bid
+    if not can_user_cancel_bid(user_id, bid_id):
+        flash('You do not have permission to cancel this bid.', 'error')
+        return redirect(url_for('subscriber'))  # Redirect back to the user's bids page
+
+    try:
+        # Cancel the bid in the database
+        conn = get_db_connection()
+        with conn.cursor() as cursor:
+            sql = "DELETE FROM bids WHERE id = %s AND user_id = %s"
+            cursor.execute(sql, (bid_id, user_id))
+        conn.commit()
+        flash('Bid cancelled successfully.', 'success')
+    except Exception as e:
+        # Log the error for debugging
+        application.logger.error(f"Error cancelling bid: {e}")
+        flash('An error occurred while cancelling the bid.', 'error')
+    finally:
+        if conn:
+            conn.close()
+
+    return redirect(url_for('subscriber'))  # Redirect back to the user's bids page
+
+# Helper function to check if the user can cancel the bid
+def can_user_cancel_bid(user_id, bid_id):
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            sql = "SELECT id FROM bids WHERE id = %s AND user_id = %s"
+            cursor.execute(sql, (bid_id, user_id))
+            bid = cursor.fetchone()
+            return bid is not None
+    finally:
+        if conn:
+            conn.close()
+    return False
+
+
 
 def extract_text_from_pdf(file_path):
     text = ""
@@ -742,6 +1011,7 @@ def format_currency(value):
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 @application.route('/upload_pdf', methods=['GET', 'POST'])
 def upload_pdf():
@@ -789,35 +1059,6 @@ def process_pdf(file_path):
 
     print("Processing of PDF completed.")
 
-
-
-@application.route('/upload_photo/<int:id>', methods=['POST'])
-def upload_photo(id):
-    if 'photo' not in request.files:
-        flash('No file part')
-        return redirect(request.url)
-    file = request.files['photo']
-    if file.filename == '':
-        flash('No selected file')
-        return redirect(request.url)
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        file_path = os.path.join(application.config['UPLOAD_FOLDER'], filename)
-        file.save(file_path)
-
-        update_photo_url(id, file_path)
-        return redirect(url_for('admin'))
-
-def update_photo_url(property_id, photo_url):
-    conn = get_db_connection()
-    try:
-        with conn.cursor() as cursor:
-            sql = "UPDATE all_properties SET photo_url = %s WHERE id = %s"
-            cursor.execute(sql, (photo_url, property_id))
-        conn.commit()
-    finally:
-        conn.close()
-
 @application.route('/properties/<date>')
 def properties_for_day(date):
     try:
@@ -828,7 +1069,21 @@ def properties_for_day(date):
 
     # Fetch properties for the selected date
     properties = get_properties_for_date(selected_date)
-    return render_template('propertiesforday.html', properties=properties, selected_date=selected_date)
+
+    # Apply photo display logic to each property
+    for property in properties:
+        if property['photo_url'] and 'maps.googleapis.com/maps/api/streetview' not in property['photo_url']:
+            property['display_photo_url'] = property['photo_url']
+        else:
+            latest_photo = get_latest_photo_by_property_id(property['id'])
+            if latest_photo:
+                property['display_photo_url'] = latest_photo['photo_url']
+            else:
+                property['display_photo_url'] = None  # Or a default image URL
+    user_role = session.get('user_role')
+
+    return render_template('propertiesforday.html', properties=properties, selected_date=selected_date, user_role=user_role)
+
 
 def get_properties_for_date(selected_date):
     conn = get_db_connection()
@@ -853,11 +1108,199 @@ def check_address_exists(address):
     finally:
         conn.close()
 
+@application.route('/upload_photo/<int:property_id>', methods=['POST'])
+def upload_photo(property_id):
+    # Ensure the upload folder exists
+    if not os.path.exists(application.config['UPLOAD_FOLDER']):
+        os.makedirs(application.config['UPLOAD_FOLDER'])
 
+    if 'photo' not in request.files:
+        flash('No file part')
+        return redirect(request.url)
 
+    file = request.files['photo']
+
+    if file.filename == '':
+        flash('No selected file')
+        return redirect(request.url)
+
+    if file and allowed_file(file.filename):
+        try:
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(application.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            insert_photo(property_id, file_path)
+            flash('Photo uploaded successfully!')
+        except Exception as e:
+            flash(f"An error occurred: {e}")
+            # Log the error for debugging
+            application.logger.error(f"Error uploading file: {e}")
+            return redirect(request.url)
+
+    return redirect(url_for('manage_photos', property_id=property_id))
+
+def insert_photo(property_id, photo_url):
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            sql = "INSERT INTO property_photos (property_id, photo_url) VALUES (%s, %s)"
+            cursor.execute(sql, (property_id, photo_url))
+        conn.commit()
+        print(f"Photo inserted: {photo_url} for property {property_id}")  # Add this line
+    finally:
+        conn.close()
+
+@application.route('/manage_photos/<int:property_id>', methods=['GET', 'POST'])
+def manage_photos(property_id):
+    if request.method == 'POST':
+        if 'photo' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+
+        file = request.files['photo']
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(application.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+
+            insert_photo(property_id, file_path)
+            flash('Photo uploaded successfully!')
+            return redirect(url_for('manage_photos', property_id=property_id))
+
+    photos = get_photos_by_property_id(property_id)
+    print(f"Photos for property {property_id}: {photos}")  # Debug print
+
+    return render_template('manage_photos.html', property_id=property_id, photos=photos)
+
+def get_properties_with_latest_photo():
+    properties = get_all_properties()
+    for property in properties:
+        # Check if property's photo_url is valid and not a Google Maps URL
+        if property['photo_url'] and 'maps.googleapis.com/maps/api/streetview' not in property['photo_url']:
+            property['display_photo_url'] = property['photo_url']
+        else:
+            # Fetch the latest uploaded photo for the property
+            latest_photo = get_latest_photo_by_property_id(property['id'])
+            if latest_photo:
+                property['display_photo_url'] = latest_photo['photo_url']
+            else:
+                # Set to a default image URL or None
+                property['display_photo_url'] = None  # or the path to a default image
         
 
+    return properties
 
+
+def get_latest_photo_by_property_id(property_id):
+    conn = get_db_connection()
+    try:
+        with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+            cursor.execute("SELECT photo_url FROM property_photos WHERE property_id = %s ORDER BY id DESC LIMIT 1", (property_id,))
+            latest_photo = cursor.fetchone()
+            print(f"Latest photo for property {property_id}: {latest_photo}")  # Debug print
+            return latest_photo
+    finally:
+        conn.close()
+
+
+YOUR_DOMAIN = 'http://localhost:8000'
+
+@application.route('/create-checkout-session/<int:user_id>', methods=['POST'])
+def create_checkout_session(user_id):
+    try:
+        user = get_user_by_id(user_id)
+        if not user:
+            flash('User not found.')
+            return redirect(url_for('register'))
+
+        # Use the existing Stripe customer ID
+        checkout_session = stripe.checkout.Session.create(
+            customer=user['stripe_customer_id'],
+            payment_method_types=['card'],
+            line_items=[{"price": 'price_1OYc4qFNut4X8qSwK07XJ8M2', "quantity": 1}],
+            mode='subscription',
+            success_url=url_for('checkout_success', user_id=user_id, _external=True),
+            cancel_url=url_for('checkout_cancel', user_id=user_id, _external=True),
+        )
+        return redirect(checkout_session.url, code=303)
+    except Exception as e:
+        application.logger.error(f"Error in create_checkout_session: {e}")
+        flash('An error occurred while creating the checkout session.')
+        return redirect(url_for('show_registration_form'))
+
+@application.route('/create-portal-session', methods=['POST'])
+def customer_portal():
+    # For demonstration purposes, we're using the Checkout session to retrieve the customer ID.
+    # Typically this is stored alongside the authenticated user in your database.
+    checkout_session_id = request.form.get('session_id')
+    checkout_session = stripe.checkout.Session.retrieve(checkout_session_id)
+
+    # This is the URL to which the customer will be redirected after they are
+    # done managing their billing with the portal.
+    return_url = YOUR_DOMAIN
+
+    portalSession = stripe.billing_portal.Session.create(
+        customer=checkout_session.customer,
+        return_url=return_url,
+    )
+    return redirect(portalSession.url, code=303)
+
+@application.route('/webhook', methods=['POST'])
+def webhook_received():
+    # Replace this endpoint secret with your endpoint's unique secret
+    # If you are testing with the CLI, find the secret by running 'stripe listen'
+    # If you are using an endpoint defined with the API or dashboard, look in your webhook settings
+    # at https://dashboard.stripe.com/webhooks
+    webhook_secret = 'whsec_12345'
+    request_data = json.loads(request.data)
+
+    if webhook_secret:
+        # Retrieve the event by verifying the signature using the raw body and secret if webhook signing is configured.
+        signature = request.headers.get('stripe-signature')
+        try:
+            event = stripe.Webhook.construct_event(
+                payload=request.data, sig_header=signature, secret=webhook_secret)
+            data = event['data']
+        except Exception as e:
+            return e
+        # Get the type of webhook event sent - used to check the status of PaymentIntents.
+        event_type = event['type']
+    else:
+        data = request_data['data']
+        event_type = request_data['type']
+    data_object = data['object']
+
+    print('event ' + event_type)
+
+    if event_type == 'checkout.session.completed':
+        print('🔔 Payment succeeded!')
+    elif event_type == 'customer.subscription.trial_will_end':
+        print('Subscription trial will end')
+    elif event_type == 'customer.subscription.created':
+        print('Subscription created %s', event.id)
+    elif event_type == 'customer.subscription.updated':
+        print('Subscription created %s', event.id)
+    elif event_type == 'customer.subscription.deleted':
+        # handle subscription canceled automatically based
+        # upon your subscription settings. Or if the user cancels it.
+        print('Subscription canceled: %s', event.id)
+
+    return jsonify({'status': 'success'})
+
+@application.route('/checkout_success/<int:user_id>')
+def checkout_success(user_id):
+    # Process successful checkout, e.g., update user status in DB
+    # Redirect to login page
+    return redirect(url_for('login_form'))
+
+@application.route('/checkout_cancel/<int:user_id>')
+def checkout_cancel(user_id):
+    # Handle checkout cancellation, e.g., notify user or log
+    return "Checkout cancelled. Please try again."
 
 if __name__ == "__main__":
     application.run()

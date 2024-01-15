@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>BONAVENTURA ADMIN</title>
+    <title>Admin</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background_color.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/contact-718.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/cs-button-6.css') }}">
@@ -55,18 +55,23 @@
                     <div class="cs-ul-wrapper">
                         <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
                             <li class="cs-li">
-                                <a href="{{ url_for('home') }}" class="cs-li-link">
-                                    <p class="cs-topper">Home</p>
-                                </a>
-                            </li>
-                            <li class="cs-li">
                                 <a href="{{ url_for('upload_pdf') }}" class="cs-li-link">
                                     <p class="cs-topper">Upload PDF</p>
                                 </a>
                             </li>
                             <li class="cs-li">
                                 <a href="{{ url_for('admin_usercontrol') }}" class="cs-li-link">
-                                    <p class="cs-topper">User Manager</p>
+                                    <p class="cs-topper">Users</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('admin_bids') }}" class="cs-li-link">
+                                    <p class="cs-topper">Bids</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('edit_profile') }}" class="cs-li-link">
+                                    <p class="cs-topper">Account</p>
                                 </a>
                             </li>
 
@@ -147,6 +152,7 @@
         <br>
         <br>
         <br>
+        
 
         <footer>
             <p>© Bonaventura</p>

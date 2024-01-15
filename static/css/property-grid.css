@@ -90,7 +90,7 @@ a {
     display: grid;
     grid-template-columns: repeat(7, 1fr); 
     grid-gap: 6px; /* Increase the gap between each tile */
-    background-color: #ccc; /* Color of the lines */
+    
     grid-auto-rows: 150px;
 }
 

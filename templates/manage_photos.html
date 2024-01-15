@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Include necessary head elements -->
+</head>
+<body>
+    <h1>Manage Photos for Property ID: {{ property_id }}</h1>
+
+    <div>
+        <h2>Existing Photos</h2>
+        {% if photos %}
+            <!-- Display existing photos -->
+            {% for photo in photos %}
+                <div class="photo-container">
+                    <img src="{{ photo['photo_url'] }}" alt="Property Photo" style="max-width: 200px; height: auto;">
+                    <!-- Optional: Add a delete button or other controls here -->
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No photos available.</p>
+        {% endif %}
+    </div>
+
+    <div>
+        <h2>Upload New Photo</h2>
+        <form action="{{ url_for('manage_photos', property_id=property_id) }}" method="POST" enctype="multipart/form-data">
+            <input type="file" name="photo" required>
+            <input type="submit" value="Upload">
+        </form>
+    </div>
+</body>
+</html>

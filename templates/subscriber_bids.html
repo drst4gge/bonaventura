@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <title>Subscriber - Bids</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background_color.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/contact-718.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/cs-button-6.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/footer.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/gallery-45.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/header.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/hero-82.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/hero-408.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/property-grid.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/services.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/table.css') }}">
+    <script src="{{ url_for('static', filename='js/header.js') }}"></script>
+</head>
+
+<body>
+    <div class="wrapper">
+        <header id="cs-navigation">
+            <div class="cs-container">
+                <!--Nav Logo-->
+                <a href="{{ url_for('home') }}" class="cs-logo" aria-label="back to home">
+                    <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="logo" width="210"
+                        height="29" aria-hidden="true" decoding="async">
+                </a>
+                <nav class="cs-nav" role="navigation">
+                    <!--Mobile Nav Toggle-->
+                    <button class="cs-toggle" aria-label="mobile menu toggle">
+                        <div class="cs-box" aria-hidden="true">
+                            <span class="cs-line cs-line1" aria-hidden="true"></span>
+                            <span class="cs-line cs-line2" aria-hidden="true"></span>
+                            <span class="cs-line cs-line3" aria-hidden="true"></span>
+                        </div>
+                    </button>
+                    <div class="cs-ul-wrapper">
+                        <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
+                            <li class="cs-li">
+                                <a href="{{ url_for('edit_profile') }}" class="cs-li-link">
+                                    <p class="cs-topper">Account</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('my_bids') }}" class="cs-li-link">
+                                    <p class="cs-topper">Bids</p>
+                                </a>
+                            </li>
+
+                        </ul>
+                    </div>
+                </nav>
+
+            </div>
+        </header>
+        <br>
+        <br>
+        <br>
+
+        <section id="table-1669">
+            <div class="cs-container">
+                <div class="cs-content">
+                    <span class="cs-topper">Bids</span>
+                    <table class="cs-table">
+                        <thead>
+                            <tr class="cs-color">
+                                
+                                <th class="cs-th">Property Address</th>
+                                <th class="cs-th">Bid Amount</th>
+                                <th class="cs-th">Bid Time</th>
+                                <th class="cs-th">Bid Status</th>
+                                <th class="cs-th">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for bid in bids %}
+                            <tr class="cs-tr">
+                                
+                                <td class="cs-td">
+                                    <a href="{{ url_for('property_details', id=bid['property_id']) }}">
+                                        {{ bid['property_address'] }}
+                                    </a>
+                                </td>
+                                <td class="cs-td">{{ bid['bid_amount'] }}</td>
+                                <td class="cs-td">{{ bid['bid_time'] }}</td>
+                                <td class="cs-td">{{ bid['bid_progress'] }}</td>
+                                <td class="cs-td">
+                                    <form action="{{ url_for('cancel_bid', bid_id=bid['id']) }}" method="post">
+                                        <button type="submit">Cancel Bid</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6">No bids available</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+</body>
+
+</html>

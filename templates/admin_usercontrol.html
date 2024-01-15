@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>BONAVENTURA ADMIN</title>
+    <title>Admin - Users</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background_color.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/contact-718.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/cs-button-6.css') }}">
@@ -69,7 +69,7 @@
         <section id="table-1669">
             <div class="cs-container">
                 <div class="cs-content">
-                    <span class="cs-topper">User Management Table</span>
+                    <span class="cs-topper">Users</span>
 
 
 
@@ -80,8 +80,6 @@
                                 <th class="cs-th">Username</th>
                                 <th class="cs-th">Email</th>
                                 <th class="cs-th">Phone</th>
-                                <th class="cs-th">User's Counties</th>
-                                <th class="cs-th">User's Favorites</th>
                                 <th class="cs-th">Role</th>
                                 <th class="cs-th">Delete</th>
                             </tr>
@@ -93,18 +91,6 @@
                                 <td class="cs-td">{{ user['username'] }}</td>
                                 <td class="cs-td">{{ user['email'] }}</td>
                                 <td class="cs-td">{{ user['phone'] }}</td>
-                                <td class="cs-td">
-                                    {% for county in counties %}
-                                        {% if county != "--" %} <!-- Check to exclude '--' -->
-                                            <div class="checkbox-container">
-                                                <input type="checkbox" id="county-{{ loop.index }}" name="counties" value="{{ county }}">
-                                                <label for="county-{{ loop.index }}">{{ county }}</label>
-                                            </div>
-                                        {% endif %}
-                                    {% endfor %}
-                                </td>
-                                
-                                <td class="cs-td"> -- </td>
                                 <td class="cs-td">
                                     {% if user['role'] == 0 %}
                                         Subscriber

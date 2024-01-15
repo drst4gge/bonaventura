@@ -3,7 +3,7 @@
 <html>
 
 <head>
-    <title>BID</title>
+    <title>Bid</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background_color.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/contact-718.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/cs-button-6.css') }}">
@@ -108,7 +108,7 @@
         <section id="contact-718">
             <div class="cs-container">
                 <div class="cs-content">
-                    <span class="cs-topper">BID ON {{ property['addresses'] }}</span>
+                    <span class="cs-topper">Place a bid on {{ property['addresses'] }}</span>
                     <form class="cs-form" action="/submit_bid/{{ property_id }}" method="post">
                         <!-- Hidden ID Field -->
                         <input type="hidden" name="id" value="{{ user['user_id'] }}">
@@ -132,17 +132,24 @@
                         </label>
 
                         <!-- Price and Fee Fields -->
-                        <label for="original-price">Price of Bid:</label>
+                        
+                        <label for="original-price">Asking Price at Auction:</label>
                         <input class="cs-input" type="text" id="original-price" name="price"
                             value="{{ formatted_price }}" readonly>
-
+                        <!--
                         <label for="fee-amount">Fee Amount:</label>
                         <input class="cs-input" type="text" id="fee-amount" name="fee" value="{{ formatted_fee }}"
                             readonly>
-
+                        
                         <label for="total-amount">Total Amount:</label>
                         <input class="cs-input" type="text" id="total-amount" name="total_amount"
                             value="{{ formatted_total }}" readonly>
+                        -->
+                        <label for="bid_amount">Cost of services + Down Payment, if Bid wins:</label>
+                        <input class="cs-input" type="text" id="bid_amount" name="bid_amount" value="{{ formatted_fee }}">
+                        
+                        
+                        
 
                         <!-- Submit Button -->
                         <button class="cs-button-solid cs-submit" type="submit">Bid</button>
