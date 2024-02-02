@@ -3,10 +3,11 @@ footer {
     bottom: 0;
     width: 100%;
     height: 50px; /* Set the height of your footer */
-    color: black; /* Text color */
+    color: rgb(255, 255, 255); /* Text color */
     text-align: center;
     padding: 10px 0; /* Padding for spacing */
     margin-top: 50px; /* Space above footer */
+    font-weight: bold;
 }
 
 /* Footer paragraph styling */

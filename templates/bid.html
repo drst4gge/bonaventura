@@ -94,10 +94,56 @@
                         </div>
                     </button>
                     <div class="cs-ul-wrapper">
+                        {% if session['user_role'] == 1 or session['user_role'] == 2 %}
                         <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
-
+                            <li class="cs-li">
+                                <a href="{{ url_for('admin') }}" class="cs-li-link">
+                                    <p class="cs-topper">Calendar</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('upload_pdf') }}" class="cs-li-link">
+                                    <p class="cs-topper">Upload PDF</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('admin_usercontrol') }}" class="cs-li-link">
+                                    <p class="cs-topper">Users</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('admin_bids') }}" class="cs-li-link">
+                                    <p class="cs-topper">Bids</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('edit_profile') }}" class="cs-li-link">
+                                    <p class="cs-topper">Account</p>
+                                </a>
+                            </li>
 
                         </ul>
+                        {% elif session['user_role'] == 0%}
+                        <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
+                            <li class="cs-li">
+                                <a href="{{ url_for('subscriber') }}" class="cs-li-link">
+                                    <p class="cs-topper">Calendar</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('my_bids') }}" class="cs-li-link">
+                                    <p class="cs-topper">Bids</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('edit_profile') }}" class="cs-li-link">
+                                    <p class="cs-topper">Account</p>
+                                </a>
+                            </li>
+                            
+
+                        </ul>
+                        {% endif %}
                     </div>
                 </nav>
             </div>

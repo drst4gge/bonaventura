@@ -23,10 +23,12 @@ stripe.api_key = 'sk_live_51OMzO8FNut4X8qSwM3IpvB68mYH3rIbKJRJpMdZWhfwpCP6Ejz4hg
 application.secret_key = os.environ.get('SECRET_KEY')
 
 UPLOAD_FOLDER = 'static/pdfs' 
+IMAGES_FOLDER = 'static/images' 
 ALLOWED_EXTENSIONS = {'pdf'}
-ALLOWED_EXTENSIONS_PHOTO = {'png', 'jpg', 'jpeg', 'gif'}
+ALLOWED_EXTENSIONS_PHOTO = {'png', 'jpg', 'jpeg'}
 
 application.config['UPLOAD_FOLDER'] = 'static/pdfs'
+application.config['IMAGES_FOLDER'] = 'static/images'
 
 def requires_roles(*roles):
     def wrapper(f):
@@ -210,6 +212,10 @@ def home():
 def pricing():
     return render_template('pricing.html')
 
+@application.route('/subscriber_agreement')
+def subscriber_agreement():
+    return render_template('subscriber_agreement.html')
+
 @application.route('/services')
 def services():
     return render_template('services.html')
@@ -337,6 +343,7 @@ def generate_calendar(year, month, properties):
     }
 
 @application.route('/admin')
+@requires_roles(2)
 def admin():
     today = datetime.today()
     current_date = today.strftime('%Y-%m-%d')
@@ -397,6 +404,7 @@ def edit_profile():
         update_user(user_id, username, email, phone)
         return redirect(url_for('admin'))
 
+
 from stripe.error import StripeError
 
 @application.route('/delete_user/<int:user_id>', methods=['GET'])
@@ -443,9 +451,9 @@ def delete_subscription(user_id):
         delete_stripe_subscription(user['stripe_customer_id'])
 
         # Delete the user from the database
-        delete_user(user_id)
+        
 
-        flash('Subscription and user deleted successfully.')
+        flash('Subscription cancelled successfully.')
         return redirect(url_for('home'))
     except Exception as e:
         flash(f'Error: {e}')
@@ -479,6 +487,7 @@ def edit_user(user_id):
 @application.route('/update_user/<int:user_id>', methods=['POST'])
 def update_user(user_id):
     # Extract form data
+    username = request.form['username']
     email = request.form['email']
     phone = request.form['phone']
 
@@ -486,8 +495,8 @@ def update_user(user_id):
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
-            update_sql = "UPDATE users SET email = %s, phone = %s WHERE id = %s"
-            cursor.execute(update_sql, (email, phone, user_id))
+            update_sql = "UPDATE users SET username = %s, email = %s, phone = %s WHERE id = %s"
+            cursor.execute(update_sql, (username, email, phone, user_id))
         conn.commit()
     finally:
         conn.close()
@@ -495,16 +504,9 @@ def update_user(user_id):
     flash('User updated successfully!')
 
     # Redirect based on user role
-    user_role = session.get('user_role')
-    if user_role == 0:
-        return redirect(url_for('subscriber'))
-    elif user_role == 1:
-        return redirect(url_for('agent'))
-    elif user_role == 2:
-        return redirect(url_for('admin'))
-    else:
-        # Default redirect if role is undefined or unexpected
-        return redirect(url_for('home'))
+
+    return redirect(url_for('admin_usercontrol'))
+    
 
 
 
@@ -541,6 +543,7 @@ def property_details(id):
 def login_form():
     return render_template('login.html')
 
+
 def get_hashed_password(username):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -572,6 +575,7 @@ def login():
         session['user_phone'] = user['phone']  # Store user phone in session
         session['user_role'] = user['role']
         session['stripe_customer_id'] = user['stripe_customer_id']
+        session['subscription_level'] = user['subscription_level']
         if user['role'] == 0:  # Assuming 0 is the role for subscribers
             if not check_active_subscription(user):
                 flash('Your subscription is inactive. Please renew to continue.')
@@ -617,19 +621,26 @@ def register_user():
         email = request.form['email']
         phone = request.form['phone']
         role = request.form['role']
+        subscription_level = request.form['subscriptionLevel']
 
-        # Create a new customer in Stripe
-        stripe_customer = stripe.Customer.create(
-            email=email,
-            name=username,
-            phone=phone
-        )
+        session['subscription_level'] = subscription_level
 
-        # Get the Stripe customer ID
-        stripe_customer_id = stripe_customer["id"]
+        if not re.match("^[A-Za-z0-9]+$", username):
+            flash("Invalid username. Only characters and integers are allowed.")
+            return redirect(url_for('show_registration_form'))
+        
+        if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+            flash("Invalid email format.")
+            return redirect(url_for('show_registration_form'))
+
+        if not re.match(r"\d{10,12}", phone):
+            flash("Phone number must be 10, 11, or 12 digits.")
+            return redirect(url_for('show_registration_form'))
+        
 
         # Create user in the database with Stripe customer ID
-        user_id = create_user_in_db(username, password, email, phone, role, stripe_customer_id)
+        user_id = create_user_in_db(username, password, email, phone, role, subscription_level=subscription_level, stripe_customer_id=None)
+
 
         return redirect(url_for('create_checkout_session', user_id=user_id), code=307)
     except StripeError as e:
@@ -641,12 +652,12 @@ def register_user():
         flash(f"An error occurred: {e}")
         return redirect(url_for('show_registration_form'))
 
-def create_user_in_db(username, password, email, phone, role, stripe_customer_id):
+def create_user_in_db(username, password, email, phone, role, subscription_level, stripe_customer_id=None):
     # Your existing database logic to create a user, now including stripe_customer_id
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO users (username, password, email, phone, role, stripe_customer_id) VALUES (%s, %s,%s, %s, %s, %s)",
-                   (username, generate_password_hash(password), email, phone, role, stripe_customer_id))
+    cursor.execute("INSERT INTO users (username, password, email, phone, role, stripe_customer_id, subscription_level) VALUES (%s, %s,%s, %s, %s, %s, %s)",
+                   (username, generate_password_hash(password), email, phone, role, stripe_customer_id, subscription_level))
     conn.commit()
     user_id = cursor.lastrowid
     cursor.close()
@@ -658,7 +669,7 @@ def create_user_in_db(username, password, email, phone, role, stripe_customer_id
 @application.route('/logout')
 def logout():
     session.pop('user_role', None)  # Remove the user role from session
-    # Redirect to login page or home page
+    return redirect(url_for('home'))
 
 @application.route('/add_address', methods=['GET'])
 def add_address():
@@ -708,6 +719,7 @@ def submit_user():
     email = request.form['email']
     phone = request.form['phone']
     role = request.form['role']
+    stripe_customer_id = "NULL"
 
     # Hash the password
     hashed_password = generate_password_hash(password)
@@ -717,8 +729,8 @@ def submit_user():
     try:
         with conn.cursor() as cursor:
             # Insert new user
-            sql = "INSERT INTO users (username, password, email, phone, role) VALUES (%s, %s, %s, %s, %s)"
-            cursor.execute(sql, (username, hashed_password, email, phone, role))
+            sql = "INSERT INTO users (username, password, email, phone, role, stripe_customer_id) VALUES (%s, %s, %s, %s, %s, %s)"
+            cursor.execute(sql, (username, hashed_password, email, phone, role, stripe_customer_id))
         conn.commit()
     finally:
         conn.close()
@@ -739,26 +751,28 @@ def update_address():
     # Retrieve the form data
     property_id = request.form['id']
     address = request.form['address']
-    zpid = request.form['zpid']
+    occupancy = request.form['occupancy']
     bedrooms = request.form['bedrooms']
     bathrooms = request.form['bathrooms']
     livingArea = request.form['livingArea']
     lotSize = request.form['lotSize']
-    dateOfSale = request.form['dateOfSale']
-    timeOfSale = request.form['timeOfSale']
+    zpid = request.form['zpid']
     county = request.form['county']
-
+    price = request.form['price']
+    
+    
+    
     # Update the property in the database
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
             update_sql = """
             UPDATE all_properties 
-            SET addresses = %s, zpid = %s, bedrooms = %s, bathrooms = %s, livingArea = %s, 
-                lotSize = %s, county = %s , timeOfSale = %s, dateOfSale = %s
+            SET addresses = %s, occupancy = %s, bedrooms = %s, bathrooms = %s, livingArea = %s, 
+                lotSize = %s, zpid = %s, county = %s, price = %s
             WHERE id = %s
             """
-            cursor.execute(update_sql, (address, zpid, bedrooms, bathrooms, livingArea, lotSize, county, dateOfSale, timeOfSale, property_id))
+            cursor.execute(update_sql, (address, occupancy, bedrooms, bathrooms, livingArea, lotSize, zpid, county, price, property_id))
         conn.commit()
     finally:
         conn.close()
@@ -1012,6 +1026,10 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def allowed_photo(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS_PHOTO
+
 
 @application.route('/upload_pdf', methods=['GET', 'POST'])
 def upload_pdf():
@@ -1111,8 +1129,8 @@ def check_address_exists(address):
 @application.route('/upload_photo/<int:property_id>', methods=['POST'])
 def upload_photo(property_id):
     # Ensure the upload folder exists
-    if not os.path.exists(application.config['UPLOAD_FOLDER']):
-        os.makedirs(application.config['UPLOAD_FOLDER'])
+    if not os.path.exists(application.config['IMAGES_FOLDER']):
+        os.makedirs(application.config['IMAGES_FOLDER'])
 
     if 'photo' not in request.files:
         flash('No file part')
@@ -1124,10 +1142,10 @@ def upload_photo(property_id):
         flash('No selected file')
         return redirect(request.url)
 
-    if file and allowed_file(file.filename):
+    if file and allowed_photo(file.filename):
         try:
             filename = secure_filename(file.filename)
-            file_path = os.path.join(application.config['UPLOAD_FOLDER'], filename)
+            file_path = os.path.join(application.config['IMAGES_FOLDER'], filename)
             file.save(file_path)
             insert_photo(property_id, file_path)
             flash('Photo uploaded successfully!')
@@ -1135,6 +1153,7 @@ def upload_photo(property_id):
             flash(f"An error occurred: {e}")
             # Log the error for debugging
             application.logger.error(f"Error uploading file: {e}")
+            print("Error uploading")
             return redirect(request.url)
 
     return redirect(url_for('manage_photos', property_id=property_id))
@@ -1164,7 +1183,7 @@ def manage_photos(property_id):
 
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            file_path = os.path.join(application.config['UPLOAD_FOLDER'], filename)
+            file_path = os.path.join(application.config['IMAGES_FOLDER'], filename)
             file.save(file_path)
 
             insert_photo(property_id, file_path)
@@ -1207,24 +1226,40 @@ def get_latest_photo_by_property_id(property_id):
         conn.close()
 
 
-YOUR_DOMAIN = 'http://localhost:8000'
+YOUR_DOMAIN = 'https://www.bonaventurarealty.com'
 
-@application.route('/create-checkout-session/<int:user_id>', methods=['POST'])
+@application.route('/create-checkout-session/<int:user_id>', methods=['GET', 'POST'])
 def create_checkout_session(user_id):
     try:
         user = get_user_by_id(user_id)
         if not user:
             flash('User not found.')
             return redirect(url_for('register'))
+        
+        subscription_level = session.get('subscription_level', 'standard')  # Default to 'standard' if not set
+    
+        # Map the subscription level to the corresponding Stripe price ID
+        price_ids = {
+            
+            'standard': 'price_1OYc4qFNut4X8qSwK07XJ8M2',
+            'gold': 'price_1Of8KoFNut4X8qSwksIcg5js',
+            'platinum': 'price_1Of8LFFNut4X8qSw1Kvnlavx',
+        }
+        selected_price_id = price_ids[subscription_level]
 
-        # Use the existing Stripe customer ID
+        success_url = url_for('checkout_success', user_id=user_id, _external=True) + '?session_id={CHECKOUT_SESSION_ID}'
+        cancel_url = url_for('checkout_cancel', user_id=user_id, _external=True)
+
         checkout_session = stripe.checkout.Session.create(
-            customer=user['stripe_customer_id'],
             payment_method_types=['card'],
-            line_items=[{"price": 'price_1OYc4qFNut4X8qSwK07XJ8M2', "quantity": 1}],
+            line_items=[{
+                "price": selected_price_id,  # Assume selected_price_id is determined from the user's choice
+                "quantity": 1
+            }],
             mode='subscription',
-            success_url=url_for('checkout_success', user_id=user_id, _external=True),
-            cancel_url=url_for('checkout_cancel', user_id=user_id, _external=True),
+            success_url=success_url,
+            cancel_url=cancel_url,
+            metadata={'user_id': str(user_id)},  # Ensure this is a string if necessary
         )
         return redirect(checkout_session.url, code=303)
     except Exception as e:
@@ -1249,52 +1284,84 @@ def customer_portal():
     )
     return redirect(portalSession.url, code=303)
 
+@application.route('/manage-portal', methods=['GET'])
+def manage_portal():
+    # User must be authenticated to view the customer portal
+    if 'user_id' not in session:
+        return redirect(url_for('login_form'))
+
+    user_id = session['user_id']
+    user = get_user_by_id(user_id)
+
+    if not user or not user.get('stripe_customer_id'):
+        flash('Stripe customer ID not found.')
+        return redirect(url_for('login'))  # Redirect to a profile or error page
+
+    try:
+        # Create a new billing portal session
+        portal_session = stripe.billing_portal.Session.create(
+            customer=user['stripe_customer_id'],
+            return_url=YOUR_DOMAIN + '/login',
+            
+        )
+        return redirect(portal_session.url, code=303)
+    except Exception as e:
+        application.logger.error(f"Error creating billing portal session: {e}")
+        flash('An error occurred while creating the billing portal session.')
+        return redirect(url_for('login'))  # Redirect to a profile or error page
+
+
+
 @application.route('/webhook', methods=['POST'])
 def webhook_received():
-    # Replace this endpoint secret with your endpoint's unique secret
-    # If you are testing with the CLI, find the secret by running 'stripe listen'
-    # If you are using an endpoint defined with the API or dashboard, look in your webhook settings
-    # at https://dashboard.stripe.com/webhooks
-    webhook_secret = 'whsec_12345'
-    request_data = json.loads(request.data)
+    payload = request.data
+    sig_header = request.headers.get('Stripe-Signature')
+    webhook_secret = 'whsec_Bpp16lnFgIta80peknafbf0lPFQhwiyK'
 
-    if webhook_secret:
-        # Retrieve the event by verifying the signature using the raw body and secret if webhook signing is configured.
-        signature = request.headers.get('stripe-signature')
-        try:
-            event = stripe.Webhook.construct_event(
-                payload=request.data, sig_header=signature, secret=webhook_secret)
-            data = event['data']
-        except Exception as e:
-            return e
-        # Get the type of webhook event sent - used to check the status of PaymentIntents.
-        event_type = event['type']
-    else:
-        data = request_data['data']
-        event_type = request_data['type']
-    data_object = data['object']
+    try:
+        event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
 
-    print('event ' + event_type)
+        # Handle the event
+        if event['type'] == 'checkout.session.completed':
+            session = event['data']['object']
+            # Extract user ID from session metadata
+            user_id = session['metadata']['user_id']
+            stripe_customer_id = session['customer']
+            print(f"User ID: {user_id}, Stripe Customer ID: {stripe_customer_id}")
 
-    if event_type == 'checkout.session.completed':
-        print('🔔 Payment succeeded!')
-    elif event_type == 'customer.subscription.trial_will_end':
-        print('Subscription trial will end')
-    elif event_type == 'customer.subscription.created':
-        print('Subscription created %s', event.id)
-    elif event_type == 'customer.subscription.updated':
-        print('Subscription created %s', event.id)
-    elif event_type == 'customer.subscription.deleted':
-        # handle subscription canceled automatically based
-        # upon your subscription settings. Or if the user cancels it.
-        print('Subscription canceled: %s', event.id)
+            # Update user with Stripe Customer ID
+            update_user_with_stripe_id(user_id, stripe_customer_id)
 
-    return jsonify({'status': 'success'})
+        return jsonify({'status': 'success'}), 200
+    except ValueError:
+        # Invalid payload
+        return 'Invalid payload', 400
+    except stripe.error.SignatureVerificationError:
+        # Invalid signature
+        return 'Invalid signature', 400
+    except Exception as e:
+        print(f"Webhook error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+def update_user_with_stripe_id(user_id, stripe_customer_id):
+    print(f"Updating user {user_id} with Stripe ID {stripe_customer_id}")
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            update_sql = "UPDATE users SET stripe_customer_id = %s WHERE id = %s"
+            cursor.execute(update_sql, (stripe_customer_id, user_id))
+        conn.commit()
+    except Exception as e:
+        print(f"Error updating user with Stripe ID: {e}")
+    finally:
+        conn.close()
 
 @application.route('/checkout_success/<int:user_id>')
 def checkout_success(user_id):
     # Process successful checkout, e.g., update user status in DB
     # Redirect to login page
+    session_id = request.args.get('session_id')
     return redirect(url_for('login_form'))
 
 @application.route('/checkout_cancel/<int:user_id>')

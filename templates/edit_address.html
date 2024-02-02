@@ -29,59 +29,74 @@
                     <form class="cs-form" action="/update_address" method="post">
                         <!-- Hidden ID Field -->
                         <input type="hidden" name="id" value="{{ property['id'] }}">
-                        <!-- Address Field -->
-                        
+
                         <label for="address">
                             <p class="cs-topper">Address</p>
                             <input class="cs-input" type="text" id="address" name="address"
-                                value="{{ property['addresses'] }}" placeholder="Address" required>
+                                value="{{ property['addresses'] }}" placeholder="Address" required readonly>
                         </label>
 
-                        <!-- ZPID Field -->
+                        <label for="occupancy">
+                            <p class="cs-topper">Occupancy</p>
+                            <input class="cs-input" type="text" id="occupancy" name="occupancy"
+                                value="{{ property['occupancy'] }}" placeholder="Occupancy" required>
+                        </label>
+                        
+
+                   
+                        <label for="bedrooms">
+                            <p class="cs-topper">Bedrooms</p>
+                            <input class="cs-input" type="number" id="bedrooms" name="bedrooms"
+                                value="{{ property['bedrooms'] }}" placeholder="Bedrooms" required>
+                        </label>
+
+                  
+                        <label for="bathrooms">
+                            <p class="cs-topper">Bathrooms</p>
+                            <input class="cs-input" type="number" id="bathrooms" name="bathrooms"
+                                value="{{ property['bathrooms'] }}" placeholder="Bathrooms" required>
+                        </label>
+
+                 
+                        <label for="livingArea">
+                            <p class="cs-topper">Home SQFT</p>
+                            <input class="cs-input" type="number" id="livingArea" name="livingArea"
+                                value="{{ property['livingArea'] }}" placeholder="Living Area" required>
+                        </label>
+
+                     
+                        <label for="lotSize">
+                            <p class="cs-topper">Lot SQFT</p>
+                            <input class="cs-input" type="number" id="lotSize" name="lotSize" value="{{ property['lotSize'] }}"
+                                placeholder="Lot Size" required>
+                        </label>
+
+                        
+
+    
                         
                         <label for="zpid">
                             <p class="cs-topper">ZillowPID</p>
                             <input class="cs-input" type="text" id="zpid" name="zpid" value="{{ property['zpid'] }}"
-                                placeholder="ZPID">
+                                placeholder="ZPID" required readonly>
                         </label>
 
-                        <!-- Bedrooms Field -->
-                        <label for="bedrooms">
-                            <p class="cs-topper">Bedrooms</p>
-                            <input class="cs-input" type="number" id="bedrooms" name="bedrooms"
-                                value="{{ property['bedrooms'] }}" placeholder="Bedrooms">
-                        </label>
-
-                        <!-- Bathrooms Field -->
-                        <label for="bathrooms">
-                            <p class="cs-topper">Bathrooms</p>
-                            <input class="cs-input" type="number" id="bathrooms" name="bathrooms"
-                                value="{{ property['bathrooms'] }}" placeholder="Bathrooms">
-                        </label>
-
-                        <!-- Living Area Field -->
-                        <label for="livingArea">
-                            <p class="cs-topper">Home SQFT</p>
-                            <input class="cs-input" type="number" id="livingArea" name="livingArea"
-                                value="{{ property['livingArea'] }}" placeholder="Living Area">
-                        </label>
-
-                        <!-- Lot Size Field -->
-                        <label for="lotSize">
-                            <p class="cs-topper">Lot SQFT</p>
-                            <input class="cs-input" type="number" id="lotSize" name="lotSize" value="{{ property['lotSize'] }}"
-                                placeholder="Lot Size">
-                        </label>
-
-                        <!-- County Field -->
+                 
                         <label for="county">
                             <p class="cs-topper">County</p>
                             <input class="cs-input" type="text" id="county"
                                 name="county" value="{{ property['county'] }}"
-                                placeholder="County">
+                                placeholder="County" required readonly>
                         </label>
 
-                        <!-- Submit Button -->
+                        <label for="price">
+                            <p class="cs-topper">Price</p>
+                            <input class="cs-input" type="number" id="price"
+                                name="price" value="{{ property['price'] }}"
+                                placeholder="Price" required>
+                        </label>
+
+           
                         <button class="cs-button-solid cs-submit" type="submit">Update</button>
                     </form>
                 </div>

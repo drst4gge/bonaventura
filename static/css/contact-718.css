@@ -150,6 +150,17 @@
                 min-width: 17.6875rem;
                 border-radius: 0;
             }
+            #contact-718 .link-container {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                margin-top: 1rem; /* Adjust as needed */
+            }
+        
+            #contact-718 .link-container p {
+                margin: 0; /* Removes default paragraph margin */
+            }
         }
 
         /* Small Desktop - 1024px */

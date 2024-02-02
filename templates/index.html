@@ -41,7 +41,11 @@
                     <!-- We need a wrapper div so we can set a fixed height on the cs-ul in case the nav list gets too long from too many dropdowns being opened and needs to have an overflow scroll. This wrapper acts as the background so it can go the full height of the screen and not cut off any overflowing nav items while the cs-ul stops short of the bottom of the screen, which keeps all nav items in view no matter how mnay there are-->
                     <div class="cs-ul-wrapper">
                         <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
-                            
+                            <li class="cs-li">
+                                <a href="{{ url_for('home') }}" class="cs-li-link">
+                                    Home
+                                </a>
+                            </li>
                             <li class="cs-li">
                                 <a href="{{ url_for('pricing') }}" class="cs-li-link">
                                     Subscriptions
@@ -79,9 +83,10 @@
                     <br>
                     <br>
                     <br>
-                    <span class="cs-topper">Bonaventura</span>
-                    <h2 class="cs-title">Real estate bidding services. </h2>
-                    <p class="cs-text">
+                    <span style="font-size: xx-large;" class="cs-topper">Bonaventura Realty</span>
+                    <br>
+                    <h2 class="cs-title">The best partner for your real estate investments.</h2>
+                    <p style="font-size: large;" class="cs-text">
                         A Bonaventura subscription grants access to our exclusive database of properties.
                     </p>
                 </div>

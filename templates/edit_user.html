@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>Admin</title>
+    <title>USER ACCOUNT</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background_color.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/contact-718.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/cs-button-6.css') }}">
@@ -16,21 +16,6 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/services.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/table.css') }}">
     <script src="{{ url_for('static', filename='js/header.js') }}"></script>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script>
-        $(document).ready(function () {
-            $('.day-dropdown').on('click', function () {
-                var date = $(this).data('date');
-                var formattedDate = date.split(', ')[1]; // Extract only the 'YYYY-MM-DD' part
-                var url = '/properties/' + formattedDate;
-                window.location.href = url;
-            });
-        });
-    </script>
-
-    <link rel='stylesheet'
-        href='https://cdn-uicons.flaticon.com/2.0.0/uicons-solid-straight/css/uicons-solid-straight.css'>
 </head>
 
 <body>
@@ -38,7 +23,7 @@
         <header id="cs-navigation">
             <div class="cs-container">
                 <!--Nav Logo-->
-                <a href="{{ url_for('admin') }}" class="cs-logo" aria-label="back to home">
+                <a href="{{ url_for('home') }}" class="cs-logo" aria-label="back to home">
                     <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="logo" width="210"
                         height="29" aria-hidden="true" decoding="async">
                 </a>
@@ -53,6 +38,7 @@
                         </div>
                     </button>
                     <div class="cs-ul-wrapper">
+
                         <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
                             <li class="cs-li">
                                 <a href="{{ url_for('admin') }}" class="cs-li-link">
@@ -91,78 +77,43 @@
         <br>
         <br>
         <br>
-        <br>
-        <br>
-        <!-- Calendar Navigation -->
-        <div class="month-header">
-            <div class="month-nav">
-                <a href="{{ url_for('admin', year=year, month=month-1) }}">&#8592;</a> <!-- Left arrow -->
-                <span>{{ current_month }} {{ year }}</span>
-                <a href="{{ url_for('admin', year=year, month=month+1) }}">&#8594;</a> <!-- Right arrow -->
+
+        <section id="contact-718">
+            <div class="cs-container">
+                <div class="cs-content">
+                    <span class="cs-topper">Update your Bonaventura account.</span>
+                    
+                    <form class="cs-form" action="{{ url_for('update_user', user_id=user['id']) }}" method="post">
+                        <!-- Hidden Fields -->
+                        <input type="hidden" name="id" value="{{ user['id'] }}">
+                        
+                        <input type="hidden" name="stripe_customer_id" value="{{ user['stripe_customer_id'] }}">
+                        <input type="hidden" name="role" value="{{ user['role'] }}">
+
+                        <label for="username">
+                            <p class="cs-topper">Username</p>
+                            <input class="cs-input" type="username" id="username" name="username" value="{{ user['username'] }}" placeholder="Email">
+                        </label>
+
+                        <label for="email">
+                            <p class="cs-topper">Email</p>
+                            <input class="cs-input" type="email" id="email" name="email" value="{{ user['email'] }}" placeholder="Email">
+                        </label>
+
+                        
+                        <label for="phone">
+                            <p class="cs-topper">Phone Number</p>
+                            <input class="cs-input" type="tel" id="phone" name="phone" value="{{ user['phone'] }}" placeholder="Phone Number">
+                        </label>
+
+
+                        <!-- Submit Button -->
+                        <button class="cs-button-solid cs-submit" type="submit">Update</button>
+                    </form>
+                    
+                </div>
             </div>
-        </div>
-
-        <div style="text-align: center; margin-bottom: 20px;">
-            <form action="{{ url_for('admin') }}" method="get">
-                <label for="county">Select County:</label>
-                <select name="county" id="county">
-                    <option value="">All Counties</option>
-                    {% for county in counties %}
-                        {% if county != "--" %} <!-- Check to exclude '--' -->
-                            <option value="{{ county }}" {% if selected_county == county %}selected{% endif %}>{{ county }}</option>
-                        {% endif %}
-                    {% endfor %}
-                </select>
-                <button type="submit">SORT</button>
-            </form>
-        </div>
-
-        <!-- Calendar Grid -->
-        <div class="calendar-grid">
-            <!-- Calendar header for days of the week -->
-            <div class="calendar-header">
-                <div>Monday</div>
-                <div>Tuesday</div>
-                <div>Wednesday</div>
-                <div>Thursday</div>
-                <div>Friday</div>
-                <div>Saturday</div>
-                <div>Sunday</div>
-            </div>
-
-            <!-- Empty cells before the start of the month -->
-            {% for _ in range(first_weekday) %}
-            <div class="day-dropdown"></div>
-            {% endfor %}
-
-            <!-- Calendar Days -->
-            {% for day in range(1, days_in_month + 1) %}
-            {% set date_str = '%d-%02d-%02d' % (year, month, day) %}
-            <div class="day-dropdown {{ 'current-day' if date_str == current_date }}">
-                <div class="day-date">{{ day }}</div>
-                <a href="{{ url_for('properties_for_day', date=date_str) }}" class="dropdown-btn">
-                    {% set property_count = properties_by_date[day]|length %}
-                    {% if property_count > 0 %}
-                    {{ property_count }} Properties
-                    {% else %}
-                    No Properties
-                    {% endif %}
-                </a>
-            </div>
-            {% endfor %}
-        </div>
-
-
-
-        <br>
-        <br>
-        <br>
-        
-
-        <footer>
-            <p>© Bonaventura</p>
-        </footer>
-
+        </section>
     </div>
 </body>
 

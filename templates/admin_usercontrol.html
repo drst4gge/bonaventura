@@ -52,10 +52,32 @@
                     <div class="cs-ul-wrapper">
                         <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
                             <li class="cs-li">
-                                <a href="{{ url_for('add_user') }}" class="cs-li-link">
-                                    <p class="cs-topper">Add User</p>
+                                <a href="{{ url_for('admin') }}" class="cs-li-link">
+                                    <p class="cs-topper">Calendar</p>
                                 </a>
                             </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('upload_pdf') }}" class="cs-li-link">
+                                    <p class="cs-topper">Upload PDF</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('admin_usercontrol') }}" class="cs-li-link">
+                                    <p class="cs-topper">Users</p>
+                                </a>
+                            </li>
+                            
+                            <li class="cs-li">
+                                <a href="{{ url_for('admin_bids') }}" class="cs-li-link">
+                                    <p class="cs-topper">Bids</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('edit_profile') }}" class="cs-li-link">
+                                    <p class="cs-topper">Account</p>
+                                </a>
+                            </li>
+
                         </ul>
                     </div>
                 </nav>
@@ -81,6 +103,7 @@
                                 <th class="cs-th">Email</th>
                                 <th class="cs-th">Phone</th>
                                 <th class="cs-th">Role</th>
+                                <th class="cs-th">Edit</th>
                                 <th class="cs-th">Delete</th>
                             </tr>
                         </thead>
@@ -102,15 +125,25 @@
                                         Unknown Role
                                     {% endif %}
                                 </td>
+                                <td class="cs-td"><a href="{{ url_for('edit_user', user_id=user.id) }}" class="btn"
+                                    onclick="return confirm('Are you sure?')">Edit</a></td>
                                 <td class="cs-td"><a href="{{ url_for('delete_user', user_id=user.id) }}" class="btn"
                                         onclick="return confirm('Are you sure?')">Delete</a></td>
                             </tr>
                             {% endfor %}
                         </tbody>
+                        
                     </table>
+                    <a href="{{ url_for('add_user') }}" class="cs-li-link">
+                        <p class="cs-topper">Add User</p>
+                    </a>
                 </div>
             </div>
+            
         </section>
+        
+            
+        
 
         <footer>
             <p>© Bonaventura</p>

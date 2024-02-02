@@ -20,10 +20,89 @@
 
 <body>
     <div class="wrapper">
+        <header id="cs-navigation">
+            <div class="cs-container">
+                <!--Nav Logo-->
+                <a href="{{ url_for('home') }}" class="cs-logo" aria-label="back to home">
+                    <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="logo" width="210"
+                        height="29" aria-hidden="true" decoding="async">
+                </a>
+                <!--Navigation List-->
+                <nav class="cs-nav" role="navigation">
+                    <!--Mobile Nav Toggle-->
+                    <button class="cs-toggle" aria-label="mobile menu toggle">
+                        <div class="cs-box" aria-hidden="true">
+                            <span class="cs-line cs-line1" aria-hidden="true"></span>
+                            <span class="cs-line cs-line2" aria-hidden="true"></span>
+                            <span class="cs-line cs-line3" aria-hidden="true"></span>
+                        </div>
+                    </button>
+                    <div class="cs-ul-wrapper">
+                        {% if session['user_role'] == 1 or session['user_role'] == 2 %}
+                        <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
+                            <li class="cs-li">
+                                <a href="{{ url_for('admin') }}" class="cs-li-link">
+                                    <p class="cs-topper">Calendar</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('upload_pdf') }}" class="cs-li-link">
+                                    <p class="cs-topper">Upload PDF</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('admin_usercontrol') }}" class="cs-li-link">
+                                    <p class="cs-topper">Users</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('admin_bids') }}" class="cs-li-link">
+                                    <p class="cs-topper">Bids</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('edit_profile') }}" class="cs-li-link">
+                                    <p class="cs-topper">Account</p>
+                                </a>
+                            </li>
+
+                        </ul>
+                        {% elif session['user_role'] == 0%}
+                        <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
+                            <li class="cs-li">
+                                <a href="{{ url_for('subscriber') }}" class="cs-li-link">
+                                    <p class="cs-topper">Calendar</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('my_bids') }}" class="cs-li-link">
+                                    <p class="cs-topper">Bids</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('edit_profile') }}" class="cs-li-link">
+                                    <p class="cs-topper">Account</p>
+                                </a>
+                            </li>
+                            
+
+                        </ul>
+                        {% endif %}
+                    </div>
+                </nav>
+            </div>
+        </header>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+
         <section id="contact-718">
             <div class="cs-container">
                 <div class="cs-content">
-                    <span class="cs-topper">Update your Bonaventura account.</span>
+                    <span class="cs-topper">Update your Contact Information for notifications.</span>
                     
                     <form class="cs-form" action="{{ url_for('update_user', user_id=user['id']) }}" method="post">
                         <!-- Hidden Fields -->
@@ -48,6 +127,19 @@
                         <!-- Submit Button -->
                         <button class="cs-button-solid cs-submit" type="submit">Update</button>
                     </form>
+                    {% if session['user_role'] == 0 %}
+                    <a class="cs-li-link" href="{{ url_for('manage_portal') }}">
+                        <p class="cs-topper">Manage Subscription</p>
+
+                    </a>
+                    {% endif %}
+                    <a class="cs-li-link" href="{{ url_for('logout') }}">
+                        <p class="cs-topper">Logout</p>
+
+                    </a>
+
+                    
+
                 </div>
             </div>
         </section>
