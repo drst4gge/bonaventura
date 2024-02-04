@@ -30,6 +30,12 @@ ALLOWED_EXTENSIONS_PHOTO = {'png', 'jpg', 'jpeg'}
 application.config['UPLOAD_FOLDER'] = 'static/pdfs'
 application.config['IMAGES_FOLDER'] = 'static/images'
 
+def format_currency(value):
+    return "{:,}".format(value)
+
+application.jinja_env.filters['format_currency'] = format_currency
+
+
 def requires_roles(*roles):
     def wrapper(f):
         @wraps(f)
@@ -85,12 +91,17 @@ def get_property_by_id(property_id):
 
 def get_photos_by_property_id(property_id):
     conn = get_db_connection()
+    photos = []
     try:
         with conn.cursor(pymysql.cursors.DictCursor) as cursor:
-            cursor.execute("SELECT photo_url FROM property_photos WHERE property_id = %s", (property_id,))
-            return cursor.fetchall()
+            query = "SELECT id, photo_url FROM property_photos WHERE property_id = %s"
+            cursor.execute(query, (property_id,))
+            photos = cursor.fetchall()  # Fetch all photo entries matching the property_id
+    except Exception as e:
+        print(f"Error fetching photos for property_id {property_id}: {e}")
     finally:
         conn.close()
+    return photos
 
 def get_unique_counties():
     conn = get_db_connection()
@@ -379,6 +390,7 @@ def admin():
     return render_template('admin.html', current_month=current_month, year=year, month=month, current_date=current_date, selected_county=selected_county, counties=counties, **calendar_data)
 
 @application.route('/admin_usercontrol', methods=['GET'])
+@requires_roles(2)
 def admin_usercontrol():
     users = get_all_users()
     county_filter = request.args.get('county')
@@ -688,6 +700,7 @@ def submit_address():
     timeOfSale = None
     zpid = get_zpid_from_address(address)
     photo_url = None
+    
 
     if zpid:
         details = get_property_details(zpid)
@@ -759,6 +772,7 @@ def update_address():
     zpid = request.form['zpid']
     county = request.form['county']
     price = request.form['price']
+    afterRehabValue = request.form['afterRehabValue']
     
     
     
@@ -769,10 +783,10 @@ def update_address():
             update_sql = """
             UPDATE all_properties 
             SET addresses = %s, occupancy = %s, bedrooms = %s, bathrooms = %s, livingArea = %s, 
-                lotSize = %s, zpid = %s, county = %s, price = %s
+                lotSize = %s, zpid = %s, county = %s, price = %s, afterRehabValue = %s
             WHERE id = %s
             """
-            cursor.execute(update_sql, (address, occupancy, bedrooms, bathrooms, livingArea, lotSize, zpid, county, price, property_id))
+            cursor.execute(update_sql, (address, occupancy, bedrooms, bathrooms, livingArea, lotSize, zpid, county, price, afterRehabValue, property_id))
         conn.commit()
     finally:
         conn.close()
@@ -1030,7 +1044,6 @@ def allowed_photo(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS_PHOTO
 
-
 @application.route('/upload_pdf', methods=['GET', 'POST'])
 def upload_pdf():
     if request.method == 'POST':
@@ -1039,6 +1052,7 @@ def upload_pdf():
             filename = secure_filename(file.filename)
             file_path = os.path.join(application.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
+            
 
             print(f"File saved at {file_path}")  # Debug print
             process_pdf(file_path)
@@ -1077,6 +1091,9 @@ def process_pdf(file_path):
 
     print("Processing of PDF completed.")
 
+
+
+
 @application.route('/properties/<date>')
 def properties_for_day(date):
     try:
@@ -1085,22 +1102,40 @@ def properties_for_day(date):
     except ValueError:
         return 'Invalid date format', 400
 
-    # Fetch properties for the selected date
-    properties = get_properties_for_date(selected_date)
-
-    # Apply photo display logic to each property
-    for property in properties:
-        if property['photo_url'] and 'maps.googleapis.com/maps/api/streetview' not in property['photo_url']:
-            property['display_photo_url'] = property['photo_url']
-        else:
-            latest_photo = get_latest_photo_by_property_id(property['id'])
-            if latest_photo:
-                property['display_photo_url'] = latest_photo['photo_url']
-            else:
-                property['display_photo_url'] = None  # Or a default image URL
+    # Fetch properties and their most recent photo for the selected date
+    properties = get_properties_for_date_with_photos(selected_date)
     user_role = session.get('user_role')
 
     return render_template('propertiesforday.html', properties=properties, selected_date=selected_date, user_role=user_role)
+
+def get_properties_for_date_with_photos(selected_date):
+    conn = get_db_connection()
+    properties_with_photos = []
+    try:
+        with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+            # Adjusted query to ensure latest photo_url is fetched
+            query = """
+            SELECT p.*, pp.latest_photo_url
+            FROM all_properties p
+            LEFT JOIN (
+                SELECT pp1.property_id, pp1.photo_url AS latest_photo_url
+                FROM property_photos pp1
+                INNER JOIN (
+                    SELECT property_id, MAX(id) AS max_id
+                    FROM property_photos
+                    GROUP BY property_id
+                ) pp2 ON pp1.property_id = pp2.property_id AND pp1.id = pp2.max_id
+            ) pp ON p.id = pp.property_id
+            WHERE p.dateOfSale = %s
+            ORDER BY p.id;
+            """
+            cursor.execute(query, (selected_date,))
+            properties_with_photos = cursor.fetchall()
+    except Exception as e:
+        print(f"Error fetching properties with photos for date {selected_date}: {e}")
+    finally:
+        conn.close()
+    return properties_with_photos
 
 
 def get_properties_for_date(selected_date):
@@ -1195,35 +1230,23 @@ def manage_photos(property_id):
 
     return render_template('manage_photos.html', property_id=property_id, photos=photos)
 
-def get_properties_with_latest_photo():
-    properties = get_all_properties()
-    for property in properties:
-        # Check if property's photo_url is valid and not a Google Maps URL
-        if property['photo_url'] and 'maps.googleapis.com/maps/api/streetview' not in property['photo_url']:
-            property['display_photo_url'] = property['photo_url']
-        else:
-            # Fetch the latest uploaded photo for the property
-            latest_photo = get_latest_photo_by_property_id(property['id'])
-            if latest_photo:
-                property['display_photo_url'] = latest_photo['photo_url']
-            else:
-                # Set to a default image URL or None
-                property['display_photo_url'] = None  # or the path to a default image
-        
-
-    return properties
-
-
-def get_latest_photo_by_property_id(property_id):
+@application.route('/delete_photo/<int:photo_id>', methods=['POST'])
+def delete_photo(photo_id):
     conn = get_db_connection()
     try:
-        with conn.cursor(pymysql.cursors.DictCursor) as cursor:
-            cursor.execute("SELECT photo_url FROM property_photos WHERE property_id = %s ORDER BY id DESC LIMIT 1", (property_id,))
-            latest_photo = cursor.fetchone()
-            print(f"Latest photo for property {property_id}: {latest_photo}")  # Debug print
-            return latest_photo
+        with conn.cursor() as cursor:
+            # SQL query to delete the photo with the given id
+            query = "DELETE FROM property_photos WHERE id = %s"
+            cursor.execute(query, (photo_id,))
+        conn.commit()
+        flash('Photo deleted successfully.', 'success')
+    except Exception as e:
+        print(f"Error deleting photo with id {photo_id}: {e}")
+        flash('Error deleting photo.', 'error')
     finally:
         conn.close()
+    # Redirect back to the manage_photos page or another appropriate page
+    return redirect(url_for('admin'))
 
 
 YOUR_DOMAIN = 'https://www.bonaventurarealty.com'

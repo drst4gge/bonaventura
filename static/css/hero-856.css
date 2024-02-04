@@ -11,7 +11,7 @@
         /* 60px - 100px  bottom */
         padding: clamp(7.25rem, 16.82vw, 10.25rem) 1rem
             clamp(3.75rem, 7.82vw, 6.25rem);
-        background-color: #f7f7f7;
+        
         /* clips the svg wave from overflowing */
         overflow: hidden;
         position: relative;
@@ -105,17 +105,18 @@
     }
     #hero-856 .cs-picture {
         width: 100%;
-        max-width: 35.625rem;
+        max-width: 20vw;
         /* 400px - 712px */
         height: clamp(25rem, 95vw, 44.5rem);
         /* 100px - 200px */
         border-radius: 0 clamp(2rem, 6vw, 4rem) 0
             clamp(2rem, 6vw, 4rem);
-        box-shadow: 0px 4px 60px rgba(0, 0, 0, 0.16);
+        
         /* clips the img tag corners */
         overflow: hidden;
         display: block;
         position: relative;
+        
     }
     #hero-856 .cs-picture img {
         position: absolute;
@@ -125,6 +126,7 @@
         width: 100%;
         /* makes image act as a background image */
         object-fit: contain;
+
         /* ensures the top of the images is at the top of the container, no heads getting cut off */
         
     }
@@ -148,6 +150,14 @@
     #hero-856 .cs-container {
         flex-direction: row;
         justify-content: space-between;
+    }
+    #hero-856 .cs-content {
+        width: 40vw;
+        /* prevents flex-box from squishing it */
+        flex: none;
+        align-items: flex-start;
+        /* sends it to the right in the 2nd position */
+        order: 2;
     }
     #hero-856 .cs-content {
         width: 40vw;

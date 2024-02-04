@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>BONAVENTURA ADMIN</title>
+    <title>Bonaventura</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background_color.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/contact-718.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/cs-button-6.css') }}">
@@ -24,8 +24,6 @@
             <div class="cs-container">
                 <!-- Optional picture section here, if you want to include an image -->
                 <div class="cs-content">
-                    <span class="cs-topper">Bonaventura Admin</span>
-                    <h2 class="cs-title">Update Property Details in the Bonaventura Dashboard.</h2>
                     <form class="cs-form" action="/update_address" method="post">
                         <!-- Hidden ID Field -->
                         <input type="hidden" name="id" value="{{ property['id'] }}">
@@ -40,6 +38,20 @@
                             <p class="cs-topper">Occupancy</p>
                             <input class="cs-input" type="text" id="occupancy" name="occupancy"
                                 value="{{ property['occupancy'] }}" placeholder="Occupancy" required>
+                        </label>
+
+                        <label for="price">
+                            <p class="cs-topper">Price</p>
+                            <input class="cs-input" type="number" id="price"
+                                name="price" value="{{ property['price'] }}"
+                                placeholder="Price" required>
+                        </label>
+
+                        <label for="afterRehabValue">
+                            <p class="cs-topper">ARV</p>
+                            <input class="cs-input" type="number" id="afterRehabValue"
+                                name="afterRehabValue" value="{{ property['afterRehabValue'] }}"
+                                placeholder="ARV" required>
                         </label>
                         
 
@@ -87,13 +99,6 @@
                             <input class="cs-input" type="text" id="county"
                                 name="county" value="{{ property['county'] }}"
                                 placeholder="County" required readonly>
-                        </label>
-
-                        <label for="price">
-                            <p class="cs-topper">Price</p>
-                            <input class="cs-input" type="number" id="price"
-                                name="price" value="{{ property['price'] }}"
-                                placeholder="Price" required>
                         </label>
 
            

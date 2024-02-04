@@ -29,12 +29,12 @@ th {
 }
 
 .property-image {
-    width: 100%; /* Set the width of the image to cover the full width of its container */
+    width: 80%; /* Set the width of the image to cover the full width of its container */
     height: 200px; /* Adjust this value based on your design requirements */
-    object-fit: contain; /* This will ensure that the image covers the allocated area without distortion */
+    object-fit: fill; /* This will ensure that the image covers the allocated area without distortion */
     display: block;
     margin: 0 auto;
-    background-color: #f0f0f0; /* Optional: a background color for when the image is not available */
+
     
 }
 

@@ -1,32 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <!-- Include necessary head elements -->
-</head>
-<body>
-    <h1>Manage Photos for Property ID: {{ property_id }}</h1>
 
-    <div>
-        <h2>Existing Photos</h2>
-        {% if photos %}
+<head>
+    <title>Bonaventura</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background_color.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/contact-718.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/cs-button-6.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/footer.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/gallery-45.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/header.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/hero-82.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/hero-408.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/property-grid.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/services.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/table.css') }}">
+    <script src="{{ url_for('static', filename='js/header.js') }}"></script>
+</head>
+
+<body>
+    <div class="wrapper">
+        <header id="cs-navigation">
+            <div class="cs-container">
+                <!--Nav Logo-->
+                <a href="{{ url_for('admin') }}" class="cs-logo" aria-label="back to home">
+                    <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="logo" width="210"
+                        height="29" aria-hidden="true" decoding="async">
+                </a>
+                <!--Navigation List-->
+                <nav class="cs-nav" role="navigation">
+                    <!--Mobile Nav Toggle-->
+                    <button class="cs-toggle" aria-label="mobile menu toggle">
+                        <div class="cs-box" aria-hidden="true">
+                            <span class="cs-line cs-line1" aria-hidden="true"></span>
+                            <span class="cs-line cs-line2" aria-hidden="true"></span>
+                            <span class="cs-line cs-line3" aria-hidden="true"></span>
+                        </div>
+                    </button>
+                    <div class="cs-ul-wrapper">
+                        <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
+                            <li class="cs-li">
+                                <a href="{{ url_for('admin') }}" class="cs-li-link">
+                                    <p class="cs-topper">Calendar</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('upload_pdf') }}" class="cs-li-link">
+                                    <p class="cs-topper">Upload PDF</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('admin_usercontrol') }}" class="cs-li-link">
+                                    <p class="cs-topper">Users</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('admin_bids') }}" class="cs-li-link">
+                                    <p class="cs-topper">Bids</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('edit_profile') }}" class="cs-li-link">
+                                    <p class="cs-topper">Account</p>
+                                </a>
+                            </li>
+
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </header>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <h1 style="padding-left: 30vw;">Manage Photos for {{ property_id }}</h1>
+
+        <div style="padding-left: 30vw;">
+            <h2>Upload New Photo</h2>
+            <form method="POST" action="{{ url_for('upload_photo', property_id=property_id) }}"
+                enctype="multipart/form-data">
+                <input type="file" name="photo">
+                <input type="submit">
+            </form>
+        </div>
+
+        <div style="padding-left: 30vw;">
+            <h2>Existing Photos</h2>
+            {% if photos %}
             <!-- Display existing photos -->
             {% for photo in photos %}
-                <div class="photo-container">
-                    <img src="{{ photo['photo_url'] }}" alt="Property Photo" style="max-width: 200px; height: auto;">
-                    <!-- Optional: Add a delete button or other controls here -->
-                </div>
+            <div class="photo-container">
+                <img src="{{ url_for('static', filename=photo['photo_url'].replace('static/', '', 1)) }}" alt="Property Photo" style="max-width: 700px; height: auto;">
+                <!-- Delete form -->
+                <form action="{{ url_for('delete_photo', photo_id=photo['id']) }}" method="post" style="display: inline;">
+                    <input type="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this photo?');">
+                </form>
+            </div>
             {% endfor %}
-        {% else %}
+            {% else %}
             <p>No photos available.</p>
-        {% endif %}
-    </div>
+            {% endif %}
+        </div>
 
-    <div>
-        <h2>Upload New Photo</h2>
-        <form action="{{ url_for('manage_photos', property_id=property_id) }}" method="POST" enctype="multipart/form-data">
-            <input type="file" name="photo" required>
-            <input type="submit" value="Upload">
-        </form>
+        
+        <br>
+        <br>
+        <br>
+        
+
+        <footer>
+            <p>© Bonaventura</p>
+        </footer>
     </div>
 </body>
+
 </html>

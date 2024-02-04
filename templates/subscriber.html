@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>BONAVENTURA HOME</title>
+    <title>Bonaventura</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background_color.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/contact-718.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/cs-button-6.css') }}">
@@ -58,7 +58,7 @@
                                     <p class="cs-topper">Calendar</p>
                                 </a>
                             </li>
-                            {% if not session['subscription_level'] == 'standard' %}
+                            {% if session['subscription_level'] == 'platinum'  %}
                             <li class="cs-li">
                                 <a href="{{ url_for('my_bids') }}" class="cs-li-link">
                                     <p class="cs-topper">Bids</p>
@@ -72,7 +72,7 @@
                             </li>
                             
 
-                        </ul>
+                        </ul> 
                     </div>
                 </nav>
 
@@ -97,7 +97,7 @@
         </div>
 
         <div style="text-align: center; margin-bottom: 20px;">
-            <form action="{{ url_for('admin') }}" method="get">
+            <form action="{{ url_for('subscriber') }}" method="get">
                 <label for="county">Select County:</label>
                 <select name="county" id="county">
                     <option value="">All Counties</option>

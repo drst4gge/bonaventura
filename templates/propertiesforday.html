@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>DAILY PROPERTIES</title>
+    <title>Bonaventura</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background_color.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/contact-718.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/cs-button-6.css') }}">
@@ -74,7 +74,7 @@
                                     <p class="cs-topper">Calendar</p>
                                 </a>
                             </li>
-                            {% if not session['subscription_level'] == 'standard' %}
+                            {% if session['subscription_level'] == 'platinum'  %}
                             <li class="cs-li">
                                 <a href="{{ url_for('my_bids') }}" class="cs-li-link">
                                     <p class="cs-topper">Bids</p>
@@ -111,12 +111,17 @@
                 {% if not session['subscription_level'] == 'standard' %}
                 <a href="{{ url_for('property_details', id=property['id']) }}" class="property-link">
                 {% endif %}
-                    {% if property.display_photo_url %}
-                    <img class="property-image" src="{{ property.display_photo_url }}" alt="Property Image">
+                    {% if property.latest_photo_url %}
+                        <!-- Check if latest_photo_url is a relative path and prepend with url_for -->
+                        {% if property.latest_photo_url.startswith('static/images/') %}
+                            <img class="property-image" src="{{ url_for('static', filename=property.latest_photo_url[7:]) }}" alt="Uploaded Property Photo">
+                        {% else %}
+                            <!-- If it's a complete URL, use it as is -->
+                            <img class="property-image" src="{{ property.latest_photo_url }}" alt="Uploaded Property Photo">
+                        {% endif %}
                     {% else %}
-                    <!-- Display a default image -->
-                    <img class="property-image" src="{{ url_for('static', filename='images/background.jpg') }}"
-                        alt="Default Property Image">
+                        <!-- Handle property['photo_url'] similarly if needed -->
+                        <img class="property-image" src="{{ property.photo_url }}" alt="Pending Drive By Photograph">
                     {% endif %}
                     <div class="property-content">
                         <table style="width: 100%;">
@@ -130,12 +135,20 @@
                                     <td style="text-align: right;">{{ property['county'] }}</td>
                                 </tr>
                                 <tr>
-                                    <td style="text-align: left; color: #000000; font-weight: bold;">Date of Sale</td>
-                                    <td style="text-align: right;">{{ property['dateOfSale'] }}</td>
-                                </tr>
-                                <tr>
                                     <td style="text-align: left; color: #000000; font-weight: bold;">Time of Sale</td>
                                     <td style="text-align: right;">{{ property['timeOfSale'] }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left; color: #000000; font-weight: bold;">Opening Bid</td>
+                                    <td style="text-align: right;">{{ property['price']|format_currency }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left; color: #000000; font-weight: bold;">ARV</td>
+                                    {% if property['afterRehabValue'] == 0 %}
+                                    <td style="text-align: right;">Not Determined</td> 
+                                    {% else %}
+                                    <td style="text-align: right;">{{ property['afterRehabValue']|format_currency }}</td>
+                                    {% endif %}
                                 </tr>
                                 <tr>
                                     <td style="text-align: left; color: #000000; font-weight: bold;">Occupancy</td>
@@ -149,7 +162,6 @@
                     </div>
                 </a>
                 {% if session['user_role'] == 1 or session['user_role'] == 2 %}
-                    <!-- Only display these buttons for agents (role 1) and admins (role 2) -->
                     <div class="property-buttons">
                         <a href="{{ url_for('edit_address', id=property['id']) }}" class="cs-button-4">Edit</a>
                         <a href="{{ url_for('delete_address', id=property['id']) }}" class="cs-button-4">Delete</a>
@@ -162,13 +174,12 @@
             {% endfor %}
         </div>
 
-        <!-- Optional: Pagination or navigation links -->
 
     </div>
 
-    <!-- Optional: JavaScript files inclusion -->
+
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    <!-- Include other necessary JavaScript files here -->
+
 </body>
 
 </html>
