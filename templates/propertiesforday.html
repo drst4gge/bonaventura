@@ -128,7 +128,7 @@
                             <tbody>
                                 <tr>
                                     <td style="text-align: left; color: #000000; font-weight: bolder;">Address</td>
-                                    <td style="text-align: right; font-weight: bold;">{{ property['addresses'] }}</td>
+                                    <td style="text-align: right; font-weight: bold;">{{ property['addresses']|split_address }}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align: left; color: #000000; font-weight: bold;">County</td>
@@ -140,7 +140,11 @@
                                 </tr>
                                 <tr>
                                     <td style="text-align: left; color: #000000; font-weight: bold;">Opening Bid</td>
-                                    <td style="text-align: right;">{{ property['price']|format_currency }}</td>
+                                    {% if property['openingBid'] == 0 %}
+                                    <td style="text-align: right;">Not Determined</td> 
+                                    {% else %}
+                                    <td style="text-align: right;">{{ property['openingBid']|format_currency }}</td>
+                                    {% endif %}
                                 </tr>
                                 <tr>
                                     <td style="text-align: left; color: #000000; font-weight: bold;">ARV</td>

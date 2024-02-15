@@ -18,32 +18,6 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/table.css') }}">
     <script src="{{ url_for('static', filename='js/header.js') }}"></script>
     <script>
-        function updateTotalAmount() {
-            // Function to clean and parse the currency formatted values
-            function parseCurrency(value) {
-                return parseFloat(value.replace(/[^0-9.-]+/g, "")) || 0;
-            }
-
-            // Function to format number as currency
-            function formatCurrency(number) {
-                return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(number);
-            }
-
-            // Get the values from the inputs
-            const originalPrice = parseCurrency(document.getElementById('original-price').value);
-            const feeAmount = parseCurrency(document.getElementById('fee-amount').value);
-
-            // Calculate the total
-            const totalAmount = originalPrice + feeAmount;
-
-            // Update the total amount field with formatted currency
-            document.getElementById('total-amount').value = formatCurrency(totalAmount);
-        }
-
-        // Call the function on page load
-        window.onload = updateTotalAmount;
-    </script>
-    <script>
         function formatPhoneNumber(phoneNumber) {
             const cleaned = ('' + phoneNumber).replace(/\D/g, '');
             const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
@@ -68,6 +42,37 @@
             updateTotalAmount();
         };
     </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Function to calculate and update fee
+            function updateFee() {
+                // Get the maximum bid amount entered by the user
+                var maxBidAmount = parseFloat(document.getElementById('maximum-bid-amount').value.replace(/[^0-9.-]+/g, "")) || 0;
+                // Calculate the fee as 20% of the maximum bid amount
+                var fee = maxBidAmount * 0.20;
+                // Update the fee field with the calculated fee, formatting as currency
+                document.getElementById('fee').value = fee.toFixed(2);
+            }
+        
+            // Event listener for changes in the maximum bid amount field
+            document.getElementById('maximum-bid-amount').addEventListener('input', updateFee);
+        
+            // Initial calculation in case there's a default value
+            updateFee();
+        });
+        </script>
+        <script>
+            document.getElementById('bid-form').addEventListener('submit', function(event) {
+                var openingBid = parseFloat(document.getElementById('maximum-bid-amount').getAttribute('min'));
+                var currentBid = parseFloat(document.getElementById('maximum-bid-amount').value);
+                
+                if (currentBid < openingBid) {
+                    event.preventDefault(); // Stop the form submission
+                    alert('Your bid must be at least the opening bid amount.');
+                }
+            });
+        </script>
+        
 
 
 
@@ -155,49 +160,41 @@
             <div class="cs-container">
                 <div class="cs-content">
                     <span class="cs-topper">Place a bid on {{ property['addresses'] }}</span>
-                    <form class="cs-form" action="/submit_bid/{{ property_id }}" method="post">
-                        <!-- Hidden ID Field -->
+                    <form id="bid-form" class="cs-form" action="/submit_bid/{{ property_id }}" method="post">
+
                         <input type="hidden" name="id" value="{{ user['user_id'] }}">
-
-                        <!-- User Field -->
-                        <label for="username">User
+                        <label class="cs-topper" for="username">User
                             <input class="cs-input" type="text" id="username" name="username"
-                                value="{{ user['username'] }}" placeholder="Username" required>
+                                value="{{ user['username'] }}" placeholder="Username" required readonly>
                         </label>
 
-                        <!-- Email Field -->
-                        <label for="email">Email
+                        <label class="cs-topper" for="email">Email
                             <input class="cs-input" type="text" id="email" name="email" value="{{ user['email'] }}"
-                                placeholder="email">
+                                placeholder="email" required readonly>
                         </label>
 
-                        <!-- Phone Field -->
-                        <label for="phone">Phone
+                        <label class="cs-topper" for="phone">Phone
                             <input class="cs-input" type="text" id="phone" name="phone" value="{{ user['phone'] }}"
-                                placeholder="phone">
+                                placeholder="phone" required readonly>
                         </label>
 
-                        <!-- Price and Fee Fields -->
+                        <label class="cs-topper" for="maximum-bid-amount">Maximum Bid Amount
+                            <input class="cs-input" type="number" id="maximum-bid-amount" name="maximum-bid-amount"
+                                value="{{ property['openingBid'] }}" min="{{ property['openingBid'] }}" required>
+                        </label>
                         
-                        <label for="original-price">Maximum Bid Amount:</label>
-                        <input class="cs-input" type="text" id="original-price" name="price"
-                            value="{{ formatted_price }}" readonly>
-                        <!--
-                        <label for="fee-amount">Fee Amount:</label>
-                        <input class="cs-input" type="text" id="fee-amount" name="fee" value="{{ formatted_fee }}"
-                            readonly>
-                        
-                        <label for="total-amount">Total Amount:</label>
-                        <input class="cs-input" type="text" id="total-amount" name="total_amount"
-                            value="{{ formatted_total }}" readonly>
-                        -->
-                        <label for="bid_amount">Fees:</label>
-                        <input class="cs-input" type="text" id="bid_amount" name="bid_amount" value="{{ formatted_fee }}" readonly>
-                        
-                        
-                        
+                        <label class="cs-topper" for="fee">Fee*
+                            <input class="cs-input" type="number" id="fee" name="fee" 
+                                value="{{ fee }}" required readonly>
+                        </label>
 
-                        <!-- Submit Button -->
+                        <label>
+                            <input type="checkbox" name="terms" required>
+                            I agree to the <a href="{{ url_for('bid_agreement') }}" target="_blank">Bidding Terms and Conditions</a>
+                        </label>
+
+                        <p style="font-size: small;">*Fee will be reduced if auction is won at lower price than maximum amount.</p>
+
                         <button class="cs-button-solid cs-submit" type="submit">Bid</button>
                     </form>
                 </div>

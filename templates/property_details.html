@@ -105,12 +105,20 @@
                 <div class="cs-content">
                     <span class="cs-topper" style="font-size: xx-large;">{{ property['addresses'] }}</span>
                     
-                    <p class="cs-text"><b>Opening Bid |</b> {{ property['price']|format_currency }}</p>
+                    
+
+                    {% if property['openingBid'] == 0 %}
+                    <p class="cs-text"><b>Opening Bid |</b> Not Determined</p>
+                    {% else %}
+                    <p class="cs-text"><b>Opening Bid |</b> {{ property['openingBid']|format_currency }}</p>
+                    {% endif %}
+                    
                     {% if property['afterRehabValue'] == 0 %}
                     <p class="cs-text"><b>ARV |</b> Not Determined</p>
                     {% else %}
                     <p class="cs-text"><b>ARV |</b> {{ property['afterRehabValue']|format_currency }}</p>
-                    {% endif %}                                               
+                    {% endif %}
+
                     <p class="cs-text"><b>Occupancy |</b> {{ property['occupancy'] }}</p>
                     <p class="cs-text"><b>{{ property['county'] }}</b></p>
                     <p class="cs-text"><b>Date of Sale |</b> {{ property['dateOfSale'] }}</p>

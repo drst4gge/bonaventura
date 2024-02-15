@@ -31,9 +31,18 @@ application.config['UPLOAD_FOLDER'] = 'static/pdfs'
 application.config['IMAGES_FOLDER'] = 'static/images'
 
 def format_currency(value):
-    return "{:,}".format(value)
+    # Format the number as a currency, with commas for thousands and two decimal places
+    # Assuming USD for currency; adjust the symbol as needed
+    return "${:,.2f}".format(value)
 
+# Register the filter with your Jinja environment
 application.jinja_env.filters['format_currency'] = format_currency
+
+def split_address(address):
+    return address.split(' - ')[0]
+
+# Register the filter with Jinja
+application.jinja_env.filters['split_address'] = split_address
 
 
 def requires_roles(*roles):
@@ -226,6 +235,10 @@ def pricing():
 @application.route('/subscriber_agreement')
 def subscriber_agreement():
     return render_template('subscriber_agreement.html')
+
+@application.route('/bid_agreement')
+def bid_agreement():
+    return render_template('bid_agreement.html')
 
 @application.route('/services')
 def services():
@@ -773,6 +786,7 @@ def update_address():
     county = request.form['county']
     price = request.form['price']
     afterRehabValue = request.form['afterRehabValue']
+    openingBid = request.form['openingBid']
     
     
     
@@ -783,10 +797,10 @@ def update_address():
             update_sql = """
             UPDATE all_properties 
             SET addresses = %s, occupancy = %s, bedrooms = %s, bathrooms = %s, livingArea = %s, 
-                lotSize = %s, zpid = %s, county = %s, price = %s, afterRehabValue = %s
+                lotSize = %s, zpid = %s, county = %s, price = %s, afterRehabValue = %s, openingBid = %s
             WHERE id = %s
             """
-            cursor.execute(update_sql, (address, occupancy, bedrooms, bathrooms, livingArea, lotSize, zpid, county, price, afterRehabValue, property_id))
+            cursor.execute(update_sql, (address, occupancy, bedrooms, bathrooms, livingArea, lotSize, zpid, county, price, afterRehabValue, openingBid, property_id))
         conn.commit()
     finally:
         conn.close()
@@ -834,10 +848,10 @@ def get_photos(zpid):
 def bid(id):
     property = get_property_by_id(id)
     if property:
-        formatted_price = "${:,.2f}".format(property['price'])
-        fee_amount = property['price'] / 5
+        formatted_price = "${:,.2f}".format(property['openingBid'])
+        fee_amount = property['openingBid'] / 5
         formatted_fee = "${:,.2f}".format(fee_amount)
-        total_amount = property['price'] + fee_amount
+        total_amount = property['openingBid'] + fee_amount
         formatted_total = "${:,.2f}".format(total_amount)
 
         user_details = {
@@ -858,7 +872,8 @@ def submit_bid(id):
     user_id = session['user_id']  # or from form data
 
     # Get the bid amount from the form data (replace 'form_field_name' with the actual field name)
-    bid_amount = request.form['bid_amount']
+
+    bid_amount = request.form['maximum-bid-amount']
 
     # Insert bid into the database
     insert_bid(user_id, id, bid_amount)

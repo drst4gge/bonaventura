@@ -5,7 +5,7 @@ th {
 .property-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
-    grid-gap: 13px;
+    grid-gap: 10px;
     padding: 20px;
 }
 
@@ -31,7 +31,7 @@ th {
 .property-image {
     width: 80%; /* Set the width of the image to cover the full width of its container */
     height: 200px; /* Adjust this value based on your design requirements */
-    object-fit: fill; /* This will ensure that the image covers the allocated area without distortion */
+    object-fit: contain; /* This will ensure that the image covers the allocated area without distortion */
     display: block;
     margin: 0 auto;
 
@@ -40,7 +40,7 @@ th {
 
 
 .property-content {
-    padding: 5px;
+    padding: 8px;
 }
 
 a {
