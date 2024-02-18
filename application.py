@@ -646,9 +646,9 @@ def register_user():
         email = request.form['email']
         phone = request.form['phone']
         role = request.form['role']
-        subscription_level = request.form['subscriptionLevel']
+        subscription_level = request.form['subscriptionLevel'] 
 
-        session['subscription_level'] = subscription_level
+        
 
         if not re.match("^[A-Za-z0-9]+$", username):
             flash("Invalid username. Only characters and integers are allowed.")
@@ -664,8 +664,8 @@ def register_user():
         
 
         # Create user in the database with Stripe customer ID
-        user_id = create_user_in_db(username, password, email, phone, role, subscription_level=subscription_level, stripe_customer_id=None)
-
+        user_id = create_user_in_db(username, password, email, phone, role, "No Checkout", stripe_customer_id=None)
+        session['actual_subscription_level'] = subscription_level
 
         return redirect(url_for('create_checkout_session', user_id=user_id), code=307)
     except StripeError as e:
@@ -1107,8 +1107,6 @@ def process_pdf(file_path):
     print("Processing of PDF completed.")
 
 
-
-
 @application.route('/properties/<date>')
 def properties_for_day(date):
     try:
@@ -1274,16 +1272,18 @@ def create_checkout_session(user_id):
             flash('User not found.')
             return redirect(url_for('register'))
         
-        subscription_level = session.get('subscription_level', 'standard')  # Default to 'standard' if not set
+        actual_subscription_level = session.get('actual_subscription_level')
+        print(actual_subscription_level)
     
         # Map the subscription level to the corresponding Stripe price ID
         price_ids = {
             
+            'test': 'price_1OYcdNFNut4X8qSwqIIX5Yz5',
             'standard': 'price_1OYc4qFNut4X8qSwK07XJ8M2',
             'gold': 'price_1Of8KoFNut4X8qSwksIcg5js',
             'platinum': 'price_1Of8LFFNut4X8qSw1Kvnlavx',
         }
-        selected_price_id = price_ids[subscription_level]
+        selected_price_id = price_ids[actual_subscription_level]
 
         success_url = url_for('checkout_success', user_id=user_id, _external=True) + '?session_id={CHECKOUT_SESSION_ID}'
         cancel_url = url_for('checkout_cancel', user_id=user_id, _external=True)
@@ -1297,7 +1297,7 @@ def create_checkout_session(user_id):
             mode='subscription',
             success_url=success_url,
             cancel_url=cancel_url,
-            metadata={'user_id': str(user_id)},  # Ensure this is a string if necessary
+            metadata={'user_id': str(user_id), 'subscription_level': actual_subscription_level},
         )
         return redirect(checkout_session.url, code=303)
     except Exception as e:
@@ -1364,11 +1364,12 @@ def webhook_received():
             session = event['data']['object']
             # Extract user ID from session metadata
             user_id = session['metadata']['user_id']
-            stripe_customer_id = session['customer']
-            print(f"User ID: {user_id}, Stripe Customer ID: {stripe_customer_id}")
+            subscription_level = session['metadata']['subscription_level']
+            
+            
 
             # Update user with Stripe Customer ID
-            update_user_with_stripe_id(user_id, stripe_customer_id)
+            update_user_with_stripe_id_and_subscription_level(user_id, session['customer'], subscription_level)
 
         return jsonify({'status': 'success'}), 200
     except ValueError:
@@ -1382,16 +1383,20 @@ def webhook_received():
         return jsonify({'error': str(e)}), 500
 
 
-def update_user_with_stripe_id(user_id, stripe_customer_id):
-    print(f"Updating user {user_id} with Stripe ID {stripe_customer_id}")
+def update_user_with_stripe_id_and_subscription_level(user_id, stripe_customer_id, subscription_level):
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
-            update_sql = "UPDATE users SET stripe_customer_id = %s WHERE id = %s"
-            cursor.execute(update_sql, (stripe_customer_id, user_id))
+            # Update SQL query to set both stripe_customer_id and subscription_level
+            update_sql = """
+            UPDATE users
+            SET stripe_customer_id = %s, subscription_level = %s
+            WHERE id = %s
+            """
+            cursor.execute(update_sql, (stripe_customer_id, subscription_level, user_id))
         conn.commit()
     except Exception as e:
-        print(f"Error updating user with Stripe ID: {e}")
+        print(f"Error updating user {user_id}: {e}")
     finally:
         conn.close()
 
@@ -1407,9 +1412,120 @@ def checkout_cancel(user_id):
     # Handle checkout cancellation, e.g., notify user or log
     return "Checkout cancelled. Please try again."
 
+import logging
+import boto3
+from botocore.exceptions import ClientError
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+def send_email_message(app_id, sender, to_addresses, subject, html_message):
+    pinpoint_client = boto3.client('pinpoint', region_name='us-east-1')
+    try:
+        response = pinpoint_client.send_messages(
+            ApplicationId=app_id,
+            MessageRequest={
+                "Addresses": {
+                    address: {"ChannelType": "EMAIL"} for address in to_addresses
+                },
+                "MessageConfiguration": {
+                    "EmailMessage": {
+                        "FromAddress": sender,
+                        "SimpleEmail": {
+                            "Subject": {
+                                "Charset": "UTF-8",
+                                "Data": subject
+                            },
+                            "HtmlPart": {
+                                "Charset": "UTF-8",
+                                "Data": html_message
+                            },
+                            # If you have a text version of the message, add it here
+                            "TextPart": {
+                                "Charset": "UTF-8",
+                                "Data": "Text version of the email content"
+                            }
+                        }
+                    }
+                }
+            }
+        )
+    except ClientError as e:
+        logger.exception("Couldn't send email via Pinpoint: %s", e)
+        return None
+    else:
+        return response['MessageResponse']['Result']
+
+from flask import current_app
+
+@application.route('/send-test-email')
+def send_test_email():
+    with application.app_context():
+        app_id = 'abccb22dc4414fe0b229357f51a1cdde'  
+        sender = '"Bonaventura Realty" <info@bonaventurarealty.com>'
+        to_addresses = ['dstagge@bonaventurarealty.com']
+        subject = 'Your Daily Properties Update'
+        
+        # Generate the dynamic URL based on the current date
+        current_date = datetime.now().strftime("%Y-%m-%d")
+        properties_url = f"https://www.bonaventurarealty.com/properties/{current_date}"
+        
+        # Construct the HTML message with the dynamic URL
+        html_message = f"""
+        <html>
+            Dear valued subscriber,<div><br></div>
+            <div>Good morning! We hope this message finds you well and excited to explore new opportunities.&nbsp;</div>
+            <div><br></div>
+            <a style="text-decoration: none; font-style: italic;" href="{properties_url}"">Today's Exclusive Property Options</a>
+            <div><br></div>
+            <div>Should you have any questions or need further assistance, please do not hesitate to reach out. Our dedicated team of professionals is here to provide you with personalized support every step of the way.</div>
+            <div><br></div>
+            <div>Thank you for your continued trust in Bonaventura Realty. We look forward to helping you achieve your real estate goals.&nbsp;</div>
+            <div><br></div>
+            <div>Warm regards,</div>
+            <div>Bonaventura Realty Team</div>
+            <div><br></div>
+            <div><br></div>
+            <div><br></div>
+        </html>
+        
+        """
+        
+        # Send the email
+        message_ids = send_email_message(app_id, sender, to_addresses, subject, html_message)
+        
+        if message_ids:
+            current_app.logger.info(f"Email sent successfully: {message_ids}")
+        else:
+            current_app.logger.info("Failed to send email")
+    
+from apscheduler.schedulers.background import BackgroundScheduler
+import atexit
+
+def schedule_daily_emails():
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(
+        func=send_test_email,
+        trigger='cron',
+        day_of_week='mon-sun', 
+        hour=6, 
+        minute=00,
+        second=00,
+        id='daily_email_task',
+        name='Send daily email updates',
+        replace_existing=True
+    )
+    scheduler.start()
+    print("Scheduler triggered.")
+
+    # Shut down the scheduler when exiting the app
+    atexit.register(lambda: scheduler.shutdown(wait=False))
+        
 if __name__ == "__main__":
-    application.run()
+    schedule_daily_emails()
+    application.run(port=4242)
     #To the next developer,
     #Good luck.. haha.
     #From Drew
+
 
