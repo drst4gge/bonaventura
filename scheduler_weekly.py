@@ -1,7 +1,7 @@
 import logging
 import boto3
 from botocore.exceptions import ClientError
-from datetime import datetime
+from datetime import datetime, timedelta
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -46,23 +46,21 @@ def send_email_message(app_id, sender, to_addresses, subject, html_message):
 from flask import current_app
 
 def send_test_email():
-
-    app_id = 'abccb22dc4414fe0b229357f51a1cdde'  
+    app_id = 'abccb22dc4414fe0b229357f51a1cdde'
     sender = '"Bonaventura Realty" <info@bonaventurarealty.com>'
     to_addresses = ['dstagge@bonaventurarealty.com', 'cskowron1@gmail.com', 'cskowron21@gmail.com', 'mikemeyers@bonaventurarealty.com']
-    subject = 'Your Daily Properties Update'
+    subject = 'Your Weekly Properties Update'
     
-    # Generate the dynamic URL based on the current date
-    current_date = datetime.now().strftime("%Y-%m-%d")
-    properties_url = f"https://www.bonaventurarealty.com/properties/{current_date}"
+    # Generate the dynamic URLs based on the next Monday to Friday dates
+    base_url = "https://www.bonaventurarealty.com/properties/"
+    html_message = '<html>Dear valued subscriber,<div><br></div><div>Good evening!&nbsp;</div><div><br></div>'
     
-    # Construct the HTML message with the dynamic URL
-    html_message = f"""
-    <html>
-        Dear valued subscriber,<div><br></div>
-        <div>Good morning!&nbsp;</div>
-        <div><br></div>
-        <a style="text-decoration: none; font-style: italic;" href="{properties_url}"">Today's Exclusive Property Options</a>
+    for i in range(1, 6):  # Monday (1) to Friday (5)
+        next_day_date = (datetime.now() + timedelta(days=i)).strftime("%Y-%m-%d")
+        properties_url = f"{base_url}{next_day_date}"
+        html_message += f'<a style="text-decoration: none; font-style: italic;" href="{properties_url}">Options for {next_day_date}</a><br>'
+    
+    html_message += """
         <div><br></div>
         <div>Should you have any questions or need further assistance, please do not hesitate to reach out. Our dedicated team of professionals is here to provide you with personalized support every step of the way.</div>
         <div><br></div>
@@ -74,7 +72,6 @@ def send_test_email():
         <div><br></div>
         <div><br></div>
     </html>
-    
     """
     
     # Send the email

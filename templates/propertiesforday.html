@@ -55,11 +55,13 @@
                                     <p class="cs-topper">Users</p>
                                 </a>
                             </li>
+                            
                             <li class="cs-li">
                                 <a href="{{ url_for('admin_bids') }}" class="cs-li-link">
                                     <p class="cs-topper">Bids</p>
                                 </a>
                             </li>
+                            
                             <li class="cs-li">
                                 <a href="{{ url_for('edit_profile') }}" class="cs-li-link">
                                     <p class="cs-topper">Account</p>
@@ -74,11 +76,17 @@
                                     <p class="cs-topper">Calendar</p>
                                 </a>
                             </li>
-                            {% if session['subscription_level'] == 'platinum'  %}
+                            {% if session['subscription_level'] == 'platinum' %}
                             <li class="cs-li">
                                 <a href="{{ url_for('my_bids') }}" class="cs-li-link">
                                     <p class="cs-topper">Bids</p>
                                 </a>
+                            </li>
+                            {% else %}
+                            <li class="cs-li">
+                                
+                                <p class="cs-topper">Bids (not subscribed)</p>
+                            </a>
                             </li>
                             {% endif %}
                             <li class="cs-li">
@@ -138,6 +146,7 @@
                                     <td style="text-align: left; color: #000000; font-weight: bold;">Time of Sale</td>
                                     <td style="text-align: right;">{{ property['timeOfSale'] }}</td>
                                 </tr>
+                                {% if session['subscription_level'] == 'platinum' or session['subscription_level'] == 'gold'   %}
                                 <tr>
                                     <td style="text-align: left; color: #000000; font-weight: bold;">Opening Bid</td>
                                     {% if property['openingBid'] == 0 %}
@@ -158,6 +167,22 @@
                                     <td style="text-align: left; color: #000000; font-weight: bold;">Occupancy</td>
                                     <td style="text-align: right;">{{ property['occupancy'] }}</td>
                                 </tr>
+                                {% else %}
+                                <tr>
+                                    <td style="text-align: left; color: #000000; font-weight: bold;">Opening Bid</td>
+                                    
+                                    <td style="text-align: right;">Not Subscribed</td> 
+                                    
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left; color: #000000; font-weight: bold;">ARV</td>
+                                    <td style="text-align: right;">Not Subscribed</td> 
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left; color: #000000; font-weight: bold;">Occupancy</td>
+                                    <td style="text-align: right;">Not Subscribed</td> 
+                                </tr>
+                                {% endif %}
                                 
 
 

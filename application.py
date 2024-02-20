@@ -870,6 +870,10 @@ def bid(id):
 def submit_bid(id):
     # Extract user ID from session or form
     user_id = session['user_id']  # or from form data
+    username = request.form['username']
+    email = request.form['email']
+    bid_amount = request.form['maximum-bid-amount']
+    phone = request.form['phone']
 
     # Get the bid amount from the form data (replace 'form_field_name' with the actual field name)
 
@@ -877,6 +881,14 @@ def submit_bid(id):
 
     # Insert bid into the database
     insert_bid(user_id, id, bid_amount)
+
+    property = get_property_by_id(id)
+
+    address = property['addresses']
+    print(address)
+
+    send_bid_receipt_email(address, email, username, bid_amount)
+    send_bid_receipt_email_to_admin(phone, address, email, username, bid_amount)
 
     # Redirect to a confirmation page or back to the property details
     return redirect(url_for('property_details', id=id))
@@ -1278,7 +1290,7 @@ def create_checkout_session(user_id):
         # Map the subscription level to the corresponding Stripe price ID
         price_ids = {
             
-            'test': 'price_1OYcdNFNut4X8qSwqIIX5Yz5',
+            
             'standard': 'price_1OYc4qFNut4X8qSwK07XJ8M2',
             'gold': 'price_1Of8KoFNut4X8qSwksIcg5js',
             'platinum': 'price_1Of8LFFNut4X8qSw1Kvnlavx',
@@ -1411,9 +1423,100 @@ def checkout_success(user_id):
 def checkout_cancel(user_id):
     # Handle checkout cancellation, e.g., notify user or log
     return "Checkout cancelled. Please try again."
+
+import logging
+import boto3
+from botocore.exceptions import ClientError
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+def send_email_message(app_id, sender, to_addresses, subject, html_message):
+    pinpoint_client = boto3.client('pinpoint', region_name='us-east-1')
+    try:
+        response = pinpoint_client.send_messages(
+            ApplicationId=app_id,
+            MessageRequest={
+                "Addresses": {
+                    address: {"ChannelType": "EMAIL"} for address in to_addresses
+                },
+                "MessageConfiguration": {
+                    "EmailMessage": {
+                        "FromAddress": sender,
+                        "SimpleEmail": {
+                            "Subject": {
+                                "Charset": "UTF-8",
+                                "Data": subject
+                            },
+                            "HtmlPart": {
+                                "Charset": "UTF-8",
+                                "Data": html_message
+                            },
+                            "TextPart": {
+                                "Charset": "UTF-8",
+                                "Data": "Text version of the email content"
+                            }
+                        }
+                    }
+                }
+            }
+        )
+    except ClientError as e:
+        logger.exception("Couldn't send email via Pinpoint: %s", e)
+        return None
+    else:
+        return response['MessageResponse']['Result']
+
+def send_bid_receipt_email(address, email, username, bid_amount):
+    app_id = 'abccb22dc4414fe0b229357f51a1cdde'  
+    sender = '"Bonaventura Realty" <info@bonaventurarealty.com>'
+    to_addresses = [email]
+    subject = 'Confirmation of Bid'
+    
+    html_message = f"""
+    <html>
+        <head></head>
+        <body>
+            <p>Dear {username},</p>
+            <p>Thank you for your bid of ${bid_amount} on {address}.</p>
+            <p>Should you have any questions or need further assistance, please do not hesitate to reach out. Our dedicated team of professionals is here to provide you with personalized support every step of the way.</p>
+            <p>Thank you for your continued trust in Bonaventura Realty. We look forward to helping you achieve your real estate goals.</p>
+            <p>Warm regards,</p>
+            <p>Bonaventura Realty Team</p>
+        </body>
+    </html>
+    """
+
+
+    message_ids = send_email_message(app_id, sender, to_addresses, subject, html_message)
+    return message_ids
+
+def send_bid_receipt_email_to_admin(phone, address, email, username, bid_amount):
+    app_id = 'abccb22dc4414fe0b229357f51a1cdde'  
+    sender = '"Bonaventura Realty" <info@bonaventurarealty.com>'
+    to_addresses = ['dstagge@bonaventurarealty.com']
+    subject = f"Notification of Bid on {address}"
+    
+    html_message = f"""
+    <html>
+        <head></head>
+        <body>
+            <p>{username} placed bid on {address}.</p>
+            <p>Maximum Bid Amount: {bid_amount}</p>
+            <p>{username} Email: {email}</p>
+            <p>{username} Phone: {phone}</p>
+        </body>
+    </html>
+    """
+
+
+    message_ids = send_email_message(app_id, sender, to_addresses, subject, html_message)
+    return message_ids
+
+        
+
  
 if __name__ == "__main__":
-    #schedule_daily_emails()
     application.run(port=4242)
     #To the next developer,
     #Good luck.. haha.
