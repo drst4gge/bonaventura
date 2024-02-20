@@ -163,6 +163,14 @@
                     <form id="bid-form" class="cs-form" action="/submit_bid/{{ property_id }}" method="post">
 
                         <input type="hidden" name="id" value="{{ user['user_id'] }}">
+                        <label class="cs-topper" for="first_name">First Name
+                            <input class="cs-input" type="text" id="first_name" name="first_name"
+                                value="{{ user['first_name'] }}" placeholder="First Name" required readonly>
+                        </label>
+                        <label class="cs-topper" for="last_name">Last Name
+                            <input class="cs-input" type="text" id="last_name" name="last_name"
+                                value="{{ user['last_name'] }}" placeholder="Last Name" required readonly>
+                        </label>
                         <label class="cs-topper" for="username">User
                             <input class="cs-input" type="text" id="username" name="username"
                                 value="{{ user['username'] }}" placeholder="Username" required readonly>

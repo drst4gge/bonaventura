@@ -512,6 +512,8 @@ def edit_user(user_id):
 @application.route('/update_user/<int:user_id>', methods=['POST'])
 def update_user(user_id):
     # Extract form data
+    first_name = request.form['first_name']
+    last_name = request.form['last_name']
     username = request.form['username']
     email = request.form['email']
     phone = request.form['phone']
@@ -520,8 +522,8 @@ def update_user(user_id):
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
-            update_sql = "UPDATE users SET username = %s, email = %s, phone = %s WHERE id = %s"
-            cursor.execute(update_sql, (username, email, phone, user_id))
+            update_sql = "UPDATE users SET first_name = %s, last_name = %s, username = %s, email = %s, phone = %s WHERE id = %s"
+            cursor.execute(update_sql, (first_name, last_name, username, email, phone, user_id))
         conn.commit()
     finally:
         conn.close()
@@ -530,7 +532,7 @@ def update_user(user_id):
 
     # Redirect based on user role
 
-    return redirect(url_for('admin_usercontrol'))
+    return redirect(url_for('login_form'))
     
 
 
@@ -596,7 +598,8 @@ def login():
     if user and check_password_hash(user['password'], password):
         session['user_id'] = user['id']  # Store user ID in session
         session['user_email'] = user['email'] 
-        session['user_username'] = user['username'] # Store user email in session
+        session['first_name'] = user['first_name'] 
+        session['last_name'] = user['last_name'] 
         session['user_phone'] = user['phone']  # Store user phone in session
         session['user_role'] = user['role']
         session['stripe_customer_id'] = user['stripe_customer_id']
@@ -641,6 +644,8 @@ from stripe.error import StripeError
 @application.route('/register_user', methods=['POST'])
 def register_user():
     try:
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
         username = request.form['username']
         password = request.form['password']
         email = request.form['email']
@@ -648,8 +653,9 @@ def register_user():
         role = request.form['role']
         subscription_level = request.form['subscriptionLevel'] 
 
+        if username_exists(username):
+            return redirect(url_for('show_registration_form'))
         
-
         if not re.match("^[A-Za-z0-9]+$", username):
             flash("Invalid username. Only characters and integers are allowed.")
             return redirect(url_for('show_registration_form'))
@@ -664,7 +670,7 @@ def register_user():
         
 
         # Create user in the database with Stripe customer ID
-        user_id = create_user_in_db(username, password, email, phone, role, "No Checkout", stripe_customer_id=None)
+        user_id = create_user_in_db(first_name, last_name, username, password, email, phone, role, "No Checkout", stripe_customer_id=None)
         session['actual_subscription_level'] = subscription_level
 
         return redirect(url_for('create_checkout_session', user_id=user_id), code=307)
@@ -677,17 +683,37 @@ def register_user():
         flash(f"An error occurred: {e}")
         return redirect(url_for('show_registration_form'))
 
-def create_user_in_db(username, password, email, phone, role, subscription_level, stripe_customer_id=None):
+def create_user_in_db(first_name, last_name, username, password, email, phone, role, subscription_level, stripe_customer_id=None):
     # Your existing database logic to create a user, now including stripe_customer_id
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO users (username, password, email, phone, role, stripe_customer_id, subscription_level) VALUES (%s, %s,%s, %s, %s, %s, %s)",
-                   (username, generate_password_hash(password), email, phone, role, stripe_customer_id, subscription_level))
+    cursor.execute("INSERT INTO users (first_name, last_name, username, password, email, phone, role, stripe_customer_id, subscription_level) VALUES (%s, %s, %s, %s,%s, %s, %s, %s, %s)",
+                   (first_name, last_name, username, generate_password_hash(password), email, phone, role, stripe_customer_id, subscription_level))
     conn.commit()
     user_id = cursor.lastrowid
     cursor.close()
     conn.close()
     return user_id
+
+def username_exists(username):
+    """Check if a username already exists in the database."""
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+            if cursor.fetchone():
+                return True  # Username exists
+            else:
+                return False  # Username does not exist
+    finally:
+        conn.close()
+
+@application.route('/check_username', methods=['POST'])
+def check_username():
+    username = request.form['username']
+    if username_exists(username):
+        return jsonify({'exists': True})
+    return jsonify({'exists': False})
 
 
     
@@ -855,6 +881,8 @@ def bid(id):
         formatted_total = "${:,.2f}".format(total_amount)
 
         user_details = {
+            'first_name': session.get('first_name', ''),
+            'last_name': session.get('last_name', ''),
             'username': session.get('user_username', ''),
             'email': session.get('user_email', ''),
             'phone': session.get('user_phone', '')
@@ -870,6 +898,8 @@ def bid(id):
 def submit_bid(id):
     # Extract user ID from session or form
     user_id = session['user_id']  # or from form data
+    first_name = request.form['first_name']
+    last_name = request.form['last_name']
     username = request.form['username']
     email = request.form['email']
     bid_amount = request.form['maximum-bid-amount']
@@ -887,8 +917,8 @@ def submit_bid(id):
     address = property['addresses']
     print(address)
 
-    send_bid_receipt_email(address, email, username, bid_amount)
-    send_bid_receipt_email_to_admin(phone, address, email, username, bid_amount)
+    send_bid_receipt_email(address, email, first_name, last_name, bid_amount)
+    send_bid_receipt_email_to_admin(phone, address, email, first_name, last_name, username, bid_amount)
 
     # Redirect to a confirmation page or back to the property details
     return redirect(url_for('property_details', id=id))
@@ -1467,7 +1497,7 @@ def send_email_message(app_id, sender, to_addresses, subject, html_message):
     else:
         return response['MessageResponse']['Result']
 
-def send_bid_receipt_email(address, email, username, bid_amount):
+def send_bid_receipt_email(address, email, first_name, last_name, bid_amount):
     app_id = 'abccb22dc4414fe0b229357f51a1cdde'  
     sender = '"Bonaventura Realty" <info@bonaventurarealty.com>'
     to_addresses = [email]
@@ -1477,7 +1507,7 @@ def send_bid_receipt_email(address, email, username, bid_amount):
     <html>
         <head></head>
         <body>
-            <p>Dear {username},</p>
+            <p>Dear {first_name},</p>
             <p>Thank you for your bid of ${bid_amount} on {address}.</p>
             <p>Should you have any questions or need further assistance, please do not hesitate to reach out. Our dedicated team of professionals is here to provide you with personalized support every step of the way.</p>
             <p>Thank you for your continued trust in Bonaventura Realty. We look forward to helping you achieve your real estate goals.</p>
@@ -1491,7 +1521,7 @@ def send_bid_receipt_email(address, email, username, bid_amount):
     message_ids = send_email_message(app_id, sender, to_addresses, subject, html_message)
     return message_ids
 
-def send_bid_receipt_email_to_admin(phone, address, email, username, bid_amount):
+def send_bid_receipt_email_to_admin(phone, address, email, first_name, last_name, username, bid_amount):
     app_id = 'abccb22dc4414fe0b229357f51a1cdde'  
     sender = '"Bonaventura Realty" <info@bonaventurarealty.com>'
     to_addresses = ['dstagge@bonaventurarealty.com']
@@ -1501,10 +1531,11 @@ def send_bid_receipt_email_to_admin(phone, address, email, username, bid_amount)
     <html>
         <head></head>
         <body>
-            <p>{username} placed bid on {address}.</p>
+            <p>{first_name} {last_name} placed bid on {address}.</p>
             <p>Maximum Bid Amount: {bid_amount}</p>
-            <p>{username} Email: {email}</p>
-            <p>{username} Phone: {phone}</p>
+            <p>{first_name} {last_name}'s Email: {email}</p>
+            <p>{first_name} {last_name}'s Phone: {phone}</p>
+            <p>{first_name} {last_name}'s Username: {username}</p>
         </body>
     </html>
     """

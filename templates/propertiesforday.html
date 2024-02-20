@@ -146,7 +146,7 @@
                                     <td style="text-align: left; color: #000000; font-weight: bold;">Time of Sale</td>
                                     <td style="text-align: right;">{{ property['timeOfSale'] }}</td>
                                 </tr>
-                                {% if session['subscription_level'] == 'platinum' or session['subscription_level'] == 'gold'   %}
+                                {% if session['subscription_level'] == 'platinum' or session['subscription_level'] == 'gold' or session['user_role'] == 1 or session['user_role'] == 2   %}
                                 <tr>
                                     <td style="text-align: left; color: #000000; font-weight: bold;">Opening Bid</td>
                                     {% if property['openingBid'] == 0 %}

@@ -17,6 +17,43 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/table.css') }}">
     <script src="{{ url_for('static', filename='js/header.js') }}"></script>
     <script src="https://js.stripe.com/v3/"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var usernameValid = false; // Assume invalid to start
+            var formSubmitted = false;
+
+            $('#username').on('blur', function() {
+                var username = $(this).val();
+                $.ajax({
+                    url: '/check_username',
+                    data: {'username': username},
+                    type: 'POST',
+                    success: function(response) {
+                        if(response.exists) {
+                            $('#username-feedback').text("Username already exists. Please choose a different one.").show();
+                            usernameValid = false;
+                        } else {
+                            $('#username-feedback').hide();
+                            usernameValid = true;
+                            if (formSubmitted) { // Check if form was previously submitted
+                                $('#registrationForm').off('submit').submit();
+                            }
+                        }
+                    }
+                });
+            });
+
+            $('#registrationForm').on('submit', function(event) {
+                formSubmitted = true;
+                if (!usernameValid) {
+                    event.preventDefault(); // Prevent form submission
+                    $('#username').blur(); // Trigger validation
+                }
+            });
+        });
+        </script>
 </head>
 
 <body>
@@ -91,10 +128,20 @@
 
                                 Subscribers get access to our exclusive database of properties.
                             </p>
+                        <label for="first_name" class="cs-label">
+                            First Name
+                            <input class="cs-input" type="text" id="first_name" name="first_name" required
+                                placeholder="First Name">
+                        </label>
+                        <label for="last_name" class="cs-label">
+                            Last Name
+                            <input class="cs-input" type="text" id="last_name" name="last_name" required
+                                placeholder="Last Name">
+                        </label>
                         <label for="username" class="cs-label">
                             Username
-                            <input class="cs-input" type="text" id="username" name="username" required
-                                placeholder="Username" pattern="[A-Za-z0-9]+" title="Username should only contain letters and numbers.">
+                            <input class="cs-input" type="text" id="username" name="username" required placeholder="Username">
+                            <div id="username-feedback" style="display: none; color: red;"></div>
                         </label>
                         <label class="cs-label cs-email">
                             Password

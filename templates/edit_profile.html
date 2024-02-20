@@ -115,24 +115,38 @@
                     <form class="cs-form" action="{{ url_for('update_user', user_id=user['id']) }}" method="post">
                         <!-- Hidden Fields -->
                         <input type="hidden" name="id" value="{{ user['id'] }}">
-                        <input type="hidden" name="username" value="{{ user['username'] }}">
+                        
                         <input type="hidden" name="stripe_customer_id" value="{{ user['stripe_customer_id'] }}">
                         <input type="hidden" name="role" value="{{ user['role'] }}">
 
-                        <!-- Email Field -->
+                        <label for="first_name">
+                            <p class="cs-topper">First Name</p>
+                            <input class="cs-input" type="first_name" id="first_name" name="first_name" value="{{ user['first_name'] }}" placeholder="First Name">
+                        </label>
+
+                        <label for="last_name">
+                            <p class="cs-topper">Last Name</p>
+                            <input class="cs-input" type="last_name" id="last_name" name="last_name" value="{{ user['last_name'] }}" placeholder="Last Name">
+                        </label>
+
+                        <label for="username">
+                            <p class="cs-topper">Username</p>
+                            <input class="cs-input" type="username" id="username" name="username" value="{{ user['username'] }}" placeholder="Username">
+                        </label>
+                        
                         <label for="email">
                             <p class="cs-topper">Email</p>
                             <input class="cs-input" type="email" id="email" name="email" value="{{ user['email'] }}" placeholder="Email">
                         </label>
 
-                        <!-- Phone Field -->
+                        
                         <label for="phone">
                             <p class="cs-topper">Phone Number</p>
                             <input class="cs-input" type="tel" id="phone" name="phone" value="{{ user['phone'] }}" placeholder="Phone Number">
                         </label>
 
 
-                        <!-- Submit Button -->
+                        
                         <button class="cs-button-solid cs-submit" type="submit">Update</button>
                     </form>
                     {% if session['user_role'] == 0 %}
