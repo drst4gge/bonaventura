@@ -3,7 +3,7 @@
 
 <head>
     <title>Bonaventura</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background_color.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/backgroundwithmap.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/contact-718.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/cs-button-6.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/footer.css') }}">
@@ -27,88 +27,50 @@
                     <form class="cs-form" action="/update_address" method="post">
                         <!-- Hidden ID Field -->
                         <input type="hidden" name="id" value="{{ property['id'] }}">
-
-                        <label for="address">
-                            <p class="cs-topper">Address</p>
-                            <input class="cs-input" type="text" id="address" name="address"
-                                value="{{ property['addresses'] }}" placeholder="Address" required readonly>
-                        </label>
-
-                        <label for="occupancy">
-                            <p class="cs-topper">Occupancy</p>
-                            <input class="cs-input" type="text" id="occupancy" name="occupancy"
-                                value="{{ property['occupancy'] }}" placeholder="Occupancy" required>
-                        </label>
-
-                        <label for="price">
-                            <p class="cs-topper">Price</p>
-                            <input class="cs-input" type="number" id="price"
-                                name="price" value="{{ property['price'] }}"
-                                placeholder="Price" required>
-                        </label>
-
+                        <input type="hidden" name="address" value="{{ property['addresses'] }}">
+                        <input type="hidden" name="price" value="{{ property['price'] }}">
+                        <input type="hidden" name="zpid" value="{{ property['zpid'] }}">
+                        <input type="hidden" name="county" value="{{ property['county'] }}">
                         <label for="afterRehabValue">
                             <p class="cs-topper">ARV</p>
                             <input class="cs-input" type="number" id="afterRehabValue"
                                 name="afterRehabValue" value="{{ property['afterRehabValue'] }}"
                                 placeholder="ARV" required>
                         </label>
-
+                        <label for="occupancy">
+                            <p class="cs-topper">Occupancy</p>
+                            <select class="cs-input" id="occupancy" name="occupancy" required>
+                                <option value="Not Determined" {% if property['occupancy'] == "Not Determined" %}selected{% endif %}>Not Determined</option>
+                                <option value="Occupied" {% if property['occupancy'] == "Occupied" %}selected{% endif %}>Occupied</option>
+                                <option value="Unoccupied" {% if property['occupancy'] == "Unoccupied" %}selected{% endif %}>Unoccupied</option>
+                            </select>
+                        </label>
                         <label for="openingBid">
                             <p class="cs-topper">Opening Bid</p>
                             <input class="cs-input" type="number" id="openingBid"
                                 name="openingBid" value="{{ property['openingBid'] }}"
                                 placeholder="Opening Bid" required>
                         </label>
-                        
-
-                   
                         <label for="bedrooms">
                             <p class="cs-topper">Bedrooms</p>
                             <input class="cs-input" type="number" id="bedrooms" name="bedrooms"
                                 value="{{ property['bedrooms'] }}" placeholder="Bedrooms" required>
                         </label>
-
-                  
                         <label for="bathrooms">
                             <p class="cs-topper">Bathrooms</p>
                             <input class="cs-input" type="number" id="bathrooms" name="bathrooms"
                                 value="{{ property['bathrooms'] }}" placeholder="Bathrooms" required>
                         </label>
-
-                 
                         <label for="livingArea">
                             <p class="cs-topper">Home SQFT</p>
                             <input class="cs-input" type="number" id="livingArea" name="livingArea"
                                 value="{{ property['livingArea'] }}" placeholder="Living Area" required>
                         </label>
-
-                     
                         <label for="lotSize">
                             <p class="cs-topper">Lot SQFT</p>
                             <input class="cs-input" type="number" id="lotSize" name="lotSize" value="{{ property['lotSize'] }}"
                                 placeholder="Lot Size" required>
                         </label>
-
-                        
-
-    
-                        
-                        <label for="zpid">
-                            <p class="cs-topper">ZillowPID</p>
-                            <input class="cs-input" type="text" id="zpid" name="zpid" value="{{ property['zpid'] }}"
-                                placeholder="ZPID" required readonly>
-                        </label>
-
-                 
-                        <label for="county">
-                            <p class="cs-topper">County</p>
-                            <input class="cs-input" type="text" id="county"
-                                name="county" value="{{ property['county'] }}"
-                                placeholder="County" required readonly>
-                        </label>
-
-           
                         <button class="cs-button-solid cs-submit" type="submit">Update</button>
                     </form>
                 </div>

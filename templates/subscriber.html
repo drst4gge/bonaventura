@@ -58,17 +58,15 @@
                                     <p class="cs-topper">Calendar</p>
                                 </a>
                             </li>
-                            {% if session['subscription_level'] == 'platinum' %}
+                            {% if session['subscription_level'] == 'platinum' or session['subscription_level'] == 'test' %}
                             <li class="cs-li">
                                 <a href="{{ url_for('my_bids') }}" class="cs-li-link">
                                     <p class="cs-topper">Bids</p>
                                 </a>
                             </li>
-                            {% else %}
+                            {% elif session['subscription_level'] == 'gold' or session['subscription_level'] == 'standard'  %}
                             <li class="cs-li">
-                                
-                                <p class="cs-topper">Bids (not subscribed)</p>
-                            </a>
+                                <p class="cs-topper">Bids (Platinum Feature)</p>
                             </li>
                             {% endif %}
                             <li class="cs-li">

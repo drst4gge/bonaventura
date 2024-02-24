@@ -596,43 +596,70 @@ def login():
     conn.close()
 
     if user and check_password_hash(user['password'], password):
-        session['user_id'] = user['id']  # Store user ID in session
+        # Set common user info in session
+        session['user_id'] = user['id'] 
         session['user_email'] = user['email'] 
         session['first_name'] = user['first_name'] 
         session['last_name'] = user['last_name'] 
-        session['user_phone'] = user['phone']  # Store user phone in session
+        session['user_phone'] = user['phone'] 
         session['user_role'] = user['role']
+        session['user_username'] = user['username']
         session['stripe_customer_id'] = user['stripe_customer_id']
-        session['subscription_level'] = user['subscription_level']
-        if user['role'] == 0:  # Assuming 0 is the role for subscribers
-            if not check_active_subscription(user):
-                flash('Your subscription is inactive. Please renew to continue.')
-                return redirect(url_for('pricing'))  # Redirect to subscription page
-            else:
-                return redirect(url_for('subscriber'))
-        elif user['role'] == 1:
-            return redirect(url_for('agent'))
-        elif user['role'] == 2:
-            return redirect(url_for('admin'))
+        
+        if user['role'] in [1, 2]:  # Assuming 1 is for agents and 2 is for admins
+            return redirect(url_for('admin')) if user['role'] == 2 else redirect(url_for('agent'))
+
+        # For subscribers, check active subscription
+        has_active_subscription, subscription_level = check_active_subscription(user)
+        if has_active_subscription:
+            session['subscription_level'] = subscription_level
+            return redirect(url_for('subscriber'))
         else:
-            return 'Invalid role', 401
+            flash('No active subscription found. Please subscribe to continue.')
+            return redirect(url_for('pricing'))
     else:
-        return 'Invalid credentials', 401
+        flash('Invalid username or password.')
+        return redirect(url_for('login_form'))
 
 def check_active_subscription(user):
     stripe_customer_id = user.get('stripe_customer_id')
+    print(f"Checking active subscription for Stripe customer ID: {stripe_customer_id}")
+
+    # Reverse mapping from price ID to subscription level
+    price_to_subscription_level = {
+        'price_1OYcdNFNut4X8qSwqIIX5Yz5': 'test',
+        'price_1OYc4qFNut4X8qSwK07XJ8M2': 'standard',
+        'price_1Of8KoFNut4X8qSwksIcg5js': 'gold',
+        'price_1Of8LFFNut4X8qSw1Kvnlavx': 'platinum',
+    }
+
     if not stripe_customer_id:
-        # Handle cases where stripe_customer_id is not available
+        print("No Stripe customer ID found for user.")
         application.logger.error("Stripe customer ID not found for user.")
-        return False
+        return False, 'none'
 
     try:
-        subscriptions = stripe.Subscription.list(customer=stripe_customer_id, status='active')
-        return any(subscriptions.data)
-    except InvalidRequestError as e:
-        # Handle Stripe API errors
+        subscriptions = stripe.Subscription.list(
+            customer=stripe_customer_id,
+            status='active',
+            limit=1
+        )
+        if subscriptions.data:
+            # Fetch the first active subscription
+            subscription = subscriptions.data[0]
+            # Assuming each subscription has at least one item and we're interested in the first one
+            for item in subscription['items']:
+                price_id = item['price']['id']
+                subscription_level = price_to_subscription_level.get(price_id, 'unknown')
+                print(f"Found active subscription with Price ID: {price_id}, interpreted as {subscription_level} level.")
+                return True, subscription_level
+
+        print("No active subscriptions found for the user.")
+        return False, 'none'
+    except Exception as e:
+        print(f"Error during subscription check: {e}")
         application.logger.error(f"Error checking active subscription: {e}")
-        return False
+        return False, 'none'
 
 
 @application.route('/register', methods=['GET'])
@@ -651,7 +678,7 @@ def register_user():
         email = request.form['email']
         phone = request.form['phone']
         role = request.form['role']
-        subscription_level = request.form['subscriptionLevel'] 
+        subscription_level = request.form['subscriptionLevel']
 
         if username_exists(username):
             return redirect(url_for('show_registration_form'))
@@ -670,10 +697,10 @@ def register_user():
         
 
         # Create user in the database with Stripe customer ID
-        user_id = create_user_in_db(first_name, last_name, username, password, email, phone, role, "No Checkout", stripe_customer_id=None)
-        session['actual_subscription_level'] = subscription_level
+        user_id = create_user_in_db(first_name, last_name, username, password, email, phone, role, stripe_customer_id=None)
 
-        return redirect(url_for('create_checkout_session', user_id=user_id), code=307)
+
+        return redirect(url_for('create_checkout_session', user_id=user_id, subscription_level=subscription_level), code=307)
     except StripeError as e:
         # Handle errors from Stripe
         flash(f"Stripe error: {e.user_message}")
@@ -683,12 +710,12 @@ def register_user():
         flash(f"An error occurred: {e}")
         return redirect(url_for('show_registration_form'))
 
-def create_user_in_db(first_name, last_name, username, password, email, phone, role, subscription_level, stripe_customer_id=None):
+def create_user_in_db(first_name, last_name, username, password, email, phone, role, stripe_customer_id=None):
     # Your existing database logic to create a user, now including stripe_customer_id
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO users (first_name, last_name, username, password, email, phone, role, stripe_customer_id, subscription_level) VALUES (%s, %s, %s, %s,%s, %s, %s, %s, %s)",
-                   (first_name, last_name, username, generate_password_hash(password), email, phone, role, stripe_customer_id, subscription_level))
+    cursor.execute("INSERT INTO users (first_name, last_name, username, password, email, phone, role, stripe_customer_id) VALUES (%s, %s, %s, %s,%s, %s, %s, %s)",
+                   (first_name, last_name, username, generate_password_hash(password), email, phone, role, stripe_customer_id))
     conn.commit()
     user_id = cursor.lastrowid
     cursor.close()
@@ -1306,26 +1333,23 @@ def delete_photo(photo_id):
 
 YOUR_DOMAIN = 'https://www.bonaventurarealty.com'
 
-@application.route('/create-checkout-session/<int:user_id>', methods=['GET', 'POST'])
-def create_checkout_session(user_id):
+@application.route('/create-checkout-session/<int:user_id>/<subscription_level>', methods=['GET', 'POST'])
+def create_checkout_session(user_id, subscription_level):
     try:
         user = get_user_by_id(user_id)
         if not user:
             flash('User not found.')
             return redirect(url_for('register'))
-        
-        actual_subscription_level = session.get('actual_subscription_level')
-        print(actual_subscription_level)
     
         # Map the subscription level to the corresponding Stripe price ID
         price_ids = {
-            
-            
+            #'test': 'price_1OYcdNFNut4X8qSwqIIX5Yz5',  
             'standard': 'price_1OYc4qFNut4X8qSwK07XJ8M2',
             'gold': 'price_1Of8KoFNut4X8qSwksIcg5js',
             'platinum': 'price_1Of8LFFNut4X8qSw1Kvnlavx',
         }
-        selected_price_id = price_ids[actual_subscription_level]
+        selected_price_id = price_ids.get(subscription_level)
+
 
         success_url = url_for('checkout_success', user_id=user_id, _external=True) + '?session_id={CHECKOUT_SESSION_ID}'
         cancel_url = url_for('checkout_cancel', user_id=user_id, _external=True)
@@ -1339,7 +1363,7 @@ def create_checkout_session(user_id):
             mode='subscription',
             success_url=success_url,
             cancel_url=cancel_url,
-            metadata={'user_id': str(user_id), 'subscription_level': actual_subscription_level},
+            metadata={'user_id': str(user_id), 'subscription_level': subscription_level},
         )
         return redirect(checkout_session.url, code=303)
     except Exception as e:
@@ -1406,12 +1430,11 @@ def webhook_received():
             session = event['data']['object']
             # Extract user ID from session metadata
             user_id = session['metadata']['user_id']
-            subscription_level = session['metadata']['subscription_level']
             
             
 
             # Update user with Stripe Customer ID
-            update_user_with_stripe_id_and_subscription_level(user_id, session['customer'], subscription_level)
+            update_user_with_stripe_id(user_id, session['customer'])
 
         return jsonify({'status': 'success'}), 200
     except ValueError:
@@ -1425,17 +1448,17 @@ def webhook_received():
         return jsonify({'error': str(e)}), 500
 
 
-def update_user_with_stripe_id_and_subscription_level(user_id, stripe_customer_id, subscription_level):
+def update_user_with_stripe_id(user_id, stripe_customer_id):
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
             # Update SQL query to set both stripe_customer_id and subscription_level
             update_sql = """
             UPDATE users
-            SET stripe_customer_id = %s, subscription_level = %s
+            SET stripe_customer_id = %s
             WHERE id = %s
             """
-            cursor.execute(update_sql, (stripe_customer_id, subscription_level, user_id))
+            cursor.execute(update_sql, (stripe_customer_id, user_id))
         conn.commit()
     except Exception as e:
         print(f"Error updating user {user_id}: {e}")

@@ -67,26 +67,23 @@
                                     <p class="cs-topper">Account</p>
                                 </a>
                             </li>
-
                         </ul>
-                        {% elif session['user_role'] == 0%}
+                        {% elif session['user_role'] == 0 %}
                         <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
                             <li class="cs-li">
                                 <a href="{{ url_for('subscriber') }}" class="cs-li-link">
                                     <p class="cs-topper">Calendar</p>
                                 </a>
                             </li>
-                            {% if session['subscription_level'] == 'platinum' %}
+                            {% if session['subscription_level'] == 'platinum' or session['subscription_level'] == 'test' %}
                             <li class="cs-li">
                                 <a href="{{ url_for('my_bids') }}" class="cs-li-link">
                                     <p class="cs-topper">Bids</p>
                                 </a>
                             </li>
-                            {% else %}
+                            {% elif session['subscription_level'] == 'gold' or session['subscription_level'] == 'standard'  %}
                             <li class="cs-li">
-                                
-                                <p class="cs-topper">Bids (not subscribed)</p>
-                            </a>
+                                <p class="cs-topper">Bids (Platinum Feature)</p>
                             </li>
                             {% endif %}
                             <li class="cs-li">
@@ -94,8 +91,6 @@
                                     <p class="cs-topper">Account</p>
                                 </a>
                             </li>
-                            
-
                         </ul>
                         {% endif %}
                     </div>
@@ -109,16 +104,10 @@
         <br>
         <br>
         <br>
-
-
-
-
         <div class="property-grid">
             {% for property in properties %}
             <div class="property-tile">
-                {% if not session['subscription_level'] == 'standard' %}
                 <a href="{{ url_for('property_details', id=property['id']) }}" class="property-link">
-                {% endif %}
                     {% if property.latest_photo_url %}
                         <!-- Check if latest_photo_url is a relative path and prepend with url_for -->
                         {% if property.latest_photo_url.startswith('static/images/') %}

@@ -30,14 +30,7 @@
                 </a>
                 <!--Navigation List-->
                 <nav class="cs-nav" role="navigation">
-                    <!--Mobile Nav Toggle-->
-                    <button class="cs-toggle" aria-label="mobile menu toggle">
-                        <div class="cs-box" aria-hidden="true">
-                            <span class="cs-line cs-line1" aria-hidden="true"></span>
-                            <span class="cs-line cs-line2" aria-hidden="true"></span>
-                            <span class="cs-line cs-line3" aria-hidden="true"></span>
-                        </div>
-                    </button>
+                    
                     <div class="cs-ul-wrapper">
                         {% if session['user_role'] == 1 or session['user_role'] == 2 %}
                         <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
@@ -75,17 +68,15 @@
                                     <p class="cs-topper">Calendar</p>
                                 </a>
                             </li>
-                            {% if session['subscription_level'] == 'platinum' %}
+                            {% if session['subscription_level'] == 'platinum' or session['subscription_level'] == 'test' %}
                             <li class="cs-li">
                                 <a href="{{ url_for('my_bids') }}" class="cs-li-link">
                                     <p class="cs-topper">Bids</p>
                                 </a>
                             </li>
-                            {% else %}
+                            {% elif session['subscription_level'] == 'gold' or session['subscription_level'] == 'standard'  %}
                             <li class="cs-li">
-                                
-                                <p class="cs-topper">Bids (not subscribed)</p>
-                            </a>
+                                <p class="cs-topper">Bids (Platinum Feature)</p>
                             </li>
                             {% endif %}
                             <li class="cs-li">
@@ -105,25 +96,28 @@
         <br>
         <br>
 
-        
+        {% if session['subscription_level'] == 'platinum' or session['subscription_level'] == 'gold' or session['subscription_level'] == 'test' or session['user_role'] == 1 or session['user_role'] == 2   %}
         <section id="hero-856">
             <div class="cs-container">
+                
                 <div class="cs-content">
+                    
                     <span class="cs-topper" style="font-size: xx-large;">{{ property['addresses'] }}</span>
                     
                     
-
                     {% if property['openingBid'] == 0 %}
                     <p class="cs-text"><b>Opening Bid |</b> Not Determined</p>
                     {% else %}
                     <p class="cs-text"><b>Opening Bid |</b> {{ property['openingBid']|format_currency }}</p>
                     {% endif %}
-                    
+    
+
                     {% if property['afterRehabValue'] == 0 %}
                     <p class="cs-text"><b>ARV |</b> Not Determined</p>
                     {% else %}
                     <p class="cs-text"><b>ARV |</b> {{ property['afterRehabValue']|format_currency }}</p>
                     {% endif %}
+
 
                     <p class="cs-text"><b>Occupancy |</b> {{ property['occupancy'] }}</p>
                     <p class="cs-text"><b>{{ property['county'] }}</b></p>
@@ -132,6 +126,8 @@
                     <p class="cs-text"><b>Beds |</b> {{ property['bedrooms'] }}</p>
                     <p class="cs-text"><b>Baths |</b> {{ property['bathrooms'] }}</p>
                     <p class="cs-text"><b>SQFT |</b> {{ property['livingArea'] }}</p>
+                    
+                    
                     <p class="cs-text">
                         <b>Acres |</b>
                         {% if property['lotSize'] is not none %}
@@ -140,10 +136,12 @@
                             Not Available
                         {% endif %}
                     </p>
-                    {% if session['subscription_level'] == 'platinum' or session['user_role'] == 1 or session['user_role'] == 2  %}
+                    
+                    
+                    {% if session['subscription_level'] == 'platinum' or session['subscription_level'] == 'test' or session['user_role'] == 1 or session['user_role'] == 2  %}
                     <a href="{{ url_for('bid', id=property['id'], address=property['address']) }}" class="cs-button-solid">Bid</a>
-                    {% else %}
-                    <a href="" class="cs-button-solid">Bid (not subscribed)</a>
+                    {% elif session['subscription_level'] == 'gold' or session['subscription_level'] == 'standard'  %}
+                    <a href="" class="cs-button-solid">Bid (Platinum Feature)</a>
                     {% endif  %}
                 </div>
                 <picture class="cs-picture">
@@ -159,13 +157,52 @@
                         <!-- Handle property['photo_url'] similarly if needed -->
                         <img class="property-image" src="{{ property.photo_url }}" alt="Pending Drive By Photograph">
                     {% endif %}
-                    
                 </picture>
 
                 
                 
             </div>
         </section>
+        {% elif session['subscription_level'] == 'standard' %}
+        <section id="hero-856">
+            <div class="cs-container">
+                
+                <div class="cs-content">
+                    
+                    <span class="cs-topper" style="font-size: xx-large;">{{ property['addresses'] }}</span>
+                    <p class="cs-text"><b>Opening Bid |</b> Platinum Subscription Data</p>
+                    <p class="cs-text"><b>ARV |</b> Platinum Subscription Data</p>
+                    <p class="cs-text"><b>Occupancy |</b> Platinum Subscription Data</p>
+                    <p class="cs-text"><b>{{ property['county'] }}</b></p>
+                    <p class="cs-text"><b>Date of Sale |</b> {{ property['dateOfSale'] }}</p>
+                    <p class="cs-text"><b>Time of Sale |</b> {{ property['timeOfSale'] }}</p> 
+                    <p class="cs-text"><b>Beds |</b> Platinum Subscription Data</p>
+                    <p class="cs-text"><b>Baths |</b> Platinum Subscription Data</p>
+                    <p class="cs-text"><b>SQFT |</b> Platinum Subscription Data</p>
+                    <p class="cs-text"><b>Acres |</b> Platinum Subscription Data</p>
+                    <a href="" class="cs-button-solid">Bid (Platinum Feature)</a>
+                    
+                </div>
+                <picture class="cs-picture">
+                    {% if property.latest_photo_url %}
+                        <!-- Check if latest_photo_url is a relative path and prepend with url_for -->
+                        {% if property.latest_photo_url.startswith('static/images/') %}
+                            <img class="property-image" src="{{ url_for('static', filename=property.latest_photo_url[7:]) }}" alt="Uploaded Property Photo">
+                        {% else %}
+                            <!-- If it's a complete URL, use it as is -->
+                            <img class="property-image" src="{{ property.latest_photo_url }}" alt="Uploaded Property Photo">
+                        {% endif %}
+                    {% else %}
+                        <!-- Handle property['photo_url'] similarly if needed -->
+                        <img class="property-image" src="{{ property.photo_url }}" alt="Pending Drive By Photograph">
+                    {% endif %}
+                </picture>
+
+                
+                
+            </div>
+        </section>
+        {% endif %}
     </div>
 </body>
 

@@ -15,7 +15,64 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/property-grid.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/services.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/table.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/draganddrop.css') }}">
     <script src="{{ url_for('static', filename='js/header.js') }}"></script>
+    <script>
+        let dropArea = document.getElementById('drop-area');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            dropArea.classList.add('highlight');
+        }
+
+        function unhighlight() {
+            dropArea.classList.remove('highlight');
+        }
+
+        dropArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            let dt = e.dataTransfer;
+            let files = dt.files;
+
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            ([...files]).forEach(uploadFile);
+            document.getElementById('fileElem').files = files; // This sets the files for the form
+        }
+
+        function uploadFile(file) {
+            let url = '/upload_pdf';
+            let formData = new FormData();
+
+            formData.append('file', file);
+
+            fetch(url, {
+                method: 'POST',
+                body: formData
+            })
+            .then(() => { /* Done. Inform the user */ })
+            .catch(() => { /* Error. Inform the user */ });
+        }
+    </script>
 
 </head>
 
@@ -78,23 +135,21 @@
             <div class="cs-container">
                 <div class="cs-content">
 
-
-                    <p class="cs-text">
-
-
-                    </p>
-                    <!-- Form structure from the second form with content from the first form -->
-                    <form action="/upload_pdf" method="post" enctype="multipart/form-data">
-                        <span class="cs-topper">Add a PDF to Bonaventura, try not to refresh or change pages. </span>
-                        <input type="file" name="file">
-                        <input type="submit" value="Upload">
+                    <form id="upload-container" action="/upload_pdf" method="post" enctype="multipart/form-data">
+                        <span class="cs-topper">Add a PDF to Bonaventura, try not to refresh or change pages.</span>
+                        <div id="drop-area">
+                            <p>Drag and drop a PDF file here, or click to select a file.</p>
+                            <input type="file" id="fileElem" name="file" accept="application/pdf" style="display:none" onchange="handleFiles(this.files)">
+                            <label class="button" for="fileElem">Select a file</label>
+                        </div>
+                        <div style="display: flex; justify-content: center;">
+                            <input style="text-align: center;" type="submit" value="Upload">
+                        </div>
                     </form>
                 </div>
             </div>
         </section>
-        <footer>
-            <p>© Bonaventura</p>
-        </footer>
+
     </div>
 
 </body>
