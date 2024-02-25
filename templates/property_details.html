@@ -95,114 +95,432 @@
         <br>
         <br>
         <br>
-
-        {% if session['subscription_level'] == 'platinum' or session['subscription_level'] == 'gold' or session['subscription_level'] == 'test' or session['user_role'] == 1 or session['user_role'] == 2   %}
+        {% if session['subscription_level'] == 'platinum' or session['subscription_level'] == 'test' or session['user_role'] == 1 or session['user_role'] == 2   %}
         <section id="hero-856">
-            <div class="cs-container">
-                
-                <div class="cs-content">
-                    
-                    <span class="cs-topper" style="font-size: xx-large;">{{ property['addresses'] }}</span>
-                    
-                    
-                    {% if property['openingBid'] == 0 %}
-                    <p class="cs-text"><b>Opening Bid |</b> Not Determined</p>
-                    {% else %}
-                    <p class="cs-text"><b>Opening Bid |</b> {{ property['openingBid']|format_currency }}</p>
-                    {% endif %}
-    
-
-                    {% if property['afterRehabValue'] == 0 %}
-                    <p class="cs-text"><b>ARV |</b> Not Determined</p>
-                    {% else %}
-                    <p class="cs-text"><b>ARV |</b> {{ property['afterRehabValue']|format_currency }}</p>
-                    {% endif %}
-
-
-                    <p class="cs-text"><b>Occupancy |</b> {{ property['occupancy'] }}</p>
-                    <p class="cs-text"><b>{{ property['county'] }}</b></p>
-                    <p class="cs-text"><b>Date of Sale |</b> {{ property['dateOfSale'] }}</p>
-                    <p class="cs-text"><b>Time of Sale |</b> {{ property['timeOfSale'] }}</p> 
-                    <p class="cs-text"><b>Beds |</b> {{ property['bedrooms'] }}</p>
-                    <p class="cs-text"><b>Baths |</b> {{ property['bathrooms'] }}</p>
-                    <p class="cs-text"><b>SQFT |</b> {{ property['livingArea'] }}</p>
-                    
-                    
-                    <p class="cs-text">
-                        <b>Acres |</b>
-                        {% if property['lotSize'] is not none %}
-                            {{ "%.2f"|format(property['lotSize'] / 43560) }}
-                        {% else %}
-                            Not Available
-                        {% endif %}
-                    </p>
-                    
-                    
-                    {% if session['subscription_level'] == 'platinum' or session['subscription_level'] == 'test' or session['user_role'] == 1 or session['user_role'] == 2  %}
-                    <a href="{{ url_for('bid', id=property['id'], address=property['address']) }}" class="cs-button-solid">Bid</a>
-                    {% elif session['subscription_level'] == 'gold' or session['subscription_level'] == 'standard'  %}
-                    <a href="" class="cs-button-solid">Bid (Platinum Feature)</a>
-                    {% endif  %}
-                </div>
-                <picture class="cs-picture">
-                    {% if property.latest_photo_url %}
-                        <!-- Check if latest_photo_url is a relative path and prepend with url_for -->
-                        {% if property.latest_photo_url.startswith('static/images/') %}
-                            <img class="property-image" src="{{ url_for('static', filename=property.latest_photo_url[7:]) }}" alt="Uploaded Property Photo">
-                        {% else %}
-                            <!-- If it's a complete URL, use it as is -->
-                            <img class="property-image" src="{{ property.latest_photo_url }}" alt="Uploaded Property Photo">
-                        {% endif %}
-                    {% else %}
-                        <!-- Handle property['photo_url'] similarly if needed -->
-                        <img class="property-image" src="{{ property.photo_url }}" alt="Pending Drive By Photograph">
-                    {% endif %}
-                </picture>
-
-                
-                
-            </div>
+            <table align="center" width="1000" cellspacing="0" cellpadding="5">
+                <tbody>
+                    <tr>
+                        <td width="50%" valign="top">
+                            <span class="cs-topper" style="font-size:large;">{{ property['addresses'] }}</span>
+                            <table width="100%">
+                                <tbody>
+                                    <tr>
+                                        <td align="left" width="30%">
+                                            <p class="cs-text">Opening Bid</p>
+                                        </td>
+                                        <td align="left" width="70%">
+                                            {% if property['openingBid'] == 0 %}
+                                            <p class="cs-text">Not Determined</p>
+                                            {% else %}
+                                            <p class="cs-text">{{ property['openingBid']|format_currency }}</p>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="left" width="30%">
+                                            <p class="cs-text">ARV</p>
+                                        </td>
+                                        <td align="left" width="70%">
+                                            {% if property['afterRehabValue'] == 0 %}
+                                            <p class="cs-text">Not Determined</p>
+                                            {% else %}
+                                            <p class="cs-text">{{ property['afterRehabValue']|format_currency }}</p>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="left" width="30%">
+                                            <p class="cs-text">Occupancy</p>
+                                        </td>
+                                        <td align="left" width="70%">
+                                            <p class="cs-text">{{ property['occupancy'] }}</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="left" width="30%">
+                                            <p class="cs-text">County</p>
+                                        </td>
+                                        <td align="left" width="70%">
+                                            <p class="cs-text">{{ property['county'] }}</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="left" width="30%">
+                                            <p class="cs-text">Date of Sale</p>
+                                        </td>
+                                        <td align="left" width="70%">
+                                            <p class="cs-text">{{ property['dateOfSale'] }}</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="left" width="30%">
+                                            <p class="cs-text">Time of Sale</p>
+                                        </td>
+                                        <td align="left" width="70%">
+                                            <p class="cs-text">{{ property['timeOfSale'] }}</p> 
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="left" width="30%">
+                                            <p class="cs-text">Bedrooms</p>
+                                        </td>
+                                        <td align="left" width="70%">
+                                            <p class="cs-text">{{ property['bedrooms'] }}</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="left" width="30%">
+                                            <p class="cs-text">Bathrooms</p>
+                                        </td>
+                                        <td align="left" width="70%">
+                                            <p class="cs-text">{{ property['bathrooms'] }}</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="left" width="30%">
+                                            <p class="cs-text">SQFT</p>
+                                        </td>
+                                        <td align="left" width="70%">
+                                            <p class="cs-text">{{ property['livingArea'] }}</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="left" width="30%">
+                                            <p class="cs-text">Acres</p>
+                                        </td>
+                                        <td align="left" width="70%">
+                                            <p class="cs-text">
+                                                {% if property['lotSize'] is not none %}
+                                                    {{ "%.2f"|format(property['lotSize'] / 43560) }}
+                                                {% else %}
+                                                    Not Available
+                                                {% endif %}
+                                            </p>
+                                        </td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </td>
+                        <td width="50%" valign="top">
+                            <table width="100%">
+                                <tbody>
+                                    <tr>
+                                        <td align="left">
+                                            <a href="{{ url_for('bid', id=property['id'], address=property['address']) }}" class="cs-button-solid">Bid</a>
+                                        </td>
+                                    </tr>
+                                    <tr></tr>
+                                    <tr></tr>
+                                    <tr></tr>
+                                    <tr>
+                                        <td align="left">
+                                            {% if property.latest_photo_url %}
+                                                <!-- Check if latest_photo_url is a relative path and prepend with url_for -->
+                                                {% if property.latest_photo_url.startswith('static/images/') %}
+                                                    <img width="100%" src="{{ url_for('static', filename=property.latest_photo_url[7:]) }}" alt="Uploaded Property Photo">
+                                                {% else %}
+                                                    <!-- If it's a complete URL, use it as is -->
+                                                    <img width="100%" src="{{ property.latest_photo_url }}" alt="Uploaded Property Photo">
+                                                {% endif %}
+                                            {% else %}
+                                                <!-- Handle property['photo_url'] similarly if needed -->
+                                                <img width="100%" src="{{ property.photo_url }}" alt="Pending Drive By Photograph">
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr></tr>
+                                    <tr></tr>
+                                    <tr></tr>
+                                    <tr>
+                                        <td align="left">
+                                            <!-- Roadmap View -->
+                                           <iframe
+                                           width="100%"
+                                           height="400"
+                                           frameborder="0" style="border:0"
+                                           src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBluIg_sxeWXK8OTApUJQ_PiBJu0-H7_0o&q={{ property['addresses']|urlencode }}"
+                                           allowfullscreen>
+                                       </iframe> 
+                                        </td>
+                                    </tr> 
+                                </tbody>
+                            </table>
+                            
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center">
+                            <div style="text-align: center;">
+                                {% for photo in interior_photos %}
+                                <img src="{{ url_for('static', filename=photo.photo_url.replace('static/', '', 1)) }}" alt="Interior photo" style="max-width: 50%; height: auto;">
+                                {% else %}
+                                <p>No interior photos available.</p>
+                                {% endfor %}
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        {% elif session['subscription_level'] == 'gold' %}
+        <section id="hero-856">
+            <table align="center" width="1200" cellspacing="0" cellpadding="5">
+                <tbody>
+                    <tr>
+                        <td width="50%" valign="top">
+                            <span class="cs-topper" style="font-size: xx-large;">{{ property['addresses'] }}</span>
+                            <table width="100%">
+                                <tbody>
+                                    <tr>
+                                        <td width="50%">
+                                            <p class="cs-text">Opening Bid</p>
+                                        </td>
+                                        <td width="50%">
+                                            {% if property['openingBid'] == 0 %}
+                                            <p class="cs-text">Not Determined</p>
+                                            {% else %}
+                                            <p class="cs-text">{{ property['openingBid']|format_currency }}</p>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width="50%">
+                                            <p class="cs-text">ARV</p>
+                                        </td>
+                                        <td width="50%">
+                                            {% if property['afterRehabValue'] == 0 %}
+                                            <p class="cs-text">Not Determined</p>
+                                            {% else %}
+                                            <p class="cs-text">{{ property['afterRehabValue']|format_currency }}</p>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width="50%">
+                                            <p class="cs-text">Occupancy</p>
+                                        </td>
+                                        <td width="50%">
+                                            <p class="cs-text">{{ property['occupancy'] }}</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width="50%">
+                                            <p class="cs-text">County</p>
+                                        </td>
+                                        <td width="50%">
+                                            <p class="cs-text">{{ property['county'] }}</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width="50%">
+                                            <p class="cs-text">Date of Sale</p>
+                                        </td>
+                                        <td width="50%">
+                                            <p class="cs-text">{{ property['dateOfSale'] }}</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width="50%">
+                                            <p class="cs-text">Time of Sale</p>
+                                        </td>
+                                        <td width="50%">
+                                            <p class="cs-text">{{ property['timeOfSale'] }}</p> 
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width="50%">
+                                            <p class="cs-text">Bedrooms</p>
+                                        </td>
+                                        <td width="50%">
+                                            <p class="cs-text">{{ property['bedrooms'] }}</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width="50%">
+                                            <p class="cs-text">Bathrooms</p>
+                                        </td>
+                                        <td width="50%">
+                                            <p class="cs-text">{{ property['bathrooms'] }}</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width="50%">
+                                            <p class="cs-text">SQFT</p>
+                                        </td>
+                                        <td width="50%">
+                                            <p class="cs-text">{{ property['livingArea'] }}</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width="50%">
+                                            <p class="cs-text">Acres</p>
+                                        </td>
+                                        <td width="50%">
+                                            <p class="cs-text">
+                                                {% if property['lotSize'] is not none %}
+                                                    {{ "%.2f"|format(property['lotSize'] / 43560) }}
+                                                {% else %}
+                                                    Not Available
+                                                {% endif %}
+                                            </p>
+                                        </td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </td>
+                        <td width="50%" align="center" valign="top">
+                            {% if property.latest_photo_url %}
+                                <!-- Check if latest_photo_url is a relative path and prepend with url_for -->
+                                {% if property.latest_photo_url.startswith('static/images/') %}
+                                    <img width="80%" src="{{ url_for('static', filename=property.latest_photo_url[7:]) }}" alt="Uploaded Property Photo">
+                                {% else %}
+                                    <!-- If it's a complete URL, use it as is -->
+                                    <img width="80%" src="{{ property.latest_photo_url }}" alt="Uploaded Property Photo">
+                                {% endif %}
+                            {% else %}
+                                <!-- Handle property['photo_url'] similarly if needed -->
+                                <img width="80%" src="{{ property.photo_url }}" alt="Pending Drive By Photograph">
+                            {% endif %}
+                            <p></p>
+                            <p></p>
+                            <a href="" class="cs-button-solid">Bid (Platinum Feature)</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </section>
         {% elif session['subscription_level'] == 'standard' %}
         <section id="hero-856">
-            <div class="cs-container">
-                
-                <div class="cs-content">
-                    
-                    <span class="cs-topper" style="font-size: xx-large;">{{ property['addresses'] }}</span>
-                    <p class="cs-text"><b>Opening Bid |</b> Platinum Subscription Data</p>
-                    <p class="cs-text"><b>ARV |</b> Platinum Subscription Data</p>
-                    <p class="cs-text"><b>Occupancy |</b> Platinum Subscription Data</p>
-                    <p class="cs-text"><b>{{ property['county'] }}</b></p>
-                    <p class="cs-text"><b>Date of Sale |</b> {{ property['dateOfSale'] }}</p>
-                    <p class="cs-text"><b>Time of Sale |</b> {{ property['timeOfSale'] }}</p> 
-                    <p class="cs-text"><b>Beds |</b> Platinum Subscription Data</p>
-                    <p class="cs-text"><b>Baths |</b> Platinum Subscription Data</p>
-                    <p class="cs-text"><b>SQFT |</b> Platinum Subscription Data</p>
-                    <p class="cs-text"><b>Acres |</b> Platinum Subscription Data</p>
-                    <a href="" class="cs-button-solid">Bid (Platinum Feature)</a>
-                    
-                </div>
-                <picture class="cs-picture">
-                    {% if property.latest_photo_url %}
-                        <!-- Check if latest_photo_url is a relative path and prepend with url_for -->
-                        {% if property.latest_photo_url.startswith('static/images/') %}
-                            <img class="property-image" src="{{ url_for('static', filename=property.latest_photo_url[7:]) }}" alt="Uploaded Property Photo">
-                        {% else %}
-                            <!-- If it's a complete URL, use it as is -->
-                            <img class="property-image" src="{{ property.latest_photo_url }}" alt="Uploaded Property Photo">
-                        {% endif %}
-                    {% else %}
-                        <!-- Handle property['photo_url'] similarly if needed -->
-                        <img class="property-image" src="{{ property.photo_url }}" alt="Pending Drive By Photograph">
-                    {% endif %}
-                </picture>
+            <table align="center" width="1200" cellspacing="0" cellpadding="5">
+                <tbody>
+                    <tr>
+                        <td width="50%" valign="top">
+                            <span class="cs-topper" style="font-size: xx-large;">{{ property['addresses'] }}</span>
+                            <table width="100%">
+                                <tbody>
+                                    <tr>
+                                        <td width="50%">
+                                            <p class="cs-text">Opening Bid</p>
+                                        </td>
+                                        <td width="50%">
 
-                
-                
-            </div>
+                                            <p class="cs-text">Platinum Subscription Required</p>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width="50%">
+                                            <p class="cs-text">ARV</p>
+                                        </td>
+                                        <td width="50%">
+                                            <p class="cs-text">Platinum Subscription Required</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width="50%">
+                                            <p class="cs-text">Occupancy</p>
+                                        </td>
+                                        <td width="50%">
+                                            <p class="cs-text">Platinum Subscription Required</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width="50%">
+                                            <p class="cs-text">County</p>
+                                        </td>
+                                        <td width="50%">
+                                            <p class="cs-text">{{ property['county'] }}</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width="50%">
+                                            <p class="cs-text">Date of Sale</p>
+                                        </td>
+                                        <td width="50%">
+                                            <p class="cs-text">{{ property['dateOfSale'] }}</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width="50%">
+                                            <p class="cs-text">Time of Sale</p>
+                                        </td>
+                                        <td width="50%">
+                                            <p class="cs-text">{{ property['timeOfSale'] }}</p> 
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width="50%">
+                                            <p class="cs-text">Bedrooms</p>
+                                        </td>
+                                        <td width="50%">
+                                            <p class="cs-text">Platinum Subscription Required</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width="50%">
+                                            <p class="cs-text">Bathrooms</p>
+                                        </td>
+                                        <td width="50%">
+                                            <p class="cs-text">Platinum Subscription Required</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width="50%">
+                                            <p class="cs-text">SQFT</p>
+                                        </td>
+                                        <td width="50%">
+                                            <p class="cs-text">Platinum Subscription Required</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width="50%">
+                                            <p class="cs-text">Acres</p>
+                                        </td>
+                                        <td width="50%">
+                                            <p class="cs-text">Platinum Subscription Required</p>
+                                        </td>
+                                    </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </td>
+                        <td width="50%" align="center" valign="top">
+                            {% if property.latest_photo_url %}
+                                <!-- Check if latest_photo_url is a relative path and prepend with url_for -->
+                                {% if property.latest_photo_url.startswith('static/images/') %}
+                                    <img width="80%" src="{{ url_for('static', filename=property.latest_photo_url[7:]) }}" alt="Uploaded Property Photo">
+                                {% else %}
+                                    <!-- If it's a complete URL, use it as is -->
+                                    <img width="80%" src="{{ property.latest_photo_url }}" alt="Uploaded Property Photo">
+                                {% endif %}
+                            {% else %}
+                                <!-- Handle property['photo_url'] similarly if needed -->
+                                <img width="80%" src="{{ property.photo_url }}" alt="Pending Drive By Photograph">
+                            {% endif %}
+                            <p></p>
+                            <p></p>
+                            <a href="" class="cs-button-solid">Bid (Platinum Feature)</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </section>
         {% endif %}
+        <footer>
+            <p>© Bonaventura</p>
+        </footer>
     </div>
 </body>
 

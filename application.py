@@ -19,7 +19,7 @@ from stripe.error import InvalidRequestError
 application = Flask(__name__)
 load_dotenv()
 
-stripe.api_key = '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'
+application.secret_key = os.environ.get('stripe.api_key')
 application.secret_key = os.environ.get('SECRET_KEY')
 
 UPLOAD_FOLDER = 'static/pdfs' 
@@ -31,9 +31,11 @@ application.config['UPLOAD_FOLDER'] = 'static/pdfs'
 application.config['IMAGES_FOLDER'] = 'static/images'
 
 def format_currency(value):
-    # Format the number as a currency, with commas for thousands and two decimal places
-    # Assuming USD for currency; adjust the symbol as needed
-    return "${:,.2f}".format(value)
+    # Assuming value might be a string with spaces, e.g., "500 000"
+    if isinstance(value, str):
+        value = value.replace(" ", "")  # Remove spaces
+    number = float(value)  # Ensure it's a float for formatting
+    return "${:,.2f}".format(number)
 
 # Register the filter with your Jinja environment
 application.jinja_env.filters['format_currency'] = format_currency
@@ -58,10 +60,10 @@ def requires_roles(*roles):
 # Database Helper Functions
 def get_db_connection():
     return pymysql.connect(
-        host="bonaventura-mysql.cponyf6gvfgg.us-east-1.rds.amazonaws.com",
-        user="admin",
-        password="Mylove707",
-        db="properties",
+        host=os.environ.get('database_host'),
+        user=os.environ.get('database_user'),
+        password=os.environ.get('database_password'),
+        db=os.environ.get('database_db'),
         port=3306
     )
 
@@ -112,6 +114,15 @@ def get_photos_by_property_id(property_id):
         conn.close()
     return photos
 
+def get_interior_photos_by_property_id(property_id):
+    conn = get_db_connection()
+    try:
+        with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+            cursor.execute("SELECT * FROM interior_photos WHERE property_id = %s", (property_id,))
+            return cursor.fetchall()
+    finally:
+        conn.close()
+
 def get_unique_counties():
     conn = get_db_connection()
     try:
@@ -149,8 +160,8 @@ def delete_property(property_id):
 def get_zpid_from_address(address):
     conn = http.client.HTTPSConnection("zillow56.p.rapidapi.com")
     headers = {
-        'X-RapidAPI-Key': "d0464de0f3msh4f7ea52273787c1p12b945jsn3e3da4819696",
-        'X-RapidAPI-Host': "zillow56.p.rapidapi.com"
+        'X-RapidAPI-Key': os.environ.get('X-RapidAPI-Key'),
+        'X-RapidAPI-Host': os.environ.get('X-RapidAPI-Host')
     }
     # Clean the address by removing newline characters and other potential control characters
     cleaned_address = re.sub(r'\s+', ' ', address.strip())
@@ -166,8 +177,8 @@ def get_zpid_from_address(address):
 def get_property_details(zpid):
     conn = http.client.HTTPSConnection("zillow56.p.rapidapi.com")
     headers = {
-        'X-RapidAPI-Key': "d0464de0f3msh4f7ea52273787c1p12b945jsn3e3da4819696",
-        'X-RapidAPI-Host': "zillow56.p.rapidapi.com"
+        'X-RapidAPI-Key': os.environ.get('X-RapidAPI-Key'),
+        'X-RapidAPI-Host': os.environ.get('X-RapidAPI-Host')
     }
 
     conn.request("GET", f"/property?zpid={zpid}", headers=headers)
@@ -559,12 +570,45 @@ def get_user_by_id(user_id):
 @application.route('/property/<int:id>')
 def property_details(id):
     property = get_property_by_id(id)
-    photos = get_photos_by_property_id(id)
+    latest_photo = get_latest_photo_by_property_id(id)  # Fetch the latest photo
+    interior_photos = get_interior_photos_by_property_id(id)
+
+    # Prepare the property data for the template, including handling of the photo URL
+    if latest_photo:
+        # If a latest photo exists, adjust the property dictionary to include it
+        property['latest_photo_url'] = latest_photo['photo_url']
+    else:
+        # Ensure there's a fallback if no latest photo is available
+        # This assumes 'photo_url' is already part of the 'property' or you have a default
+        property['latest_photo_url'] = property.get('photo_url', '/path/to/default/image')
 
     if property:
-        return render_template('property_details.html', property=property, photos=photos)
+        return render_template('property_details.html', property=property, interior_photos=interior_photos)
     else:
         return 'Property not found', 404
+
+    
+def get_latest_photo_by_property_id(property_id):
+    conn = get_db_connection()
+    try:
+        with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+            # Assuming there's a 'created_at' or similar timestamp field you can sort by
+            # If not, you can sort by 'id' assuming higher IDs are newer
+            query = """
+                SELECT id, photo_url 
+                FROM property_photos 
+                WHERE property_id = %s
+                ORDER BY id DESC  # or 'created_at DESC'
+                LIMIT 1
+            """
+            cursor.execute(query, (property_id,))
+            photo = cursor.fetchone()  # Fetch the most recent photo entry
+            return photo
+    except Exception as e:
+        print(f"Error fetching the latest photo for property_id {property_id}: {e}")
+        return None
+    finally:
+        conn.close()
 
 @application.route('/login', methods=['GET'])
 def login_form():
@@ -817,13 +861,35 @@ def submit_user():
     flash('User created successfully!')
     return redirect(url_for('admin'))
 
-@application.route('/edit/<int:id>', methods=['GET'])
+@application.route('/edit/<int:id>', methods=['GET', 'POST'])
 def edit_address(id):
+    # Fetch property details
     property = get_property_by_id(id)
-    if property:
-        print(property)  # Debugging statement to check the property details
-        return render_template('edit_address.html', property=property)
-    return 'Property not found', 404
+    photos = get_photos_by_property_id(id)  # Fetch existing photos
+    interior_photos = get_interior_photos_by_property_id(id)
+
+    if request.method == 'POST':
+        # Handle photo upload
+        if 'photo' in request.files:
+            file = request.files['photo']
+            if file.filename == '' or not allowed_photo(file.filename):
+                flash('Invalid file or no file selected', 'error')
+            else:
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(application.config['IMAGES_FOLDER'], filename)
+                file.save(file_path)
+                insert_photo(id, file_path)  # Assuming this function exists
+                flash('Photo uploaded successfully!', 'success')
+                return redirect(url_for('edit_address', id=id))  # Reload the page to show the new photo
+
+        # Additional POST handling, e.g., updating property details
+        # This part depends on how you handle property updates (not shown here)
+
+    if not property:
+        return 'Property not found', 404
+    
+    # Render the template, passing property and photos
+    return render_template('edit_address.html', property=property, photos=photos, interior_photos=interior_photos)
 
 @application.route('/update_address', methods=['POST'])
 def update_address():
@@ -876,8 +942,8 @@ def delete_address(id):
 def get_photos(zpid):
     conn = http.client.HTTPSConnection("zillow56.p.rapidapi.com")
     headers = {
-        'X-RapidAPI-Key': "d0464de0f3msh4f7ea52273787c1p12b945jsn3e3da4819696",
-        'X-RapidAPI-Host': "zillow56.p.rapidapi.com"
+        'X-RapidAPI-Key': os.environ.get('X-RapidAPI-Key'),
+        'X-RapidAPI-Host': os.environ.get('X-RapidAPI-Host')
     }
 
     conn.request("GET", f"/photos?zpid={zpid}", headers=headers)
@@ -1286,6 +1352,35 @@ def insert_photo(property_id, photo_url):
     finally:
         conn.close()
 
+@application.route('/upload_interior_photo/<int:property_id>', methods=['POST'])
+def upload_interior_photo(property_id):
+    if 'photo' not in request.files:
+        flash('No photo part')
+        return redirect(request.url)
+    file = request.files['photo']
+    if file.filename == '':
+        flash('No selected file')
+        return redirect(request.url)
+    if file and allowed_photo(file.filename):
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(application.config['IMAGES_FOLDER'], filename)
+        file.save(file_path)
+        # Here, insert a record in your database to associate the photo with the property_id
+        insert_interior_photo(property_id, file_path)
+        flash('Interior photo uploaded successfully!')
+    return redirect(url_for('edit_address', id=property_id))
+
+def insert_interior_photo(property_id, photo_url):
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            sql = "INSERT INTO interior_photos (property_id, photo_url) VALUES (%s, %s)"
+            cursor.execute(sql, (property_id, photo_url))
+        conn.commit()
+    finally:
+        conn.close()
+
+
 @application.route('/manage_photos/<int:property_id>', methods=['GET', 'POST'])
 def manage_photos(property_id):
     if request.method == 'POST':
@@ -1330,8 +1425,43 @@ def delete_photo(photo_id):
     # Redirect back to the manage_photos page or another appropriate page
     return redirect(url_for('admin'))
 
+@application.route('/delete_interior_photo/<int:photo_id>', methods=['POST'])
+def delete_interior_photo(photo_id):
+    try:
+        property_id = delete_interior_photo_from_db(photo_id)  # This now returns property_id
+        if property_id:
+            flash('Photo deleted successfully.')
+            return redirect(url_for('edit_address', id=property_id))  # Use returned property_id for redirection
+        else:
+            flash('An error occurred. Property ID not found.')
+    except Exception as e:
+        flash('An error occurred while deleting the photo.')
+        application.logger.error(f"Error deleting interior photo {photo_id}: {e}")
+    
+    # Fallback redirection if property_id is not found or any other error occurs
+    return redirect(url_for('admin'))  # Adjust as necessary
 
-YOUR_DOMAIN = 'https://www.bonaventurarealty.com'
+def delete_interior_photo_from_db(photo_id):
+    conn = get_db_connection()  # Ensure you have a function or method to get your DB connection
+    property_id = None
+    try:
+        with conn.cursor() as cursor:
+            # First, retrieve the property_id before deletion
+            cursor.execute("SELECT property_id FROM interior_photos WHERE id = %s", (photo_id,))
+            property_id_row = cursor.fetchone()
+            if property_id_row:
+                property_id = property_id_row[0]
+                
+            # Then, delete the photo
+            cursor.execute("DELETE FROM interior_photos WHERE id = %s", (photo_id,))
+        conn.commit()
+    finally:
+        conn.close()
+    return property_id
+
+
+
+YOUR_DOMAIN = os.environ.get('YOUR_DOMAIN')
 
 @application.route('/create-checkout-session/<int:user_id>/<subscription_level>', methods=['GET', 'POST'])
 def create_checkout_session(user_id, subscription_level):
@@ -1521,7 +1651,7 @@ def send_email_message(app_id, sender, to_addresses, subject, html_message):
         return response['MessageResponse']['Result']
 
 def send_bid_receipt_email(address, email, first_name, last_name, bid_amount):
-    app_id = 'abccb22dc4414fe0b229357f51a1cdde'  
+    app_id = os.environ.get('pinpoint_app_id')  
     sender = '"Bonaventura Realty" <info@bonaventurarealty.com>'
     to_addresses = [email]
     subject = 'Confirmation of Bid'
@@ -1545,7 +1675,7 @@ def send_bid_receipt_email(address, email, first_name, last_name, bid_amount):
     return message_ids
 
 def send_bid_receipt_email_to_admin(phone, address, email, first_name, last_name, username, bid_amount):
-    app_id = 'abccb22dc4414fe0b229357f51a1cdde'  
+    app_id = os.environ.get('pinpoint_app_id') 
     sender = '"Bonaventura Realty" <info@bonaventurarealty.com>'
     to_addresses = ['dstagge@bonaventurarealty.com']
     subject = f"Notification of Bid on {address}"
@@ -1567,9 +1697,6 @@ def send_bid_receipt_email_to_admin(phone, address, email, first_name, last_name
     message_ids = send_email_message(app_id, sender, to_addresses, subject, html_message)
     return message_ids
 
-        
-
- 
 if __name__ == "__main__":
     application.run(port=4242)
     #To the next developer,

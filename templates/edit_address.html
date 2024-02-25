@@ -15,66 +15,194 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/property-grid.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/services.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/table.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/draganddrop.css') }}">
     <script src="{{ url_for('static', filename='js/header.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            setupDropArea('drop-area', '{{ url_for("upload_photo", property_id=property.id) }}', 'photo');
+            setupDropArea('drop-area-interior', '{{ url_for("upload_interior_photo", property_id=property.id) }}', 'photo');
+        
+            function setupDropArea(dropAreaId, uploadUrl, inputName) {
+                let dropArea = document.getElementById(dropAreaId);
+        
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    dropArea.addEventListener(eventName, preventDefaults, false);
+                });
+        
+                function preventDefaults(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+        
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    dropArea.addEventListener(eventName, () => dropArea.classList.add('highlight'), false);
+                });
+        
+                ['dragleave', 'drop'].forEach(eventName => {
+                    dropArea.addEventListener(eventName, () => dropArea.classList.remove('highlight'), false);
+                });
+        
+                dropArea.addEventListener('drop', function(e) {
+                    var dt = e.dataTransfer;
+                    var files = dt.files;
+                    handleFiles(files, uploadUrl, inputName);
+                });
+            }
+        
+            function handleFiles(files, uploadUrl, inputName) {
+                ([...files]).forEach(file => uploadFile(file, uploadUrl, inputName));
+            }
+        
+            function uploadFile(file, url, inputName) {
+                let formData = new FormData();
+                formData.append(inputName, file);
+        
+                fetch(url, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Photo uploaded successfully!');
+                        location.reload(); // Reload the page to show the new photo
+                    } else {
+                        throw new Error('Upload failed');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Upload failed');
+                });
+            }
+        });
+        </script>
 </head>
 
 <body>
     <div class="wrapper">
         <section id="contact-718">
-            <div class="cs-container">
-                <!-- Optional picture section here, if you want to include an image -->
-                <div class="cs-content">
-                    <form class="cs-form" action="/update_address" method="post">
-                        <!-- Hidden ID Field -->
-                        <input type="hidden" name="id" value="{{ property['id'] }}">
-                        <input type="hidden" name="address" value="{{ property['addresses'] }}">
-                        <input type="hidden" name="price" value="{{ property['price'] }}">
-                        <input type="hidden" name="zpid" value="{{ property['zpid'] }}">
-                        <input type="hidden" name="county" value="{{ property['county'] }}">
-                        <label for="afterRehabValue">
-                            <p class="cs-topper">ARV</p>
-                            <input class="cs-input" type="number" id="afterRehabValue"
-                                name="afterRehabValue" value="{{ property['afterRehabValue'] }}"
-                                placeholder="ARV" required>
-                        </label>
-                        <label for="occupancy">
-                            <p class="cs-topper">Occupancy</p>
-                            <select class="cs-input" id="occupancy" name="occupancy" required>
-                                <option value="Not Determined" {% if property['occupancy'] == "Not Determined" %}selected{% endif %}>Not Determined</option>
-                                <option value="Occupied" {% if property['occupancy'] == "Occupied" %}selected{% endif %}>Occupied</option>
-                                <option value="Unoccupied" {% if property['occupancy'] == "Unoccupied" %}selected{% endif %}>Unoccupied</option>
-                            </select>
-                        </label>
-                        <label for="openingBid">
-                            <p class="cs-topper">Opening Bid</p>
-                            <input class="cs-input" type="number" id="openingBid"
-                                name="openingBid" value="{{ property['openingBid'] }}"
-                                placeholder="Opening Bid" required>
-                        </label>
-                        <label for="bedrooms">
-                            <p class="cs-topper">Bedrooms</p>
-                            <input class="cs-input" type="number" id="bedrooms" name="bedrooms"
-                                value="{{ property['bedrooms'] }}" placeholder="Bedrooms" required>
-                        </label>
-                        <label for="bathrooms">
-                            <p class="cs-topper">Bathrooms</p>
-                            <input class="cs-input" type="number" id="bathrooms" name="bathrooms"
-                                value="{{ property['bathrooms'] }}" placeholder="Bathrooms" required>
-                        </label>
-                        <label for="livingArea">
-                            <p class="cs-topper">Home SQFT</p>
-                            <input class="cs-input" type="number" id="livingArea" name="livingArea"
-                                value="{{ property['livingArea'] }}" placeholder="Living Area" required>
-                        </label>
-                        <label for="lotSize">
-                            <p class="cs-topper">Lot SQFT</p>
-                            <input class="cs-input" type="number" id="lotSize" name="lotSize" value="{{ property['lotSize'] }}"
-                                placeholder="Lot Size" required>
-                        </label>
-                        <button class="cs-button-solid cs-submit" type="submit">Update</button>
-                    </form>
-                </div>
-            </div>
+            <table align="center" width="1600" cellspacing="0" cellpadding="5">
+                <tbody>
+                    <tr>
+                        <td align="left">
+                            <p class="cs-topper">{{ property['addresses'] }}</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="25%" align="left">
+                            <h2>Editable Details</h2>
+                            <form class="cs-form" action="/update_address" method="post">
+                                <!-- Hidden ID Field -->
+                                <input type="hidden" name="id" value="{{ property['id'] }}">
+                                <input type="hidden" name="address" value="{{ property['addresses'] }}">
+                                <input type="hidden" name="price" value="{{ property['price'] }}">
+                                <input type="hidden" name="zpid" value="{{ property['zpid'] }}">
+                                <input type="hidden" name="county" value="{{ property['county'] }}">
+                                <label for="afterRehabValue">
+                                    <p class="cs-topper">ARV</p>
+                                    <input class="cs-input" type="number" id="afterRehabValue" name="afterRehabValue"
+                                        value="{{ property['afterRehabValue'] }}" placeholder="ARV" required>
+                                </label>
+                                <label for="occupancy">
+                                    <p class="cs-topper">Occupancy</p>
+                                    <select class="cs-input" id="occupancy" name="occupancy" required>
+                                        <option value="Not Determined" {% if property['occupancy']=="Not Determined"
+                                            %}selected{% endif %}>Not Determined</option>
+                                        <option value="Occupied" {% if property['occupancy']=="Occupied" %}selected{%
+                                            endif %}>Occupied</option>
+                                        <option value="Unoccupied" {% if property['occupancy']=="Unoccupied"
+                                            %}selected{% endif %}>Unoccupied</option>
+                                    </select>
+                                </label>
+                                <label for="openingBid">
+                                    <p class="cs-topper">Opening Bid</p>
+                                    <input class="cs-input" type="number" id="openingBid" name="openingBid"
+                                        value="{{ property['openingBid'] }}" placeholder="Opening Bid" required>
+                                </label>
+                                <label for="bedrooms">
+                                    <p class="cs-topper">Bedrooms</p>
+                                    <input class="cs-input" type="number" id="bedrooms" name="bedrooms"
+                                        value="{{ property['bedrooms'] }}" placeholder="Bedrooms" required>
+                                </label>
+                                <label for="bathrooms">
+                                    <p class="cs-topper">Bathrooms</p>
+                                    <input class="cs-input" type="number" id="bathrooms" name="bathrooms"
+                                        value="{{ property['bathrooms'] }}" placeholder="Bathrooms" required>
+                                </label>
+                                <label for="livingArea">
+                                    <p class="cs-topper">Home SQFT</p>
+                                    <input class="cs-input" type="number" id="livingArea" name="livingArea"
+                                        value="{{ property['livingArea'] }}" placeholder="Living Area" required>
+                                </label>
+                                <label for="lotSize">
+                                    <p class="cs-topper">Lot SQFT</p>
+                                    <input class="cs-input" type="number" id="lotSize" name="lotSize"
+                                        value="{{ property['lotSize'] }}" placeholder="Lot Size" required>
+                                </label>
+                                <button class="cs-button-solid cs-submit" type="submit">Update</button>
+                            </form>
+                        </td>
+                        <td width="25%" valign="top" align="center">
+                            <h2>Additional Details</h2>
+                            <p class="cs-topper">{{ property['county'] }}</p>
+                            <p class="cs-topper">Final Judgement: {{ property['price']|format_currency }}</p>
+                        </td>
+                        <td width="25%" valign="top" align="center">
+                            <h2>Driveby Photo</h2>
+                            <div id="drop-area">
+                                <h3>Drag and drop driveby photo here or click to select photos</h3>
+                                <form method="POST" enctype="multipart/form-data">
+                                    <input type="file" id="fileElem" name="photo" accept="image/*" multiple
+                                        style="display:none" onchange="handleFiles(this.files)">
+                                    <label for="fileElem">Select photos</label>
+                                </form>
+                            </div>
+                            <div>
+                                {% if photos %}
+                                <div class="photo-gallery">
+                                    {% for photo in photos %}
+                                    <div class="photo-container">
+                                        <img width="80%"
+                                            src="{{ url_for('static', filename=photo['photo_url'].replace('static/', '', 1)) }}"
+                                            alt="Property Photo" class="property-photo">
+                                        <form action="{{ url_for('delete_photo', photo_id=photo['id']) }}" method="post"
+                                            onsubmit="return confirm('Are you sure you want to delete this photo?');">
+                                            <button type="submit" class="delete-photo-btn">Delete</button>
+                                        </form>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                <p>No photos available.</p>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td width="25%" valign="top" align="center">
+                            <h2>Interior Photos</h2>
+                            <div id="drop-area-interior">
+                                <h3>Drag and drop interior photos here or click to select photos</h3>
+                                <form action="{{ url_for('upload_interior_photo', property_id=property.id) }}" method="post" enctype="multipart/form-data">
+                                    <input type="file" id="fileElemInterior" name="photo" accept="image/*" multiple style="display:none" onchange="handleFiles(this.files, 'drop-area-interior')">
+                                    <label for="fileElemInterior">Select photos</label>
+                                </form>
+                            </div>
+                            <div class="interior-photos-gallery">
+                                {% for photo in interior_photos %}
+                                <div class="interior-photo">
+                                    <img width="80%" src="{{ url_for('static', filename=photo.photo_url.replace('static/', '', 1)) }}" alt="Interior photo">
+                                    <!-- Delete button for the photo -->
+                                    <form action="{{ url_for('delete_interior_photo', photo_id=photo.id) }}" method="post">
+                                        <button type="submit" class="delete-photo-btn">Delete</button>
+                                    </form>
+                                </div>
+                                {% else %}
+                                <p>No interior photos available.</p>
+                                {% endfor %}
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </section>
         <footer>
             <p>© Bonaventura</p>
