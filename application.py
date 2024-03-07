@@ -19,7 +19,7 @@ from stripe.error import InvalidRequestError
 application = Flask(__name__)
 load_dotenv()
 
-application.secret_key = os.environ.get('stripe.api_key')
+stripe.api_key = os.environ.get('stripe.api_key')
 application.secret_key = os.environ.get('SECRET_KEY')
 
 UPLOAD_FOLDER = 'static/pdfs' 
@@ -34,7 +34,7 @@ def format_currency(value):
     # Assuming value might be a string with spaces, e.g., "500 000"
     if isinstance(value, str):
         value = value.replace(" ", "")  # Remove spaces
-    number = float(value)  # Ensure it's a float for formatting
+    number = float(value)
     return "${:,.2f}".format(number)
 
 # Register the filter with your Jinja environment
@@ -45,6 +45,12 @@ def split_address(address):
 
 # Register the filter with Jinja
 application.jinja_env.filters['split_address'] = split_address
+
+def split_city(address):
+    return address.split(' - ')[1]
+
+# Register the filter with Jinja
+application.jinja_env.filters['split_city'] = split_city
 
 
 def requires_roles(*roles):
@@ -569,23 +575,46 @@ def get_user_by_id(user_id):
 
 @application.route('/property/<int:id>')
 def property_details(id):
-    property = get_property_by_id(id)
-    latest_photo = get_latest_photo_by_property_id(id)  # Fetch the latest photo
-    interior_photos = get_interior_photos_by_property_id(id)
+    property = get_property_with_latest_photo(id)  # Make sure this function exists and fetches the data correctly
+    interior_photos = get_interior_photos_by_property_id(id)  # Fetch interior photos
 
-    # Prepare the property data for the template, including handling of the photo URL
-    if latest_photo:
-        # If a latest photo exists, adjust the property dictionary to include it
-        property['latest_photo_url'] = latest_photo['photo_url']
-    else:
-        # Ensure there's a fallback if no latest photo is available
-        # This assumes 'photo_url' is already part of the 'property' or you have a default
-        property['latest_photo_url'] = property.get('photo_url', '/path/to/default/image')
-
-    if property:
-        return render_template('property_details.html', property=property, interior_photos=interior_photos)
-    else:
+    if not property:
         return 'Property not found', 404
+
+    
+
+    return render_template('property_details.html', property=property, interior_photos=interior_photos)
+
+
+
+def get_property_with_latest_photo(property_id):
+    conn = get_db_connection()
+    property_with_photo = None
+    try:
+        with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+            # Query to fetch the property details and latest photo_url for a specific property ID
+            query = """
+            SELECT p.*, pp.latest_photo_url
+            FROM all_properties p
+            LEFT JOIN (
+                SELECT pp1.property_id, pp1.photo_url AS latest_photo_url
+                FROM property_photos pp1
+                INNER JOIN (
+                    SELECT property_id, MAX(id) AS max_id
+                    FROM property_photos
+                    WHERE property_id = %s  # Filter by the specific property ID
+                    GROUP BY property_id
+                ) pp2 ON pp1.property_id = pp2.property_id AND pp1.id = pp2.max_id
+            ) pp ON p.id = pp.property_id
+            WHERE p.id = %s;  # Filter for the specific property ID
+            """
+            cursor.execute(query, (property_id, property_id))
+            property_with_photo = cursor.fetchone()  # Since it's only one property, we use fetchone()
+    except Exception as e:
+        print(f"Error fetching property with photo for property ID {property_id}: {e}")
+    finally:
+        conn.close()
+    return property_with_photo
 
     
 def get_latest_photo_by_property_id(property_id):
@@ -995,12 +1024,13 @@ def submit_bid(id):
     last_name = request.form['last_name']
     username = request.form['username']
     email = request.form['email']
-    bid_amount = request.form['maximum-bid-amount']
     phone = request.form['phone']
 
-    # Get the bid amount from the form data (replace 'form_field_name' with the actual field name)
-
-    bid_amount = request.form['maximum-bid-amount']
+    # Original bid_amount as a string with potential currency formatting
+    bid_amount_str = request.form['maximum-bid-amount']
+    
+    # Remove currency symbols and commas, then convert to integer
+    bid_amount = int(re.sub(r'[^\d.]', '', bid_amount_str).split('.')[0])
 
     # Insert bid into the database
     insert_bid(user_id, id, bid_amount)

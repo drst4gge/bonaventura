@@ -17,6 +17,20 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/table.css') }}">
     <script src="{{ url_for('static', filename='js/header.js') }}"></script>
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.0.0/uicons-solid-straight/css/uicons-solid-straight.css'>
+    <script>
+        window.onload = function() {
+            var images = document.getElementsByClassName('exterior-image');
+            for (var i = 0; i < images.length; i++) {
+                // If the image is complete but has no width, it has failed to load
+                if (images[i].complete && images[i].naturalWidth === 0) {
+                    images[i].src = '{{ url_for("static", filename="images/background.jpg") }}';
+                }
+                images[i].onerror = function() {
+                    this.src = '{{ url_for("static", filename="images/background.jpg") }}';
+                };
+            }
+        };
+    </script>
 </head>
 
 <body>
@@ -97,7 +111,7 @@
         <br>
         {% if session['subscription_level'] == 'platinum' or session['subscription_level'] == 'test' or session['user_role'] == 1 or session['user_role'] == 2   %}
         <section id="hero-856">
-            <table align="center" width="1000" cellspacing="0" cellpadding="5">
+            <table align="center" width="1000" cellspacing="0" cellpadding="2">
                 <tbody>
                     <tr>
                         <td width="50%" valign="top">
@@ -198,6 +212,21 @@
                                             </p>
                                         </td>
                                     </tr>
+                                    <tr>
+                                        <td>
+                                            <p></p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p></p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="left">
+                                            <a href="{{ url_for('bid', id=property['id'], address=property['address']) }}" class="cs-button-solid">Bid</a>
+                                        </td>
+                                    </tr>
                                     
                                 </tbody>
                             </table>
@@ -207,25 +236,17 @@
                                 <tbody>
                                     <tr>
                                         <td align="left">
-                                            <a href="{{ url_for('bid', id=property['id'], address=property['address']) }}" class="cs-button-solid">Bid</a>
-                                        </td>
-                                    </tr>
-                                    <tr></tr>
-                                    <tr></tr>
-                                    <tr></tr>
-                                    <tr>
-                                        <td align="left">
                                             {% if property.latest_photo_url %}
                                                 <!-- Check if latest_photo_url is a relative path and prepend with url_for -->
                                                 {% if property.latest_photo_url.startswith('static/images/') %}
-                                                    <img width="100%" src="{{ url_for('static', filename=property.latest_photo_url[7:]) }}" alt="Uploaded Property Photo">
+                                                    <img class="exterior-image" width="100%"  src="{{ url_for('static', filename=property.latest_photo_url[7:]) }}" alt="Uploaded Property Photo">
                                                 {% else %}
                                                     <!-- If it's a complete URL, use it as is -->
-                                                    <img width="100%" src="{{ property.latest_photo_url }}" alt="Uploaded Property Photo">
+                                                    <img class="exterior-image" width="100%"  src="{{ property.latest_photo_url }}" alt="Uploaded Property Photo">
                                                 {% endif %}
                                             {% else %}
                                                 <!-- Handle property['photo_url'] similarly if needed -->
-                                                <img width="100%" src="{{ property.photo_url }}" alt="Pending Drive By Photograph">
+                                                <img class="exterior-image" width="100%"  src="{{ property.photo_url }}" alt="Pending Drive By Photograph">
                                             {% endif %}
                                         </td>
                                     </tr>
@@ -250,10 +271,10 @@
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="2" align="center">
-                            <div style="text-align: center;">
+                        <td colspan="2">
+                            <div style="text-align: center; display: flex; flex-wrap: wrap;">
                                 {% for photo in interior_photos %}
-                                <img src="{{ url_for('static', filename=photo.photo_url.replace('static/', '', 1)) }}" alt="Interior photo" style="max-width: 50%; height: auto;">
+                                <img src="{{ url_for('static', filename=photo.photo_url.replace('static/', '', 1)) }}" alt="Interior photo" style="max-width: 33%; height: auto;">
                                 {% else %}
                                 <p>No interior photos available.</p>
                                 {% endfor %}
@@ -366,7 +387,6 @@
                                             </p>
                                         </td>
                                     </tr>
-                                    
                                 </tbody>
                             </table>
                         </td>
@@ -374,14 +394,14 @@
                             {% if property.latest_photo_url %}
                                 <!-- Check if latest_photo_url is a relative path and prepend with url_for -->
                                 {% if property.latest_photo_url.startswith('static/images/') %}
-                                    <img width="80%" src="{{ url_for('static', filename=property.latest_photo_url[7:]) }}" alt="Uploaded Property Photo">
+                                    <img class="exterior-image" width="100%"  src="{{ url_for('static', filename=property.latest_photo_url[7:]) }}" alt="Uploaded Property Photo">
                                 {% else %}
                                     <!-- If it's a complete URL, use it as is -->
-                                    <img width="80%" src="{{ property.latest_photo_url }}" alt="Uploaded Property Photo">
+                                    <img class="exterior-image" width="100%"  src="{{ property.latest_photo_url }}" alt="Uploaded Property Photo">
                                 {% endif %}
                             {% else %}
                                 <!-- Handle property['photo_url'] similarly if needed -->
-                                <img width="80%" src="{{ property.photo_url }}" alt="Pending Drive By Photograph">
+                                <img class="exterior-image" width="100%"  src="{{ property.photo_url }}" alt="Pending Drive By Photograph">
                             {% endif %}
                             <p></p>
                             <p></p>
@@ -495,14 +515,14 @@
                             {% if property.latest_photo_url %}
                                 <!-- Check if latest_photo_url is a relative path and prepend with url_for -->
                                 {% if property.latest_photo_url.startswith('static/images/') %}
-                                    <img width="80%" src="{{ url_for('static', filename=property.latest_photo_url[7:]) }}" alt="Uploaded Property Photo">
+                                    <img class="exterior-image" width="100%"  src="{{ url_for('static', filename=property.latest_photo_url[7:]) }}" alt="Uploaded Property Photo">
                                 {% else %}
                                     <!-- If it's a complete URL, use it as is -->
-                                    <img width="80%" src="{{ property.latest_photo_url }}" alt="Uploaded Property Photo">
+                                    <img class="exterior-image" width="100%"  src="{{ property.latest_photo_url }}" alt="Uploaded Property Photo">
                                 {% endif %}
                             {% else %}
                                 <!-- Handle property['photo_url'] similarly if needed -->
-                                <img width="80%" src="{{ property.photo_url }}" alt="Pending Drive By Photograph">
+                                <img class="exterior-image" width="100%"  src="{{ property.photo_url }}" alt="Pending Drive By Photograph">
                             {% endif %}
                             <p></p>
                             <p></p>

@@ -20,18 +20,18 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             var usernameValid = false; // Assume invalid to start
             var formSubmitted = false;
 
-            $('#username').on('blur', function() {
+            $('#username').on('blur', function () {
                 var username = $(this).val();
                 $.ajax({
                     url: '/check_username',
-                    data: {'username': username},
+                    data: { 'username': username },
                     type: 'POST',
-                    success: function(response) {
-                        if(response.exists) {
+                    success: function (response) {
+                        if (response.exists) {
                             $('#username-feedback').text("Username already exists. Please choose a different one.").show();
                             usernameValid = false;
                         } else {
@@ -45,7 +45,7 @@
                 });
             });
 
-            $('#registrationForm').on('submit', function(event) {
+            $('#registrationForm').on('submit', function (event) {
                 formSubmitted = true;
                 if (!usernameValid) {
                     event.preventDefault(); // Prevent form submission
@@ -53,7 +53,7 @@
                 }
             });
         });
-        </script>
+    </script>
 </head>
 
 <body>
@@ -97,8 +97,8 @@
                                 Login
                                 <!--SVG Arrow-->
                                 <div class="cs-wrapper">
-                                    <svg class="cs-icon" aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
+                                    <svg class="cs-icon" aria-hidden="true" width="24" height="24" viewBox="0 0 24 24"
+                                        fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path
                                             d="M17.92 11.62C17.8724 11.4973 17.801 11.3851 17.71 11.29L12.71 6.29C12.6168 6.19676 12.5061 6.1228 12.3842 6.07234C12.2624 6.02188 12.1319 5.99591 12 5.99591C11.7337 5.99591 11.4783 6.1017 11.29 6.29C11.1968 6.38324 11.1228 6.49393 11.0723 6.61575C11.0219 6.73758 10.9959 6.86814 10.9959 7C10.9959 7.2663 11.1017 7.5217 11.29 7.71L14.59 11H7C6.73478 11 6.48043 11.1054 6.29289 11.2929C6.10536 11.4804 6 11.7348 6 12C6 12.2652 6.10536 12.5196 6.29289 12.7071C6.48043 12.8946 6.73478 13 7 13H14.59L11.29 16.29C11.1963 16.383 11.1219 16.4936 11.0711 16.6154C11.0203 16.7373 10.9942 16.868 10.9942 17C10.9942 17.132 11.0203 17.2627 11.0711 17.3846C11.1219 17.5064 11.1963 17.617 11.29 17.71C11.383 17.8037 11.4936 17.8781 11.6154 17.9289C11.7373 17.9797 11.868 18.0058 12 18.0058C12.132 18.0058 12.2627 17.9797 12.3846 17.9289C12.5064 17.8781 12.617 17.8037 12.71 17.71L17.71 12.71C17.801 12.6149 17.8724 12.5028 17.92 12.38C18.02 12.1365 18.02 11.8635 17.92 11.62Z"
                                             fill="#1a1a1a" />
@@ -107,102 +107,261 @@
                             </a>
                         </ul>
                     </div>
-                    
+
                 </nav>
 
-                
+
             </div>
         </header>
         <br>
         <br>
         <br>
-        
+
         <section id="contact-718">
-            <div class="cs-container">
-                <div class="cs-content">
-                    
-                    <!-- Form structure from the second form with content from the first form -->
-                    <form class="cs-form" id="cs-form-718" name="Contact Form" action="/register_user" method="post">
-                        <span class="cs-topper">Create a Bonaventura account</span>
-                            <p class="cs-text">
+            <table width="900" border="0" align="center">
+                <tbody>
+                    <tr>
+                        <td width="60%">
+                            <form class="cs-form" id="cs-form-718" name="Contact Form" action="/register_user"
+                                method="post">
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <span class="cs-topper">Create a Bonaventura account</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p></p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
 
-                                Subscribers get access to our exclusive database of properties.
-                            </p>
-                        <label for="first_name" class="cs-label">
-                            First Name
-                            <input class="cs-input" type="text" id="first_name" name="first_name" required
-                                placeholder="First Name">
-                        </label>
-                        <label for="last_name" class="cs-label">
-                            Last Name
-                            <input class="cs-input" type="text" id="last_name" name="last_name" required
-                                placeholder="Last Name">
-                        </label>
-                        <label for="username" class="cs-label">
-                            Username
-                            <input class="cs-input" type="text" id="username" name="username" required placeholder="Username">
-                            <div id="username-feedback" style="display: none; color: red;"></div>
-                        </label>
-                        <label class="cs-label cs-email">
-                            Password
-                            <input class="cs-input" type="password" id="password" name="password" required
-                                placeholder="Password">
-                        </label>
-                        <label class="cs-label cs-phone">
-                            Email
-                            <input class="cs-input" type="email" id="email" name="email" required placeholder="Email">
-                        </label>
-                        <label class="cs-label">
-                            Phone Number
-                            <input class="cs-input" type="tel" id="phone" name="phone" placeholder="Phone Number"
-                            pattern="\d{10,12}" title="Phone number must be 10, 11, or 12 digits.">
-                        </label>
-                        <p class="cs-text">Subscription level:</p>
-                        <!--
-                        <label>
-                            <input type="radio" name="subscriptionLevel" value="test" checked>
-                            Test
-                        </label>
-                        -->
-                        <label>
-                            <input type="radio" name="subscriptionLevel" value="standard" checked>
-                            Standard
-                        </label>
-                        <label>
-                            <input type="radio" name="subscriptionLevel" value="gold">
-                            Gold
-                        </label>
-                        <label>
-                            <input type="radio" name="subscriptionLevel" value="platinum">
-                            Platinum
-                        </label>
+                                                <input class="cs-input" type="text" id="first_name" name="first_name"
+                                                    required placeholder="First Name">
 
-                        <br>
-                        <br>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p></p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
 
+                                                <input class="cs-input" type="text" id="last_name" name="last_name"
+                                                    required placeholder="Last Name">
 
-                        <label>
-                            <input type="checkbox" name="terms" required>
-                            I agree to the <a href="{{ url_for('subscriber_agreement') }}" target="_blank">Terms and Conditions</a>
-                        </label>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p></p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
 
-                        <br>
-                        
-                        <input type="hidden" id="role" name="role" value="0">
+                                                <input class="cs-input" type="text" id="username" name="username"
+                                                    required placeholder="Username">
+                                                <div id="username-feedback" style="display: none; color: red;"></div>
 
-                        <!--<button class="cs-button-solid cs-submit">Subscribe</button>-->
-                        <section>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p></p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
 
-                            <form class="cs-form" id="cs-form-718" action="{{ url_for('register_user') }}" method="post">
-                                <!-- Form fields for username, password, email, phone, etc. -->
-                                <button class="cs-button-solid cs-submit" type="submit">Subscribe</button>
+                                                <input class="cs-input" type="password" id="password" name="password"
+                                                    required placeholder="Password">
+
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p></p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+
+                                                <input class="cs-input" type="email" id="email" name="email" required
+                                                    placeholder="Email">
+
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p></p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+
+                                                <input class="cs-input" type="tel" id="phone" name="phone"
+                                                    placeholder="Phone Number" pattern="\d{10,12}"
+                                                    title="Phone number must be 10, 11, or 12 digits.">
+
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p></p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <span class="cs-topper">Subscription Level</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label>
+                                                    <input type="radio" name="subscriptionLevel" value="standard"
+                                                        checked>
+                                                    Standard
+                                                </label>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label>
+                                                    <input type="radio" name="subscriptionLevel" value="gold">
+                                                    Gold
+                                                </label>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label>
+                                                    <input type="radio" name="subscriptionLevel" value="platinum">
+                                                    Platinum
+                                                </label>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p></p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label>
+                                                    <input type="checkbox" name="terms" required>
+                                                    I agree to the <a href="{{ url_for('subscriber_agreement') }}"
+                                                        target="_blank">Terms and Conditions</a>
+                                                </label>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p></p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label>
+                                                    <input type="checkbox" name="terms" required>
+                                                    Would you like to receive SMS updates regarding your subscription?
+                                                </label>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p></p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <form class="cs-form" id="cs-form-718"
+                                                    action="{{ url_for('register_user') }}" method="post">
+                                                    <!-- Form fields for username, password, email, phone, etc. -->
+                                                    <button class="cs-button-solid cs-submit"
+                                                        type="submit">Subscribe</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <input type="hidden" id="role" name="role" value="0">
                             </form>
-                        </section>
-
-
-                    </form>
-                </div>
-            </div>
+                        </td>
+                        <td width="40%">
+                            <table class="second-table" border="0" width="80%" align="center">
+                                <tbody>
+                                    <tr>
+                                        <td align="center">
+                                            <span style="color: black; font-size: x-large;" class="cs-topper">Standard</span>
+                                            <span style="color: black;" class="cs-topper">$100/month</span>
+                                            <p>Database of Foreclosure Auctions</p>
+                                            <p>Weekly SMS and Email Updates</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p></p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p></p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p></p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="center">
+                                            <span style="color: gold; font-size: x-large;" class="cs-topper">Gold</span>
+                                            <span style="color: gold;" class="cs-topper">$599/month</span>
+                                            <p>Database of Foreclosure Auctions</p>
+                                            <p>Weekly SMS and Email Updates</p>
+                                            <p>Daily Property Due Dilligence</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p></p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p></p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p></p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="center">
+                                            <span style="color: silver; font-size: x-large;" class="cs-topper">Platinum</span>
+                                            <span style="color: silver;" class="cs-topper">$999/month</span>
+                                            <p>Database of Foreclosure Auctions</p>
+                                            <p>Daily SMS and Email Updates</p>
+                                            <p>Daily Property Due Dilligence</p>
+                                            <p>Interior Photos as Avaiable</p>
+                                            <p>Live Auction Strategy Discussions</p>
+                                            <p>Real Time Auction Intelligence</p>
+                                            <p>Bidding Services</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </section>
 
         <footer>

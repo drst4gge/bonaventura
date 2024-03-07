@@ -85,7 +85,7 @@
                 <tbody>
                     <tr>
                         <td align="left">
-                            <p class="cs-topper">{{ property['addresses'] }}</p>
+                            <p style="font-size: x-large;" class="cs-topper">{{ property['addresses'] }}</p>
                         </td>
                     </tr>
                     <tr>
@@ -119,6 +119,11 @@
                                     <input class="cs-input" type="number" id="openingBid" name="openingBid"
                                         value="{{ property['openingBid'] }}" placeholder="Opening Bid" required>
                                 </label>
+                                <label for="county">
+                                    <p class="cs-topper">County</p>
+                                    <input class="cs-input" type="text" id="county" name="county"
+                                        value="{{ property['county'] }}" placeholder="County" required>
+                                </label>
                                 <label for="bedrooms">
                                     <p class="cs-topper">Bedrooms</p>
                                     <input class="cs-input" type="number" id="bedrooms" name="bedrooms"
@@ -144,7 +149,7 @@
                         </td>
                         <td width="25%" valign="top" align="center">
                             <h2>Additional Details</h2>
-                            <p class="cs-topper">{{ property['county'] }}</p>
+
                             <p class="cs-topper">Final Judgement: {{ property['price']|format_currency }}</p>
                         </td>
                         <td width="25%" valign="top" align="center">

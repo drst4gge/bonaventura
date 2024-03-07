@@ -2,6 +2,7 @@ import logging
 import boto3
 from botocore.exceptions import ClientError
 from datetime import datetime
+import os
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -47,7 +48,7 @@ from flask import current_app
 
 def send_test_email():
 
-    app_id = 'abccb22dc4414fe0b229357f51a1cdde'  
+    app_id = os.environ.get('pinpoint_app_id') 
     sender = '"Bonaventura Realty" <info@bonaventurarealty.com>'
     to_addresses = ['dstagge@bonaventurarealty.com', 'cskowron1@gmail.com', 'cskowron21@gmail.com', 'mikemeyers@bonaventurarealty.com']
     subject = 'Your Daily Properties Update'

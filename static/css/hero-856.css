@@ -65,7 +65,7 @@
         width: 100%;
         max-width: 33.1875rem;
         /* 28px - 40px */
-        margin: 0 0 clamp(1.75rem, 3.92vw, 2.5rem) 0;
+        margin: 0 0 calc(clamp(1.75rem, 3.92vw, 2.5rem) * 0.50) 0;
         color: var(--bodyTextColor);
     }
     #hero-856 .cs-button-solid {
