@@ -1,3 +1,4 @@
+from flask import current_app
 import logging
 import boto3
 import os
@@ -25,12 +26,11 @@ def get_user_first_names(email_list):
     first_names = {}
     try:
         with conn.cursor() as cursor:
-            # Prepare a query that can find multiple email addresses at once
             format_strings = ','.join(['%s'] * len(email_list))
             sql = f"SELECT email, first_name FROM users WHERE email IN ({format_strings})"
             cursor.execute(sql, tuple(email_list))
             for row in cursor.fetchall():
-                first_names[row[0]] = row[1]  # Assuming row[0] is email and row[1] is first_name
+                first_names[row[0]] = row[1]
     finally:
         conn.close()
     return first_names
@@ -56,7 +56,6 @@ def send_email_message(app_id, sender, to_addresses, subject, html_message):
                                 "Charset": "UTF-8",
                                 "Data": html_message
                             },
-                            # If you have a text version of the message, add it here
                             "TextPart": {
                                 "Charset": "UTF-8",
                                 "Data": "Text version of the email content"
@@ -72,12 +71,36 @@ def send_email_message(app_id, sender, to_addresses, subject, html_message):
     else:
         return response['MessageResponse']['Result']
 
-from flask import current_app
+def send_sms_message(app_id, sender_phone_number, to_phone_numbers, message):
+    pinpoint_client = boto3.client('pinpoint', region_name='us-east-1')
+    try:
+        response = pinpoint_client.send_messages(
+            ApplicationId=app_id,
+            MessageRequest={
+                "Addresses": {
+                    phone_number: {"ChannelType": "SMS"} for phone_number in to_phone_numbers
+                },
+                "MessageConfiguration": {
+                    "SMSMessage": {
+                        "Body": message,
+                        "MessageType": "TRANSACTIONAL",
+                        "OriginationNumber": sender_phone_number
+                    }
+                }
+            }
+        )
+    except ClientError as e:
+        logger.exception("Couldn't send SMS via Pinpoint: %s", e)
+        return None
+    else:
+        return response['MessageResponse']['Result']
 
-def send_test_email():
+def send_test_notifications():
     app_id = os.environ.get('pinpoint_app_id')
     sender = '"Bonaventura Realty" <info@bonaventurarealty.com>'
+    sender_phone_number = '+18885411353' 
     to_addresses = ['dstagge@bonaventurarealty.com', 'cskowron1@gmail.com', 'cskowron21@gmail.com', 'mikemeyers@bonaventurarealty.com']
+    to_phone_numbers = ['+17652125159', '+12033565886', '+12033565611', '+16312605400']  
 
     # Fetch first names for all addresses
     user_first_names = get_user_first_names(to_addresses)
@@ -96,7 +119,7 @@ def send_test_email():
             Dear {user_first_name},<div><br></div>
             <div>Good morning!&nbsp;</div>
             <div><br></div>
-            <a style="text-decoration: none; font-style: italic;" href="{properties_url}"">Bonaventura's Exclusive Properties for {current_date}</a>
+            <a style="text-decoration: none; font-style: italic;" href="{properties_url}"">Properties for {current_date}</a>
             <div><br></div>
             <div>Should you have any questions, please do not hesitate to reach out. Our dedicated team of professionals is here to provide you with personalized support every step of the way.</div>
             <div><br></div>
@@ -111,12 +134,17 @@ def send_test_email():
         """
 
         # Send the email individually
-        message_id = send_email_message(app_id, sender, [email], "Your Daily Properties Update", html_message)
-
+        send_email_message(app_id, sender, [email], "Your Daily Properties Update", html_message)
+    
+    # SMS content
+    sms_message = f"Good morning {user_first_name}, \nThese are the properties scheduled for foreclosure auction today ({current_date}). \n{properties_url}"
+    
+    # Send the SMS to each phone number
+    for phone_number in to_phone_numbers:
+        send_sms_message(app_id, sender_phone_number, [phone_number], sms_message)
 
 def main():
-    send_test_email()
+    send_test_notifications()
 
 if __name__ == "__main__":
     main()
-        
