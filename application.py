@@ -390,6 +390,7 @@ def admin():
     current_date = today.strftime('%Y-%m-%d')
     year = request.args.get('year', today.year, type=int)
     month = request.args.get('month', today.month, type=int)
+    #here is the county selector what argument is gotten
     selected_county = request.args.get('county', type=str)
 
     if month < 1:
@@ -402,10 +403,11 @@ def admin():
     year = max(1900, min(year, 2100))
     current_month = datetime(year, month, 1).strftime('%B')
     properties = get_all_properties()  # Fetch all properties
+    #fetch whole list of counties here
     counties = get_unique_counties()
-    # Fetch all properties with their latest photo URLs
     
     
+    #displays properties in that county if argument gotten
     if selected_county:
         properties = [prop for prop in properties if prop.get('county') == selected_county]
 
@@ -1274,6 +1276,7 @@ def process_pdf(file_path):
 
 @application.route('/properties/<date>')
 def properties_for_day(date):
+
     try:
         # Convert string date to datetime object
         selected_date = datetime.strptime(date, '%Y-%m-%d')

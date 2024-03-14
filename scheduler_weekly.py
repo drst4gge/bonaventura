@@ -3,6 +3,8 @@ import boto3
 from botocore.exceptions import ClientError
 from datetime import datetime, timedelta
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
