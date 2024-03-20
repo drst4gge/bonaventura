@@ -868,6 +868,8 @@ def submit_address():
 @application.route('/submit_user', methods=['POST'])
 def submit_user():
     # Extract form data
+    first_name = request.form['first_name']
+    last_name = request.form['last_name']
     username = request.form['username']
     password = request.form['password']
     email = request.form['email']
@@ -883,8 +885,8 @@ def submit_user():
     try:
         with conn.cursor() as cursor:
             # Insert new user
-            sql = "INSERT INTO users (username, password, email, phone, role, stripe_customer_id) VALUES (%s, %s, %s, %s, %s, %s)"
-            cursor.execute(sql, (username, hashed_password, email, phone, role, stripe_customer_id))
+            sql = "INSERT INTO users (first_name, last_name, username, password, email, phone, role, stripe_customer_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+            cursor.execute(sql, (first_name, last_name, username, hashed_password, email, phone, role, stripe_customer_id))
         conn.commit()
     finally:
         conn.close()
@@ -1732,8 +1734,5 @@ def send_bid_receipt_email_to_admin(phone, address, email, first_name, last_name
 
 if __name__ == "__main__":
     application.run(port=4242)
-    #To the next developer,
-    #Good luck.. haha.
-    #From Drew
 
 
