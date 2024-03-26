@@ -118,8 +118,8 @@ def send_test_notifications():
     app_id = os.environ.get('pinpoint_app_id')
     sender = '"Bonaventura Realty" <info@bonaventurarealty.com>'
     sender_phone_number = '+18885411353'
-    to_addresses = ['dstagge@bonaventurarealty.com', 'cskowron1@gmail.com', 'cskowron21@gmail.com', 'mikemeyers@bonaventurarealty.com', 'alex@skimprovementscorp.com', 'mike@peartreefunding.com']
-    to_phone_numbers = ['+17652125159', '+12033565611', '+12033565886', '+16312605400', '+12014421086', '+16176464241']
+    to_addresses = ['dstagge@bonaventurarealty.com']
+    to_phone_numbers = ['+17652125159']
 
     # Fetch first names for all phone numbers
     user_first_names_by_phone = get_user_first_names_by_phone(to_phone_numbers)

@@ -550,7 +550,7 @@ def edit_profile():
         phone = request.form["phone"]
         # Update user information in the database
         update_user(user_id, username, email, phone)
-        return redirect(url_for("admin"))
+        return redirect(url_for("login_form"))
 
 
 @application.route("/delete_user/<int:user_id>", methods=["GET"])
@@ -590,7 +590,7 @@ def edit_user(user_id):
         return render_template("edit_user.html", user=user)
     else:
         flash("User not found.")
-        return redirect(url_for("home"))
+        return redirect(url_for("admin_usercontrol"))
 
 
 @application.route("/update_user/<int:user_id>", methods=["POST"])
@@ -891,7 +891,7 @@ def submit_user():
         conn.close()
 
     flash("User created successfully!")
-    return redirect(url_for("admin"))
+    return redirect(url_for("admin_usercontrol"))
 
 
 @application.route("/edit/<int:id>", methods=["GET", "POST"])

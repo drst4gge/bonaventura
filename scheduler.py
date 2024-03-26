@@ -117,8 +117,8 @@ def send_test_notifications():
     app_id = os.environ.get('pinpoint_app_id')
     sender = '"Bonaventura Realty" <info@bonaventurarealty.com>'
     sender_phone_number = '+18885411353' 
-    to_addresses = ['dstagge@bonaventurarealty.com', 'cskowron1@gmail.com', 'cskowron21@gmail.com', 'mikemeyers@bonaventurarealty.com', 'alex@skimprovementscorp.com', 'mike@peartreefunding.com']
-    to_phone_numbers = ['+17652125159', '+12033565611', '+12033565886', '+16312605400', '+12014421086', '+16176464241']
+    to_addresses = ['dstagge@bonaventurarealty.com']
+    to_phone_numbers = ['+17652125159']
 
     # Fetch first names for all addresses
     user_first_names = get_user_first_names(to_addresses)
@@ -158,7 +158,7 @@ def send_test_notifications():
         user_first_name = user_first_names_by_phone.get(phone_number, "Valued Customer")
         current_date = datetime.now().strftime("%Y-%m-%d")
         properties_url = f"https://www.bonaventurarealty.com/properties/{current_date}"
-        sms_message = f"Good morning {user_first_name}, \nThese are the properties for {current_date}. \n{properties_url}"
+        sms_message = f"Good morning {user_first_name}, \nProperties for {current_date}. \n{properties_url}"
         
         # Send the SMS to each phone number
         send_sms_message(app_id, sender_phone_number, [phone_number], sms_message)
