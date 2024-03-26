@@ -29,7 +29,6 @@
     <link rel='stylesheet'
         href='https://cdn-uicons.flaticon.com/2.0.0/uicons-solid-straight/css/uicons-solid-straight.css'>
 </head>
-
 <body>
     <div class="wrapper">
         <header id="cs-navigation">
@@ -41,14 +40,6 @@
                 </a>
                 <!--Navigation List-->
                 <nav class="cs-nav" role="navigation">
-                    <!--Mobile Nav Toggle-->
-                    <button class="cs-toggle" aria-label="mobile menu toggle">
-                        <div class="cs-box" aria-hidden="true">
-                            <span class="cs-line cs-line1" aria-hidden="true"></span>
-                            <span class="cs-line cs-line2" aria-hidden="true"></span>
-                            <span class="cs-line cs-line3" aria-hidden="true"></span>
-                        </div>
-                    </button>
                     <div class="cs-ul-wrapper">
                         <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
                             <li class="cs-li">
@@ -77,7 +68,6 @@
                                     <p class="cs-topper">Account</p>
                                 </a>
                             </li>
-
                         </ul>
                     </div>
                 </nav>
@@ -123,7 +113,6 @@
                 </div>
             </div>
         </section>
-        
         <section id="table-1669">
             <div class="cs-container">
                 <div class="cs-content">
@@ -135,8 +124,6 @@
                                 <th class="cs-th">Username</th>
                                 <th class="cs-th">Email</th>
                                 <th class="cs-th">Phone</th>
-                                <th class="cs-th">Role</th>
-                                <th class="cs-th">Subscription</th>
                                 <th class="cs-th">Edit</th>
                                 <th class="cs-th">Delete</th>
                             </tr>
@@ -149,8 +136,6 @@
                                         <td class="cs-td">{{ user['username'] }}</td>
                                         <td class="cs-td">{{ user['email'] }}</td>
                                         <td class="cs-td">{{ user['phone'] }}</td>
-                                        <td class="cs-td">Subscriber</td>
-                                        <td class="cs-td">{{ user['subscription_level'] }}</td>
                                         <td class="cs-td"><a href="{{ url_for('edit_user', user_id=user['id']) }}" class="btn" onclick="return confirm('Are you sure?')">Edit</a></td>
                                         <td class="cs-td"><a href="{{ url_for('delete_user', user_id=user['id']) }}" class="btn" onclick="return confirm('Are you sure?')">Delete</a></td>
                                     </tr>
@@ -165,20 +150,10 @@
                     </a>
                 </div>
             </div>
-            
         </section>
-
-        <!--
-        <a href="/send-test-email" class="btn btn-primary">Send Daily Properties Email</a>
-        -->
-
-        
-        
         <footer>
             <p>© Bonaventura</p>
         </footer>
-
     </div>
 </body>
-
 </html>

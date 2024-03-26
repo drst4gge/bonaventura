@@ -17,7 +17,6 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/table.css') }}">
     <script src="{{ url_for('static', filename='js/header.js') }}"></script>
 </head>
-
 <body>
     <div class="wrapper">
         <header id="cs-navigation">
@@ -29,15 +28,6 @@
                 </a>
                 <!--Navigation List-->
                 <nav class="cs-nav" role="navigation">
-                    <!--Mobile Nav Toggle-->
-                    <button class="cs-toggle" aria-label="mobile menu toggle">
-                        <div class="cs-box" aria-hidden="true">
-                            <span class="cs-line cs-line1" aria-hidden="true"></span>
-                            <span class="cs-line cs-line2" aria-hidden="true"></span>
-                            <span class="cs-line cs-line3" aria-hidden="true"></span>
-                        </div>
-                    </button>
-                    <!-- We need a wrapper div so we can set a fixed height on the cs-ul in case the nav list gets too long from too many dropdowns being opened and needs to have an overflow scroll. This wrapper acts as the background so it can go the full height of the screen and not cut off any overflowing nav items while the cs-ul stops short of the bottom of the screen, which keeps all nav items in view no matter how mnay there are-->
                     <div class="cs-ul-wrapper">
                         <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
                             <li class="cs-li">
@@ -69,21 +59,16 @@
                             </a>
                         </ul>
                     </div>
-                    
                 </nav>
-
-                
             </div>
         </header>
         <br>
         <br>
         <br>
-        
         <section id="contact-718">
             <div class="cs-container">
                 <div class="cs-content">
                     <span class="cs-topper">Bonaventura Login</span>
-
                     <form class="cs-form" action="/login" method="post">
                         <label for="username" class="cs-label">
                             Username
@@ -95,26 +80,18 @@
                                 required>
                         </label>
                         <button class="cs-button-solid cs-submit" type="submit">Login</button>
-                        
                         <div class="link-container">
-                            <p>
-                                <a href="{{ url_for('show_registration_form') }}">Create an Account?</a>
-                            </p>
                             <p>
                                 <a href="{{ url_for('login') }}">Reset Password?</a>
                             </p>
                         </div>
                     </form>
-                    
                 </div>
             </div>
         </section>
-
         <footer>
             <p>© Bonaventura</p>
         </footer>
     </div>
-
 </body>
-
 </html>
