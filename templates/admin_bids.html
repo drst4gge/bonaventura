@@ -73,6 +73,11 @@
         <br>
         <br>
         <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
 
         <section id="table-1669">
             <div class="cs-container">
@@ -86,8 +91,6 @@
                                 <th class="cs-th">Email</th>
                                 <th class="cs-th">Phone</th>
                                 <th class="cs-th">Bid Time</th>
-                                <th class="cs-th">Maximum Bid Amount</th>
-
                                 <th class="cs-th">Cancel Bid</th>
                                 <th class="cs-th">Update Bid</th>
                                 
@@ -102,10 +105,7 @@
                                 <td class="cs-td">{{ bid['email'] }}</td>
                                 <td class="cs-td">{{ bid['phone'] }}</td>
                                 <td class="cs-td">{{ bid['bid_time'] }}</td>
-                                <td class="cs-td">{{ bid['bid_amount'] }}</td>
 
-                                
-                                
                                 <td class="cs-td">
                                     <form action="{{ url_for('delete_bid', bid_id=bid.id) }}" method="post">
                                         <button type="submit">Delete</button>

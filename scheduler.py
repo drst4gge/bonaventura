@@ -21,37 +21,14 @@ def get_db_connection():
         port=3306
     )
 
-def get_user_first_names(email_list):
+def get_all_users_numbers_and_emails_and_names():
     conn = get_db_connection()
-    first_names = {}
     try:
-        with conn.cursor() as cursor:
-            format_strings = ','.join(['%s'] * len(email_list))
-            sql = f"SELECT email, first_name FROM users WHERE email IN ({format_strings})"
-            cursor.execute(sql, tuple(email_list))
-            for row in cursor.fetchall():
-                first_names[row[0]] = row[1]
+        with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+            cursor.execute("SELECT DISTINCT phone, email, first_name FROM users")
+            return cursor.fetchall()
     finally:
         conn.close()
-    return first_names
-
-def get_user_first_names_by_phone(phone_number_list):
-    conn = get_db_connection()
-    first_names = {}
-    # Remove the "+1" prefix from phone numbers
-    formatted_phone_numbers = [number.lstrip('+1') for number in phone_number_list]
-    try:
-        with conn.cursor() as cursor:
-            format_strings = ','.join(['%s'] * len(formatted_phone_numbers))
-            sql = f"SELECT phone, first_name FROM users WHERE phone IN ({format_strings})"
-            cursor.execute(sql, tuple(formatted_phone_numbers))
-            for row in cursor.fetchall():
-                # Reconstruct the original phone number with the prefix for the return value
-                original_number = '+1' + row[0]
-                first_names[original_number] = row[1]
-    finally:
-        conn.close()
-    return first_names
 
 def send_email_message(app_id, sender, to_addresses, subject, html_message):
     pinpoint_client = boto3.client('pinpoint', region_name='us-east-1')
@@ -116,21 +93,20 @@ def send_sms_message(app_id, sender_phone_number, to_phone_numbers, message):
 def send_test_notifications():
     app_id = os.environ.get('pinpoint_app_id')
     sender = '"Bonaventura Realty" <info@bonaventurarealty.com>'
-    sender_phone_number = '+18885411353' 
-    to_addresses = ['dstagge@bonaventurarealty.com']
-    to_phone_numbers = ['+17652125159']
+    sender_phone_number = '+18885411353'
+    
+    # Fetch all users' phone numbers, emails, and names
+    users_data = get_all_users_numbers_and_emails_and_names()
 
-    # Fetch first names for all addresses
-    user_first_names = get_user_first_names(to_addresses)
-    # Fetch first names for all phone numbers
-    user_first_names_by_phone = get_user_first_names_by_phone(to_phone_numbers)
-
-    # Iterate over each address to send personalized emails
-    for email in to_addresses:
-        user_first_name = user_first_names.get(email, "Valued Customer")
+    for user in users_data:
+        email = user['email']
+        # Add "+1" prefix to phone numbers
+        phone_number = '+1' + user['phone']
+        user_first_name = user['first_name'] if user['first_name'] else "Valued Customer"
         current_date = datetime.now().strftime("%Y-%m-%d")
         properties_url = f"https://www.bonaventurarealty.com/properties/{current_date}"
 
+        # Email Message
         html_message = f"""
         <html>
             Dear {user_first_name},<div><br></div>
@@ -149,18 +125,12 @@ def send_test_notifications():
             <div><br></div>
         </html>
         """
-
-        # Send the email individually
+        # Send the email
         send_email_message(app_id, sender, [email], "Your Daily Properties Update", html_message)
 
-    # Send SMS with correct first name for each phone number
-    for phone_number in to_phone_numbers:
-        user_first_name = user_first_names_by_phone.get(phone_number, "Valued Customer")
-        current_date = datetime.now().strftime("%Y-%m-%d")
-        properties_url = f"https://www.bonaventurarealty.com/properties/{current_date}"
+        # SMS Message
         sms_message = f"Good morning {user_first_name}, \nProperties for {current_date}. \n{properties_url}"
-        
-        # Send the SMS to each phone number
+        # Send the SMS
         send_sms_message(app_id, sender_phone_number, [phone_number], sms_message)
 
 def main():

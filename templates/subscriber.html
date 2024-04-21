@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    
     <title>Bonaventura</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background_color.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/contact-718.css') }}">
@@ -26,12 +27,8 @@
             });
         });
     </script>
-
-    <link rel='stylesheet'
-        href='https://cdn-uicons.flaticon.com/2.0.0/uicons-solid-straight/css/uicons-solid-straight.css'>
-
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.0.0/uicons-solid-straight/css/uicons-solid-straight.css'>
 </head>
-
 <body>
     <div class="wrapper">
         <header id="cs-navigation">
@@ -42,14 +39,6 @@
                         height="29" aria-hidden="true" decoding="async">
                 </a>
                 <nav class="cs-nav" role="navigation">
-                    <!--Mobile Nav Toggle-->
-                    <button class="cs-toggle" aria-label="mobile menu toggle">
-                        <div class="cs-box" aria-hidden="true">
-                            <span class="cs-line cs-line1" aria-hidden="true"></span>
-                            <span class="cs-line cs-line2" aria-hidden="true"></span>
-                            <span class="cs-line cs-line3" aria-hidden="true"></span>
-                        </div>
-                    </button>
                     <div class="cs-ul-wrapper">
                         <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
                             <li class="cs-li">
@@ -67,12 +56,9 @@
                                     <p class="cs-topper">Account</p>
                                 </a>
                             </li>
-                            
-
                         </ul> 
                     </div>
                 </nav>
-
             </div>
         </header>
         <br>
@@ -99,12 +85,12 @@
                 <select name="county" id="county">
                     <option value="">All Counties</option>
                     {% for county in counties %}
-                        {% if county != "--" %} <!-- Check to exclude '--' -->
+                        {% if county == "Suffolk County" or county == "Nassau County" %}
                             <option value="{{ county }}" {% if selected_county == county %}selected{% endif %}>{{ county }}</option>
                         {% endif %}
                     {% endfor %}
                 </select>
-                <button type="submit">SORT</button>
+                <button type="submit">Sort</button>
             </form>
         </div>
         <!-- Calendar Grid -->
@@ -130,7 +116,7 @@
             {% set date_str = '%d-%02d-%02d' % (year, month, day) %}
             <div class="day-dropdown {{ 'current-day' if date_str == current_date }}">
                 <div class="day-date">{{ day }}</div>
-                <a href="{{ url_for('properties_for_day', date=date_str) }}" class="dropdown-btn">
+                <a href="{{ url_for('properties_for_day', date=date_str, county=selected_county) }}" class="dropdown-btn">
                     {% set property_count = properties_by_date[day]|length %}
                     {% if property_count > 0 %}
                     {{ property_count }} Properties

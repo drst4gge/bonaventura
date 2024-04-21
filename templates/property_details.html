@@ -16,20 +16,56 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/services.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/table.css') }}">
     <script src="{{ url_for('static', filename='js/header.js') }}"></script>
-    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.0.0/uicons-solid-straight/css/uicons-solid-straight.css'>
+    <link rel='stylesheet'
+        href='https://cdn-uicons.flaticon.com/2.0.0/uicons-solid-straight/css/uicons-solid-straight.css'>
     <script>
-        window.onload = function() {
+        window.onload = function () {
             var images = document.getElementsByClassName('exterior-image');
             for (var i = 0; i < images.length; i++) {
                 // If the image is complete but has no width, it has failed to load
                 if (images[i].complete && images[i].naturalWidth === 0) {
                     images[i].src = '{{ url_for("static", filename="images/background.jpg") }}';
                 }
-                images[i].onerror = function() {
+                images[i].onerror = function () {
                     this.src = '{{ url_for("static", filename="images/background.jpg") }}';
                 };
             }
         };
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Get the submit button and add a click event listener
+            var submitBidButton = document.getElementById('submitBidButton');
+            submitBidButton.addEventListener('click', function (event) {
+                event.preventDefault(); // Prevent the default form submission
+
+                var propertyId = this.getAttribute('data-property-id'); // Get property ID set in the data attribute
+
+                // Send an AJAX request to the Flask endpoint
+                fetch(`/submit_bid/${propertyId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // Add any other headers as needed, such as CSRF tokens
+                    },
+                    credentials: 'same-origin', // For sending cookies with the request
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Handle response data
+                        console.log(data);
+                        if (data.error) {
+                            alert("Error: " + data.error); // Display error message
+                        } else {
+                            alert("Success: " + data.message); // Display success message
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                        alert("An error occurred. Please try again."); // Fallback error message
+                    });
+            });
+        });
     </script>
 </head>
 
@@ -44,9 +80,9 @@
                 </a>
                 <!--Navigation List-->
                 <nav class="cs-nav" role="navigation">
-                    
+
                     <div class="cs-ul-wrapper">
-                        {% if session['user_role'] == 1 or session['user_role'] == 2 %}
+                        {% if session['user_role'] == 2 %}
                         <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
                             <li class="cs-li">
                                 <a href="{{ url_for('admin') }}" class="cs-li-link">
@@ -74,6 +110,24 @@
                                 </a>
                             </li>
 
+                        </ul>
+                        {% elif session['user_role'] == 1 %}
+                        <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
+                            <li class="cs-li">
+                                <a href="{{ url_for('agent') }}" class="cs-li-link">
+                                    <p class="cs-topper">Calendar</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('upload_pdf') }}" class="cs-li-link">
+                                    <p class="cs-topper">Upload PDF</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('edit_profile') }}" class="cs-li-link">
+                                    <p class="cs-topper">Account</p>
+                                </a>
+                            </li>
                         </ul>
                         {% elif session['user_role'] == 0%}
                         <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
@@ -162,7 +216,7 @@
                                             <p class="cs-text">Time of Sale</p>
                                         </td>
                                         <td align="left" width="70%">
-                                            <p class="cs-text">{{ property['timeOfSale'] }}</p> 
+                                            <p class="cs-text">{{ property['timeOfSale'] }}</p>
                                         </td>
                                     </tr>
                                     <tr>
@@ -196,9 +250,9 @@
                                         <td align="left" width="70%">
                                             <p class="cs-text">
                                                 {% if property['lotSize'] is not none %}
-                                                    {{ "%.2f"|format(property['lotSize'] / 43560) }}
+                                                {{ "%.2f"|format(property['lotSize'] / 43560) }}
                                                 {% else %}
-                                                    Not Available
+                                                Not Available
                                                 {% endif %}
                                             </p>
                                         </td>
@@ -215,10 +269,10 @@
                                     </tr>
                                     <tr>
                                         <td align="left">
-                                            <a href="{{ url_for('bid', id=property['id'], address=property['address']) }}" class="cs-button-solid">Bid</a>
+                                            <button class="cs-button-solid cs-submit" id="submitBidButton" data-property-id="{{property.id}}" onclick="return confirm('This will notify the Bonaventura Realty team. They will reach out to you shortly after. Are you sure?')">Bid</button>
                                         </td>
                                     </tr>
-                                    
+
                                 </tbody>
                             </table>
                         </td>
@@ -228,16 +282,20 @@
                                     <tr>
                                         <td align="left">
                                             {% if property.latest_photo_url %}
-                                                <!-- Check if latest_photo_url is a relative path and prepend with url_for -->
-                                                {% if property.latest_photo_url.startswith('static/images/') %}
-                                                    <img class="exterior-image" width="100%"  src="{{ url_for('static', filename=property.latest_photo_url[7:]) }}" alt="Uploaded Property Photo">
-                                                {% else %}
-                                                    <!-- If it's a complete URL, use it as is -->
-                                                    <img class="exterior-image" width="100%"  src="{{ property.latest_photo_url }}" alt="Uploaded Property Photo">
-                                                {% endif %}
+                                            <!-- Check if latest_photo_url is a relative path and prepend with url_for -->
+                                            {% if property.latest_photo_url.startswith('static/images/') %}
+                                            <img class="exterior-image" width="100%"
+                                                src="{{ url_for('static', filename=property.latest_photo_url[7:]) }}"
+                                                alt="Uploaded Property Photo">
                                             {% else %}
-                                                <!-- Handle property['photo_url'] similarly if needed -->
-                                                <img class="exterior-image" width="100%"  src="{{ property.photo_url }}" alt="Pending Drive By Photograph">
+                                            <!-- If it's a complete URL, use it as is -->
+                                            <img class="exterior-image" width="100%"
+                                                src="{{ property.latest_photo_url }}" alt="Uploaded Property Photo">
+                                            {% endif %}
+                                            {% else %}
+                                            <!-- Handle property['photo_url'] similarly if needed -->
+                                            <img class="exterior-image" width="100%" src="{{ property.photo_url }}"
+                                                alt="Pending Drive By Photograph">
                                             {% endif %}
                                         </td>
                                     </tr>
@@ -247,25 +305,23 @@
                                     <tr>
                                         <td align="left">
                                             <!-- Roadmap View -->
-                                           <iframe
-                                           width="100%"
-                                           height="400"
-                                           frameborder="0" style="border:0"
-                                           src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBluIg_sxeWXK8OTApUJQ_PiBJu0-H7_0o&q={{ property['addresses']|urlencode }}"
-                                           allowfullscreen>
-                                       </iframe> 
+                                            <iframe width="100%" height="400" frameborder="0" style="border:0"
+                                                src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBluIg_sxeWXK8OTApUJQ_PiBJu0-H7_0o&q={{ property['addresses']|urlencode }}"
+                                                allowfullscreen>
+                                            </iframe>
                                         </td>
-                                    </tr> 
+                                    </tr>
                                 </tbody>
                             </table>
-                            
+
                         </td>
                     </tr>
                     <tr>
                         <td colspan="2">
-                            <div style="text-align: center; display: flex; flex-wrap: wrap;">
+                            <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
                                 {% for photo in interior_photos %}
-                                <img src="{{ url_for('static', filename=photo.photo_url.replace('static/', '', 1)) }}" alt="Interior photo" style="max-width: 33%; height: auto;">
+                                <img src="{{ url_for('static', filename=photo.photo_url.replace('static/', '', 1)) }}"
+                                    alt="Interior photo" style="width: 100%; height: auto; margin-bottom: 20px;">
                                 {% else %}
                                 <p>No interior photos available.</p>
                                 {% endfor %}

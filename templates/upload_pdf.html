@@ -62,15 +62,27 @@
         function uploadFile(file) {
             let url = '/upload_pdf';
             let formData = new FormData();
-
             formData.append('file', file);
 
             fetch(url, {
                 method: 'POST',
                 body: formData
             })
-            .then(() => { /* Done. Inform the user */ })
-            .catch(() => { /* Error. Inform the user */ });
+            .then(response => {
+                if (response.ok) {
+                    return response.text(); // Assuming the server sends a success message
+                } else {
+                    throw new Error('Upload failed');
+                }
+            })
+            .then(result => {
+                document.getElementById('feedback').innerText = 'Upload successful: ' + result;
+                document.getElementById('feedback').style.color = 'green';
+            })
+            .catch(error => {
+                document.getElementById('feedback').innerText = 'Upload error: ' + error.message;
+                document.getElementById('feedback').style.color = 'red';
+            });
         }
     </script>
 
@@ -96,6 +108,7 @@
                         </div>
                     </button>
                     <div class="cs-ul-wrapper">
+                        {% if session['user_role'] == 2 %}
                         <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
                             <li class="cs-li">
                                 <a href="{{ url_for('admin') }}" class="cs-li-link">
@@ -123,9 +136,26 @@
                                 </a>
                             </li>
 
-
-                            
                         </ul>
+                        {% elif session['user_role'] == 1 %}
+                        <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
+                            <li class="cs-li">
+                                <a href="{{ url_for('agent') }}" class="cs-li-link">
+                                    <p class="cs-topper">Calendar</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('upload_pdf') }}" class="cs-li-link">
+                                    <p class="cs-topper">Upload PDF</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('edit_profile') }}" class="cs-li-link">
+                                    <p class="cs-topper">Account</p>
+                                </a>
+                            </li>
+                        </ul>
+                        {% endif %}
                     </div>
                 </nav>
             </div>
@@ -153,6 +183,7 @@
                                 <input type="file" id="fileElem" name="file" accept="application/pdf" style="display:none" onchange="handleFiles(this.files)">
                                 <label class="button" for="fileElem">Select a file</label>
                             </div>
+                            <div id="feedback" style="color: green; margin-top: 10px;"></div> <!-- Feedback area -->
                         </form>
                     </td>
                 </tr>

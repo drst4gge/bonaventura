@@ -38,7 +38,7 @@
                         </div>
                     </button>
                     <div class="cs-ul-wrapper">
-                        {% if session['user_role'] == 1 or session['user_role'] == 2 %}
+                        {% if session['user_role'] == 2 %}
                         <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
                             <li class="cs-li">
                                 <a href="{{ url_for('admin') }}" class="cs-li-link">
@@ -67,6 +67,24 @@
                             </li>
 
                         </ul>
+                        {% elif session['user_role'] == 1 %}
+                        <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
+                            <li class="cs-li">
+                                <a href="{{ url_for('agent') }}" class="cs-li-link">
+                                    <p class="cs-topper">Calendar</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('upload_pdf') }}" class="cs-li-link">
+                                    <p class="cs-topper">Upload PDF</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('edit_profile') }}" class="cs-li-link">
+                                    <p class="cs-topper">Account</p>
+                                </a>
+                            </li>
+                        </ul>
                         {% elif session['user_role'] == 0%}
                         <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
                             <li class="cs-li">
@@ -90,6 +108,8 @@
                 </nav>
             </div>
         </header>
+        <br>
+        <br>
         <br>
         <br>
         <br>

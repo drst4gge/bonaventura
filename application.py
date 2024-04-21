@@ -177,10 +177,18 @@ def get_interior_photos_by_property_id(property_id):
 def get_unique_counties():
     conn = get_db_connection()
     try:
-        with conn.cursor(pymysql.cursors.DictCursor) as cursor:  # Use DictCursor here
-            cursor.execute(
-                "SELECT DISTINCT county FROM all_properties WHERE county IS NOT NULL"
-            )
+        # Get today's date in the format that matches your database's date format
+        today = datetime.now().strftime('%Y-%m-%d')
+        
+        with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+            # Adjust the SQL query to filter by dateOfSale
+            query = """
+                SELECT DISTINCT county 
+                FROM all_properties 
+                WHERE county IS NOT NULL 
+                AND dateOfSale >= %s
+            """
+            cursor.execute(query, (today,))
             return [row["county"] for row in cursor.fetchall()]
     finally:
         conn.close()
@@ -205,9 +213,19 @@ def delete_property(property_id):
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
-            delete_sql = "DELETE FROM all_properties WHERE id = %s"
-            cursor.execute(delete_sql, (property_id,))
+            delete_interior_photos_sql = "DELETE FROM interior_photos WHERE property_id = %s"
+            cursor.execute(delete_interior_photos_sql, (property_id,))
+
+            delete_photos_sql = "DELETE FROM property_photos WHERE property_id = %s"
+            cursor.execute(delete_photos_sql, (property_id,))
+            
+            delete_property_sql = "DELETE FROM all_properties WHERE id = %s"
+            cursor.execute(delete_property_sql, (property_id,))
+            
         conn.commit()
+    except Exception as e:
+        conn.rollback()
+        raise e
     finally:
         conn.close()
 
@@ -317,25 +335,10 @@ def subscriber_agreement():
     return render_template("subscriber_agreement.html")
 
 
-@application.route("/bid_agreement")
-def bid_agreement():
-    return render_template("bid_agreement.html")
-
 
 @application.route("/services")
 def services():
     return render_template("services.html")
-
-
-@application.route("/properties")
-def properties_page():
-    properties = get_all_properties()
-    users = get_all_users()
-    # Convert 'id' to integer if necessary
-    for property in properties:
-        property["id"] = int(property["id"])
-    return render_template("properties.html", properties=properties)
-
 
 @application.route("/subscriber")
 @requires_roles(0)
@@ -393,46 +396,49 @@ def subscriber():
 @application.route("/agent")
 @requires_roles(1)
 def agent():
-    county_filter = request.args.get("county")
-    properties = get_all_properties()
+    today = datetime.today()
+    current_date = today.strftime("%Y-%m-%d")
+    year = request.args.get("year", today.year, type=int)
+    month = request.args.get("month", today.month, type=int)
+    # here is the county selector what argument is gotten
+    selected_county = request.args.get("county", type=str)
 
-    # Filter properties by date and county if selected
-    filtered_properties = []
-    for prop in properties:
-        prop_date = prop["dateOfSale"]
-        if isinstance(prop_date, str):
-            prop_date = datetime.strptime(prop_date, "%Y-%m-%d").date()
+    if month < 1:
+        month = 12
+        year -= 1
+    elif month > 12:
+        month = 1
+        year += 1
 
-        if prop_date >= datetime.now().date():
-            if not county_filter or (
-                county_filter and prop.get("county") == county_filter
-            ):
-                filtered_properties.append(prop)
-
-    # Sort the filtered properties by 'dateOfSale'
-    filtered_properties.sort(key=lambda x: x["dateOfSale"])
-
-    # Group properties by 'dateOfSale' and include the day of the week
-    properties_by_date_with_day = {}
-    for prop in filtered_properties:
-        prop_date = prop["dateOfSale"]
-        if isinstance(prop_date, str):
-            prop_date = datetime.strptime(prop_date, "%Y-%m-%d").date()
-
-        day_name = prop_date.strftime("%A")  # Gets the day name (e.g., 'Monday')
-        formatted_date = (
-            f"{day_name}, {prop_date.strftime('%Y-%m-%d')}"  # Format: 'Day, YYYY-MM-DD'
-        )
-        properties_by_date_with_day.setdefault(formatted_date, []).append(prop)
-
-    # Get unique counties for the filter dropdown
+    year = max(1900, min(year, 2100))
+    current_month = datetime(year, month, 1).strftime("%B")
+    properties = get_all_properties()  # Fetch all properties
+    # fetch whole list of counties here
     counties = get_unique_counties()
+
+    # displays properties in that county if argument gotten
+    if selected_county:
+        properties = [
+            prop for prop in properties if prop.get("county") == selected_county
+        ]
+
+    calendar_data = generate_calendar(year, month, properties)
+
+    # Remove 'year' and 'month' from calendar_data to prevent duplication
+    calendar_data.pop("year", None)
+    calendar_data.pop("month", None)
+
+    counties = get_unique_counties()  # Fetch unique counties for filter dropdown
 
     return render_template(
         "agent.html",
-        properties_by_date=properties_by_date_with_day,
+        current_month=current_month,
+        year=year,
+        month=month,
+        current_date=current_date,
+        selected_county=selected_county,
         counties=counties,
-        selected_county=county_filter,
+        **calendar_data,
     )
 
 
@@ -531,6 +537,76 @@ def admin_usercontrol():
         counties=counties,
         selected_county=county_filter,
     )
+
+@application.route('/admin/update_password', methods=['POST'])
+def admin_update_password():
+    # You may want to include additional checks to verify the user's role is admin
+    username = request.form['username']
+    new_password = request.form['new_password']
+
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            # Check if the username exists
+            cursor.execute('SELECT id FROM users WHERE username = %s', (username,))
+            user_id = cursor.fetchone()
+            if user_id:
+                # Proceed with updating the password
+                new_password_hash = generate_password_hash(new_password)
+                cursor.execute('UPDATE users SET password = %s WHERE username = %s', (new_password_hash, username))
+                conn.commit()
+                flash('Password updated successfully.', 'success')
+            else:
+                # Username does not exist
+                flash('Username not found.', 'danger')
+    except Exception as e:
+        # Log the exception; for simplicity, just flash a message here
+        flash(f'An error occurred: {e}', 'danger')
+    finally:
+        conn.close()
+
+    # Redirect to the admin page or wherever is appropriate
+    return redirect(url_for('admin_usercontrol'))
+
+@application.route('/admin/show_update_password_form', methods=['GET'])
+def show_admin_update_password_form():
+    # Add any required logic here, for example, verifying that the user is an admin
+    return render_template('admin_update_password.html')
+
+@application.route('/update_password', methods=['POST'])
+def subscriber_update_password():
+    # You may want to include additional checks to verify the user's role is admin
+    username = request.form['username']
+    new_password = request.form['new_password']
+
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            # Check if the username exists
+            cursor.execute('SELECT id FROM users WHERE username = %s', (username,))
+            user_id = cursor.fetchone()
+            if user_id:
+                # Proceed with updating the password
+                new_password_hash = generate_password_hash(new_password)
+                cursor.execute('UPDATE users SET password = %s WHERE username = %s', (new_password_hash, username))
+                conn.commit()
+                flash('Password updated successfully.', 'success')
+            else:
+                # Username does not exist
+                flash('Username not found.', 'danger')
+    except Exception as e:
+        # Log the exception; for simplicity, just flash a message here
+        flash(f'An error occurred: {e}', 'danger')
+    finally:
+        conn.close()
+
+    # Redirect to the admin page or wherever is appropriate
+    return redirect(url_for('login_form'))
+
+@application.route('/show_update_password_form', methods=['GET'])
+def show_subscriber_update_password_form():
+    # Add any required logic here, for example, verifying that the user is an admin
+    return render_template('update_password.html')
 
 
 @application.route("/edit_profile", methods=["GET", "POST"])
@@ -741,29 +817,35 @@ def login():
     cursor.close()
     conn.close()
 
-    if user and check_password_hash(user["password"], password):
-        # Set common user info in session
-        session["user_id"] = user["id"]
-        session["user_email"] = user["email"]
-        session["first_name"] = user["first_name"]
-        session["last_name"] = user["last_name"]
-        session["user_phone"] = user["phone"]
-        session["user_role"] = user["role"]
-        session["user_username"] = user["username"]
-
-        if user["role"] in [1, 2]:  # Assuming 1 is for agents and 2 is for admins
-            return (
-                redirect(url_for("admin"))
-                if user["role"] == 2
-                else redirect(url_for("agent"))
-            )
-        elif user["role"] in [0]:
-            return redirect(url_for("subscriber"))
-        else:
-            return redirect(url_for("pricing"))
-    else:
-        flash("Invalid username or password.")
+    if not user:
+        # Username does not exist
+        flash("Invalid username. Please try again.", "error")
         return redirect(url_for("login_form"))
+
+    if not check_password_hash(user["password"], password):
+        # Password is incorrect
+        flash("Wrong password. Please try again.", "error")
+        return redirect(url_for("login_form"))
+
+    # Set user session info here if login is successful
+    session["user_id"] = user["id"]
+    session["user_email"] = user["email"]
+    session["first_name"] = user["first_name"]
+    session["last_name"] = user["last_name"]
+    session["user_phone"] = user["phone"]
+    session["user_role"] = user["role"]
+    session["user_username"] = user["username"]
+
+    # Redirect based on user role
+    if user["role"] in [1, 2]:  # Assuming 1 is for agents and 2 is for admins
+        return redirect(url_for("admin") if user["role"] == 2 else url_for("agent"))
+    elif user["role"] == 0:
+        return redirect(url_for("subscriber"))
+    else:
+        return redirect(url_for("pricing"))
+
+
+
 
 
 @application.route("/register", methods=["GET"])
@@ -1020,81 +1102,61 @@ def get_photos(zpid):
 
     return None  # Return None if no photo URL is found
 
-
-@application.route("/bid/<int:id>")
-def bid(id):
-    property = get_property_by_id(id)
-    if property:
-        formatted_price = "${:,.2f}".format(property["openingBid"])
-        fee_amount = property["openingBid"] / 5
-        formatted_fee = "${:,.2f}".format(fee_amount)
-        total_amount = property["openingBid"] + fee_amount
-        formatted_total = "${:,.2f}".format(total_amount)
-
-        user_details = {
-            "first_name": session.get("first_name", ""),
-            "last_name": session.get("last_name", ""),
-            "username": session.get("user_username", ""),
-            "email": session.get("user_email", ""),
-            "phone": session.get("user_phone", ""),
-            # Your user details logic
-        }
-        return render_template(
-            "bid.html",
-            property=property,
-            property_id=id,
-            user=user_details,
-            formatted_price=formatted_price,
-            formatted_fee=formatted_fee,
-            formatted_total=formatted_total,
-        )
-    else:
-        return "Property not found", 404
+@application.route('/submit_bid/<int:property_id>', methods=['POST'])
+def submit_bid(property_id):
+    # Ensure the user is logged in
+    if 'user_id' not in session:
+        return jsonify({'error': 'You must be logged in to submit a bid.'}), 403
+    
+    # Retrieve user details from session for the email
+    user_id = session.get('user_id')
+    username = session.get('user_username')
+    first_name = session.get('first_name')
+    last_name = session.get('last_name')
+    email = session.get('user_email')
+    phone = session.get('user_phone')
 
 
-@application.route("/submit_bid/<int:id>", methods=["POST"])
-def submit_bid(id):
-    # Extract user ID from session or form
-    user_id = session["user_id"]  # or from form data
-    first_name = request.form["first_name"]
-    last_name = request.form["last_name"]
-    username = request.form["username"]
-    email = request.form["email"]
-    phone = request.form["phone"]
+    property_address = get_address_by_id(property_id)
+    
+    if not property_address:
+        return jsonify({'error': 'Property not found.'}), 404
 
-    # Original bid_amount as a string with potential currency formatting
-    bid_amount_str = request.form["maximum-bid-amount"]
-
-    # Remove currency symbols and commas, then convert to integer
-    bid_amount = int(re.sub(r"[^\d.]", "", bid_amount_str).split(".")[0])
-
-    # Insert bid into the database
-    insert_bid(user_id, id, bid_amount)
-
-    property = get_property_by_id(id)
-
-    address = property["addresses"]
-    print(address)
-
-    send_bid_receipt_email(address, email, first_name, last_name, bid_amount)
-    send_bid_receipt_email_to_admin(
-        phone, address, email, first_name, last_name, username, bid_amount
-    )
-
-    # Redirect to a confirmation page or back to the property details
-    return redirect(url_for("property_details", id=id))
-
-
-def insert_bid(user_id, property_id, bid_amount):
-    conn = get_db_connection()
     try:
+        conn = get_db_connection()
         with conn.cursor() as cursor:
             sql = """
-            INSERT INTO bids (user_id, property_id, bid_progress, bid_amount) 
-            VALUES (%s, %s, 'Pending', %s)
+            INSERT INTO bids (user_id, property_id, bid_progress)
+            VALUES (%s, %s, 'Pending')
             """
-            cursor.execute(sql, (user_id, property_id, bid_amount))
+            cursor.execute(sql, (user_id, property_id))
         conn.commit()
+
+
+
+        send_bid_receipt_email_to_admin(phone, property_address, email, first_name, last_name, username)
+        
+    except Exception as e:
+        # Log the error and return an appropriate error message
+        print(f"Error submitting bid or sending email: {e}")
+        return jsonify({'error': 'An error occurred while submitting the bid or sending emails.'}), 500
+    finally:
+        if conn:
+            conn.close()
+
+    # Bid was successfully submitted and emails sent
+    return jsonify({'message': 'Your intent to bid was submitted successfully! The Bonaventura Team will reach out to you shortly.'}), 200
+
+def get_address_by_id(property_id):
+    conn = get_db_connection()
+    try:
+        with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+            cursor.execute("SELECT addresses FROM all_properties WHERE id = %s", (property_id,))
+            result = cursor.fetchone()
+            if result:
+                return result['addresses']  # Returns only the address string
+            else:
+                return None  # Property not found
     finally:
         conn.close()
 
@@ -1116,7 +1178,7 @@ def get_all_bids_with_progress():
             # Join the bids table with the users table
             cursor.execute(
                 """
-                SELECT b.id, b.property_id, b.bid_amount, b.bid_time, b.bid_progress, 
+                SELECT b.id, b.property_id, b.bid_time, b.bid_progress, 
                        u.username, u.email, u.phone
             FROM bids b
             INNER JOIN users u ON b.user_id = u.id
@@ -1347,6 +1409,7 @@ def process_pdf(file_path):
 
 
 @application.route("/properties/<date>")
+@requires_roles(0,1,2)
 def properties_for_day(date):
 
     try:
@@ -1359,11 +1422,26 @@ def properties_for_day(date):
     properties = get_properties_for_date_with_photos(selected_date)
     user_role = session.get("user_role")
 
+    today = datetime.today()
+    current_date = today.strftime("%Y-%m-%d")
+
+    selected_county = request.args.get("county", type=str)
+
+    counties = get_unique_counties()
+
+    if selected_county:
+        properties = [
+            prop for prop in properties if prop.get("county") == selected_county
+        ]
+
     return render_template(
         "propertiesforday.html",
         properties=properties,
         selected_date=selected_date,
         user_role=user_role,
+        selected_county=selected_county,
+        counties=counties,
+        current_date=current_date
     )
 
 
@@ -1603,23 +1681,29 @@ logger = logging.getLogger(__name__)
 
 def send_email_message(app_id, sender, to_addresses, subject, html_message):
     pinpoint_client = boto3.client("pinpoint", region_name="us-east-1")
+
+    # Ensure to_addresses is a list of email addresses
+    if not isinstance(to_addresses, list) or not all(isinstance(addr, str) for addr in to_addresses):
+        raise ValueError("to_addresses must be a list of non-empty strings.")
+
+    addresses_dict = {addr: {"ChannelType": "EMAIL"} for addr in to_addresses if addr}
+
+    # Check if addresses_dict is not empty
+    if not addresses_dict:
+        raise ValueError("Addresses dictionary is empty. Check the to_addresses list.")
+
     try:
         response = pinpoint_client.send_messages(
             ApplicationId=app_id,
             MessageRequest={
-                "Addresses": {
-                    address: {"ChannelType": "EMAIL"} for address in to_addresses
-                },
+                "Addresses": addresses_dict,
                 "MessageConfiguration": {
                     "EmailMessage": {
                         "FromAddress": sender,
                         "SimpleEmail": {
                             "Subject": {"Charset": "UTF-8", "Data": subject},
                             "HtmlPart": {"Charset": "UTF-8", "Data": html_message},
-                            "TextPart": {
-                                "Charset": "UTF-8",
-                                "Data": "Text version of the email content",
-                            },
+                            "TextPart": {"Charset": "UTF-8", "Data": "Text version of the email content"},
                         },
                     }
                 },
@@ -1632,38 +1716,10 @@ def send_email_message(app_id, sender, to_addresses, subject, html_message):
         return response["MessageResponse"]["Result"]
 
 
-def send_bid_receipt_email(address, email, first_name, last_name, bid_amount):
+def send_bid_receipt_email_to_admin(phone, address, email, first_name, last_name, username):
     app_id = os.environ.get("pinpoint_app_id")
     sender = '"Bonaventura Realty" <info@bonaventurarealty.com>'
-    to_addresses = [email]
-    subject = "Confirmation of Bid"
-
-    html_message = f"""
-    <html>
-        <head></head>
-        <body>
-            <p>Dear {first_name},</p>
-            <p>Thank you for your bid of ${bid_amount} on {address}.</p>
-            <p>Should you have any questions or need further assistance, please do not hesitate to reach out. Our dedicated team of professionals is here to provide you with personalized support every step of the way.</p>
-            <p>Thank you for your continued trust in Bonaventura Realty. We look forward to helping you achieve your real estate goals.</p>
-            <p>Warm regards,</p>
-            <p>Bonaventura Realty Team</p>
-        </body>
-    </html>
-    """
-
-    message_ids = send_email_message(
-        app_id, sender, to_addresses, subject, html_message
-    )
-    return message_ids
-
-
-def send_bid_receipt_email_to_admin(
-    phone, address, email, first_name, last_name, username, bid_amount
-):
-    app_id = os.environ.get("pinpoint_app_id")
-    sender = '"Bonaventura Realty" <info@bonaventurarealty.com>'
-    to_addresses = ["dstagge@bonaventurarealty.com"]
+    to_addresses = ["mikemeyers@bonaventurarealty.com"]
     subject = f"Notification of Bid on {address}"
 
     html_message = f"""
@@ -1671,7 +1727,6 @@ def send_bid_receipt_email_to_admin(
         <head></head>
         <body>
             <p>{first_name} {last_name} placed bid on {address}.</p>
-            <p>Maximum Bid Amount: {bid_amount}</p>
             <p>{first_name} {last_name}'s Email: {email}</p>
             <p>{first_name} {last_name}'s Phone: {phone}</p>
             <p>{first_name} {last_name}'s Username: {username}</p>

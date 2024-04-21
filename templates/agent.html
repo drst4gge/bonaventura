@@ -2,6 +2,7 @@
 <html>
 
 <head>
+    
     <title>Bonaventura</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background_color.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/contact-718.css') }}">
@@ -16,20 +17,21 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/services.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/table.css') }}">
     <script src="{{ url_for('static', filename='js/header.js') }}"></script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const dropdowns = document.querySelectorAll('.dropdown-btn');
-            dropdowns.forEach(dropdown => {
-                dropdown.addEventListener('click', function() {
-                    this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block';
-                });
+        $(document).ready(function () {
+            $('.day-dropdown').on('click', function () {
+                var date = $(this).data('date');
+                var formattedDate = date.split(', ')[1]; // Extract only the 'YYYY-MM-DD' part
+                var url = '/properties/' + formattedDate;
+                window.location.href = url;
             });
         });
     </script>
+
     <link rel='stylesheet'
         href='https://cdn-uicons.flaticon.com/2.0.0/uicons-solid-straight/css/uicons-solid-straight.css'>
-
-
 </head>
 
 <body>
@@ -37,7 +39,7 @@
         <header id="cs-navigation">
             <div class="cs-container">
                 <!--Nav Logo-->
-                <a href="{{ url_for('home') }}" class="cs-logo" aria-label="back to home">
+                <a href="{{ url_for('admin') }}" class="cs-logo" aria-label="back to home">
                     <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="logo" width="210"
                         height="29" aria-hidden="true" decoding="async">
                 </a>
@@ -54,121 +56,104 @@
                     <div class="cs-ul-wrapper">
                         <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
                             <li class="cs-li">
+                                <a href="{{ url_for('agent') }}" class="cs-li-link">
+                                    <p class="cs-topper">Calendar</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
                                 <a href="{{ url_for('upload_pdf') }}" class="cs-li-link">
                                     <p class="cs-topper">Upload PDF</p>
                                 </a>
                             </li>
-
-
                             <li class="cs-li">
-                                <a href="https://salesweb.civilview.com/Sales/SalesSearch?countyId=7" target="_blank"
-                                    class="cs-li-link">
-                                    <p class="cs-topper">Bergen County Addresses</p>
+                                <a href="{{ url_for('edit_profile') }}" class="cs-li-link">
+                                    <p class="cs-topper">Account</p>
                                 </a>
                             </li>
+
                         </ul>
                     </div>
                 </nav>
             </div>
         </header>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <!-- Calendar Navigation -->
+        <div class="month-header">
+            <div class="month-nav">
+                <a href="{{ url_for('agent', year=year, month=month-1) }}">&#8592;</a> <!-- Left arrow -->
+                <span>{{ current_month }} {{ year }}</span>
+                <a href="{{ url_for('agent', year=year, month=month+1) }}">&#8594;</a> <!-- Right arrow -->
+            </div>
+        </div>
 
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
         <div style="text-align: center; margin-bottom: 20px;">
-            <form action="{{ url_for('admin') }}" method="get">
+            <form action="{{ url_for('agent') }}" method="get">
                 <label for="county">Select County:</label>
                 <select name="county" id="county">
                     <option value="">All Counties</option>
                     {% for county in counties %}
-                    <option value="{{ county }}" {% if selected_county == county %}selected{% endif %}>{{ county }}</option>
+                        {% if county == "Suffolk County" or county == "Nassau County" %}
+                            <option value="{{ county }}" {% if selected_county == county %}selected{% endif %}>{{ county }}</option>
+                        {% endif %}
                     {% endfor %}
                 </select>
-                <button type="submit">SORT</button>
+                <button type="submit">Sort</button>
             </form>
-
         </div>
 
-
+        <!-- Calendar Grid -->
         <div class="calendar-grid">
-            {% for formatted_date, properties_on_date in properties_by_date.items() %}
-                <div class="day-dropdown">
-                    <button class="dropdown-btn">{{ formatted_date }} ({{ properties_on_date|length }} Properties)</button>
-                    <div class="dropdown-content">
-                        {% for property in properties_on_date %}
-                        <div class="property-tile">
-                            <!-- Wrap the contents in an anchor tag -->
-                            <a href="{{ url_for('property_details', id = property['id']) }}" class="property-link">
-                                <img class="property-image" src="{{ property['photo_url'] }}" alt="Agent Uploading Image Soon">
-                                <div class="property-content">
-                                    <table style="width: 100%;">
-                                        <tbody>
-                                            <tr>
-                                                <td style="text-align: left; color: #808080;">Address</td>
-                                                <td style="text-align: right; font-weight: bold;">{{ property['addresses'] }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td style="text-align: left; color: #808080;">Time of Sale</td>
-                                                <td style="text-align: right; font-weight: bold;">{{ property['timeOfSale'] }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td style="text-align: left; color: #808080;">County</td>
-                                                <td style="text-align: right; font-weight: bold;">{{ property['county'] }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td style="text-align: left; color: #808080;">Sqft</td>
-                                                <td style="text-align: right; font-weight: bold;">{{ property['livingArea'] }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td style="text-align: left; color: #808080;">Acres</td>
-                                                <td style="text-align: right; font-weight: bold;">
-                                                    {% if property['lotSize'] %}
-                                                    {{ "%.2f"|format((property['lotSize']) / 43560) }}
-                                                    {% else %}
-                                                    Not Available
-                                                    {% endif %}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td><i style="text-align: left;" class="fi fi-ss-bed-empty"></i></td>
-                                                <td style="text-align: right; font-weight: bold;">{{ property['bedrooms'] }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><i style="text-align: left;" class="fi fi-ss-shower"></i></td>
-                                                <td style="text-align: right; font-weight: bold;">{{ property['bathrooms'] }}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </a>
-                            <div class="property-buttons">
-                                <a href="{{ url_for('edit_address', id=property['id']) }}" class="cs-button-4"
-                                    aria-label="read more about us">Edit</a>
-                                <a href="{{ url_for('delete_address', id=property['id']) }}" class="cs-button-4"
-                                    aria-label="read more about us">Delete</a>
-                                <a href="" class="cs-button-4" aria-label="read more about us">Photos</a>
-                                <a href="{{ url_for('bid', id=property['id'], address=property['address']) }}" class="cs-button-4" aria-label="read more about us">Bid</a>
-                                
-            
-                            </div>
-            
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
+            <!-- Calendar header for days of the week -->
+            <div class="calendar-header">
+                <div>Monday</div>
+                <div>Tuesday</div>
+                <div>Wednesday</div>
+                <div>Thursday</div>
+                <div>Friday</div>
+                <div>Saturday</div>
+                <div>Sunday</div>
+            </div>
+
+            <!-- Empty cells before the start of the month -->
+            {% for _ in range(first_weekday) %}
+            <div class="day-dropdown"></div>
+            {% endfor %}
+
+            <!-- Calendar Days -->
+            {% for day in range(1, days_in_month + 1) %}
+            {% set date_str = '%d-%02d-%02d' % (year, month, day) %}
+            <div class="day-dropdown {{ 'current-day' if date_str == current_date }}">
+                <div class="day-date">{{ day }}</div>
+                <a href="{{ url_for('properties_for_day', date=date_str, county=selected_county) }}" class="dropdown-btn">
+                    {% set property_count = properties_by_date[day]|length %}
+                    {% if property_count > 0 %}
+                    {{ property_count }} Properties
+                    {% else %}
+                    No Properties
+                    {% endif %}
+                </a>
+            </div>
             {% endfor %}
         </div>
+
+
+
         <br>
         <br>
+        <br>
+        
 
         <footer>
             <p>© Bonaventura</p>
         </footer>
+
     </div>
 </body>
 

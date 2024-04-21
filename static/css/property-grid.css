@@ -14,7 +14,7 @@ th {
     flex-direction: column;
     justify-content: space-between;
     border: 0.5px solid #000000;
-    border-radius: 10px;
+    border-radius: 5px;
     overflow: hidden;
     background: #ffffff;
     color: #272343;
@@ -90,7 +90,7 @@ a {
     display: grid;
     grid-template-columns: repeat(7, 1fr); 
     grid-gap: 6px; /* Increase the gap between each tile */
-    
+    padding: 20px 0;
     grid-auto-rows: 150px;
 }
 
@@ -106,7 +106,7 @@ a {
     transition: background-color 0.3s ease;
     font-weight: bold;
     text-align: center;
-    padding: 30px 10px;
+    padding: 20px 10px;
 }
 
 .day-date {
@@ -141,16 +141,16 @@ a {
 
 .dropdown-btn {
     /* Same styles as before */
-    font-size: 1.2em;
+    font-size: 1em;
     color: white;
     font-weight: bold;
     text-align: center;
     background-color: #000000;
     border: none;
-    padding: 10px 20px;
+    padding: 8px 16px;
     width: 100%;
     cursor: pointer;
-    border-radius: 6px;
+    border-radius: 5px;
     transition: background-color 0.3s ease;
 }
 
@@ -205,7 +205,7 @@ a {
 .calendar-header div {
     text-align: center;
     background-color: #f0f0f0;
-    padding: 10px 0;
+    padding: 2px 0;
     font-weight: bold;
 }
 
@@ -231,4 +231,26 @@ a {
     font-weight: bold; /* Make text bold */
     margin: 0 10px; /* Adjust spacing as needed */
 }
+
+.list-view {
+    display: block;
+}
+
+.list-view .property-tile {
+    display: flex;
+    flex-direction: row;
+    
+    margin: 5px 0; /* Adjust spacing between list items */
+    height: 400px;
+}
+
+.list-view .property-image {
+    display: block;
+    
+}
+
+.list-view .property-content {
+    display: block;
+}
+
 

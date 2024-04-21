@@ -30,29 +30,20 @@
             }
         };
     </script>
+   
 </head>
 
 <body>
     <div class="wrapper">
         <header id="cs-navigation">
             <div class="cs-container">
-                <!--Nav Logo-->
                 <a href="{{ url_for('home') }}" class="cs-logo" aria-label="back to home">
                     <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="logo" width="210"
                         height="29" aria-hidden="true" decoding="async">
                 </a>
-                <!--Navigation List-->
                 <nav class="cs-nav" role="navigation">
-                    <!--Mobile Nav Toggle-->
-                    <button class="cs-toggle" aria-label="mobile menu toggle">
-                        <div class="cs-box" aria-hidden="true">
-                            <span class="cs-line cs-line1" aria-hidden="true"></span>
-                            <span class="cs-line cs-line2" aria-hidden="true"></span>
-                            <span class="cs-line cs-line3" aria-hidden="true"></span>
-                        </div>
-                    </button>
                     <div class="cs-ul-wrapper">
-                        {% if session['user_role'] == 1 or session['user_role'] == 2 %}
+                        {% if session['user_role'] == 2 %}
                         <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
                             <li class="cs-li">
                                 <a href="{{ url_for('admin') }}" class="cs-li-link">
@@ -76,6 +67,24 @@
                                 </a>
                             </li>
                             
+                            <li class="cs-li">
+                                <a href="{{ url_for('edit_profile') }}" class="cs-li-link">
+                                    <p class="cs-topper">Account</p>
+                                </a>
+                            </li>
+                        </ul>
+                        {% elif session['user_role'] == 1 %}
+                        <ul id="cs-expanded" class="cs-ul" aria-expanded="false">
+                            <li class="cs-li">
+                                <a href="{{ url_for('agent') }}" class="cs-li-link">
+                                    <p class="cs-topper">Calendar</p>
+                                </a>
+                            </li>
+                            <li class="cs-li">
+                                <a href="{{ url_for('upload_pdf') }}" class="cs-li-link">
+                                    <p class="cs-topper">Upload PDF</p>
+                                </a>
+                            </li>
                             <li class="cs-li">
                                 <a href="{{ url_for('edit_profile') }}" class="cs-li-link">
                                     <p class="cs-topper">Account</p>
@@ -112,6 +121,10 @@
         <br>
         <br>
         <br>
+        <div style="margin-left: 30px;" class="view-toggle">
+            <button id="toggleViewBtn">Toggle View</button>
+        </div>
+        
         <div class="property-grid">
             {% for property in properties %}
             <div class="property-tile">
@@ -119,14 +132,14 @@
                     {% if property.latest_photo_url %}
                         <!-- Check if latest_photo_url is a relative path and prepend with url_for -->
                         {% if property.latest_photo_url.startswith('static/images/') %}
-                            <img class="property-image" src="{{ url_for('static', filename=property.latest_photo_url[7:]) }}" alt="Uploaded Property Photo">
+                            <img class="property-image" src="{{ url_for('static', filename=property.latest_photo_url[7:]) }}" alt="Uploaded Property Photo" async>
                         {% else %}
                             <!-- If it's a complete URL, use it as is -->
-                            <img class="property-image" src="{{ property.latest_photo_url }}" alt="Uploaded Property Photo">
+                            <img class="property-image" src="{{ property.latest_photo_url }}" alt="Uploaded Property Photo" async>
                         {% endif %}
                     {% else %}
                         <!-- Handle property['photo_url'] similarly if needed -->
-                        <img class="property-image" src="{{ property.photo_url }}" alt="Pending Drive By Photograph">
+                        <img class="property-image" src="{{ property.photo_url }}" alt="Pending Drive By Photograph" async>
                     {% endif %}
                     <div class="property-content">
                         <table style="width: 100%;">
@@ -184,5 +197,22 @@
         </div>
     </div>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const toggleBtn = document.getElementById('toggleViewBtn');
+            const propertyGrid = document.querySelector('.property-grid');
+    
+            toggleBtn.addEventListener('click', function() {
+                propertyGrid.classList.toggle('list-view');
+                
+                // Update button text based on current view
+                if(propertyGrid.classList.contains('list-view')) {
+                    toggleBtn.textContent = 'Switch to Grid View';
+                } else {
+                    toggleBtn.textContent = 'Switch to List View';
+                }
+            });
+        });
+    </script>
 </body>
 </html>

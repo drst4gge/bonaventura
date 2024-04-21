@@ -77,7 +77,8 @@
         <br>
         <br>
         <br>
-
+        <br>
+        <br>
         <section id="contact-718">
             <div class="cs-container">
                 <div class="cs-content">
@@ -86,8 +87,6 @@
                     <form class="cs-form" action="{{ url_for('update_user', user_id=user['id']) }}" method="post">
                         <!-- Hidden Fields -->
                         <input type="hidden" name="id" value="{{ user['id'] }}">
-                        
-                        <input type="hidden" name="stripe_customer_id" value="{{ user['stripe_customer_id'] }}">
                         <input type="hidden" name="role" value="{{ user['role'] }}">
 
                         <label for="first_name">
