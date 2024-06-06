@@ -110,7 +110,7 @@ def send_weekly_notifications():
         next_monday = today + timedelta((7 - today.weekday()) % 7 or 7)  # Calculate next Monday
 
         # Prepare and send SMS
-        sms_message = f"Good evening {user_first_name}, \nYour weekly properties update is ready."
+        sms_message = f"Good morning {user_first_name}, \nYour weekly properties update is ready."
         for i in range(0, 5):  # Monday (0) to Friday (4)
             day_date = (next_monday + timedelta(days=i)).strftime("%Y-%m-%d")
             properties_url = f"{base_url}{day_date}"
@@ -118,7 +118,7 @@ def send_weekly_notifications():
         send_sms_message(app_id, sender_phone_number, [phone_number], sms_message)
         
         # Prepare and send Email
-        html_message = f'<html>Dear {user_first_name},<div><br></div><div>Good evening!&nbsp;</div><div><br></div>'
+        html_message = f'<html>Dear {user_first_name},<div><br></div><div>Good morning!&nbsp;</div><div><br></div>'
         for i in range(0, 5):  # Monday (0) to Friday (4)
             day_date = (next_monday + timedelta(days=i)).strftime("%Y-%m-%d")
             properties_url = f"{base_url}{day_date}"
